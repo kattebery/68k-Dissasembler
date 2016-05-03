@@ -8,10 +8,6 @@
 START:                  ; first instruction of program
     *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
     MOVE.L      #$2000,A1        *set address of register A1
-    
-    BRA         READ_MEMORY      *for testing purposes only
-    
-    
 *----Display input message for mem start-----*
 INPUT_START
     LEA         M_INPUT_START,A1      *load message
@@ -97,15 +93,11 @@ VALID_CHAR
     ADD.L       #1,A1           *increment address
     CMP         A1,A4           *if A3 > A4
     BLT         READ_CHAR_LOOP  *begin converting to float    
-    RTS                         *loop back to INPUT_START || INPUT_END
+    RTS                         *loop back to INPUT_START || INPUT_END   
     
-    
-READ_MEMORY
-    MOVEA.L     #$1000,A2       *start
-    MOVEA.L     #$1200,A3       *end
-    
-    *MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
-    *MOVEA.L     MEM_END,A3      *A3 will act as the ending address
+READ_MEMORY   
+    MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
+    MOVEA.L     MEM_END,A3      *A3 will act as the ending address
 READ_MEMORY_LOOP
     CMP         A2,A3           *compare the incrementing address and the end address
     BEQ         END             *stop if the end address is reached
