@@ -1,0 +1,170 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 5/5/2016 12:48:05 PM
+
+00000000                             1  **************************************************************************
+00000000                             2  *               Jump table 1. Determine OP code.                         *
+00000000                             3  *        Analyzes the first four bits within the instruction             *
+00000000                             4  *        and jumps to the corresponding subroutine.                      *
+00000000                             5  **************************************************************************
+00000000                             6  OP_JTAB
+00000000  4EB9 00000070              7      JSR     OP0000      *Subroutine for operations beginning with 0000
+00000006  4E75                       8      RTS
+00000008  4EB9 00000072              9      JSR     OP0001      *Subroutine for operations beginning with 0001
+0000000E  4E75                      10      RTS
+00000010  4EB9 00000074             11      JSR     OP0010      *Subroutine for operations beginning with 0010
+00000016  4E75                      12      RTS
+00000018  4EB9 00000076             13      JSR     OP0011      *Subroutine for operations beginning with 0011
+0000001E  4E75                      14      RTS
+00000020  4EB9 00000078             15      JSR     OP0100      *Subroutine for operations beginning with 0100
+00000026  4E75                      16      RTS
+00000028  4EB9 0000007A             17      JSR     OP0101      *Subroutine for operations beginning with 0101
+0000002E  4E75                      18      RTS
+00000030  4EB9 0000007C             19      JSR     OP0110      *Subroutine for operations beginning with 0110
+00000036  4E75                      20      RTS
+00000038  4EB9 0000007E             21      JSR     OP1000      *Subroutine for operations beginning with 1000
+0000003E  4E75                      22      RTS
+00000040  4EB9 00000080             23      JSR     OP1001      *Subroutine for operations beginning with 1001
+00000046  4E75                      24      RTS
+00000048  4EB9 00000082             25      JSR     OP1011      *Subroutine for operations beginning with 1011
+0000004E  4E75                      26      RTS
+00000050  4EB9 00000084             27      JSR     OP1100      *Subroutine for operations beginning with 1100
+00000056  4E75                      28      RTS
+00000058  4EB9 00000086             29      JSR     OP1101      *Subroutine for operations beginning with 1101
+0000005E  4E75                      30      RTS
+00000060  4EB9 00000088             31      JSR     OP1110      *Subroutine for operations beginning with 1110
+00000066  4E75                      32      RTS
+00000068                            33      
+00000068                            34      *I don't know if this one is necessary:
+Line 35 ERROR: Undefined symbol
+00000068  4EB9 004DBB8E             35      JSR     OP_DATA     *Subroutine to store as non-decodable
+0000006E  4E75                      36      RTS
+00000070                            37  
+00000070                            38  **************************************************************************
+00000070                            39  *        OP0000 - Subroutine for operations beginning with 0000          *
+00000070                            40  *        ADDI                                                            *
+00000070                            41  **************************************************************************
+00000070                            42  OP0000
+00000070                            43      *DO SOME THINGS
+00000070  4E75                      44      RTS
+00000072                            45  
+00000072                            46  **************************************************************************
+00000072                            47  *        OP0001 - Subroutine for operations beginning with 0001          *
+00000072                            48  *        MOVE.B                                                          *
+00000072                            49  **************************************************************************
+00000072                            50  OP0001
+00000072                            51      *DO SOME THINGS
+00000072  4E75                      52      RTS
+00000074                            53  
+00000074                            54  **************************************************************************
+00000074                            55  *        OP0010 - Subroutine for operations beginning with 0010          *
+00000074                            56  *        MOVE.W, MOVEA(WORD)                                             *
+00000074                            57  **************************************************************************
+00000074                            58  OP0010
+00000074                            59      *DO SOME THINGS
+00000074  4E75                      60      RTS
+00000076                            61  
+00000076                            62  **************************************************************************
+00000076                            63  *        OP0011 - Subroutine for operations beginning with 0011          *
+00000076                            64  *        MOVE.L, MOVEA(LONG)                                             *
+00000076                            65  **************************************************************************
+00000076                            66  OP0011
+00000076                            67      *DO SOME THINGS
+00000076  4E75                      68      RTS
+00000078                            69  
+00000078                            70  **************************************************************************
+00000078                            71  *        OP0100 - Subroutine for operations beginning with 0100          *
+00000078                            72  *        NOP, MOVEM, MULS(LONG), DIVU(LONG), LEA, CLR, JSR, RTS          *
+00000078                            73  **************************************************************************
+00000078                            74  OP0100
+00000078                            75      *DO SOME THINGS
+00000078  4E75                      76      RTS
+0000007A                            77  
+0000007A                            78  **************************************************************************
+0000007A                            79  *        OP0101 - Subroutine for operations beginning with 0101          *
+0000007A                            80  *        ADDQ                                                            *
+0000007A                            81  **************************************************************************
+0000007A                            82  OP0101
+0000007A                            83      *DO SOME THINGS
+0000007A  4E75                      84      RTS
+0000007C                            85  
+0000007C                            86  **************************************************************************
+0000007C                            87  *        OP0110 - Subroutine for operations beginning with 0110          *
+0000007C                            88  *        MOVEQ, Bcc                                                      *
+0000007C                            89  **************************************************************************
+0000007C                            90  OP0110
+0000007C                            91      *DO SOME THINGS
+0000007C  4E75                      92      RTS
+0000007E                            93  
+0000007E                            94  **************************************************************************
+0000007E                            95  *        OP1000 - Subroutine for operations beginning with 1000          *
+0000007E                            96  *        DIVU(WORD), OR                                                  *
+0000007E                            97  **************************************************************************
+0000007E                            98  OP1000
+0000007E                            99      *DO SOME THINGS
+0000007E  4E75                     100      RTS
+00000080                           101  
+00000080                           102  **************************************************************************
+00000080                           103  *        OP1001 - Subroutine for operations beginning with 1001          *
+00000080                           104  *        SUB                                                             *
+00000080                           105  **************************************************************************
+00000080                           106  OP1001
+00000080                           107      *DO SOME THINGS
+00000080  4E75                     108      RTS
+00000082                           109  
+00000082                           110  **************************************************************************
+00000082                           111  *        OP1011 - Subroutine for operations beginning with 1011          *
+00000082                           112  *        CMP                                                             *
+00000082                           113  **************************************************************************
+00000082                           114  OP1011
+00000082                           115      *DO SOME THINGS
+00000082  4E75                     116      RTS
+00000084                           117  
+00000084                           118  **************************************************************************
+00000084                           119  *        OP1100 - Subroutine for operations beginning with 1100          *
+00000084                           120  *        MULS(WORD), AND                                                 *
+00000084                           121  **************************************************************************
+00000084                           122  OP1100
+00000084                           123      *DO SOME THINGS
+00000084  4E75                     124      RTS
+00000086                           125  
+00000086                           126  **************************************************************************
+00000086                           127  *        OP1101 - Subroutine for operations beginning with 1101          *
+00000086                           128  *        ADD, ADDA                                                       *
+00000086                           129  **************************************************************************
+00000086                           130  OP1101
+00000086                           131      *DO SOME THINGS
+00000086  4E75                     132      RTS
+00000088                           133      
+00000088                           134  **************************************************************************
+00000088                           135  *        OP1110 - Subroutine for operations beginning with 1110          *
+00000088                           136  *        LSR, LSL, ASR, ASL, ROL, ROR                                    *
+00000088                           137  **************************************************************************
+00000088                           138  OP1110
+00000088                           139      *DO SOME THINGS
+00000088  4E75                     140      RTS
+0000008A                           141  
+0000008A                           142  
+Line 143 WARNING: END directive missing, starting address not set
+
+1 error detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+OP0000              70
+OP0001              72
+OP0010              74
+OP0011              76
+OP0100              78
+OP0101              7A
+OP0110              7C
+OP1000              7E
+OP1001              80
+OP1011              82
+OP1100              84
+OP1101              86
+OP1110              88
+OP_JTAB             0
