@@ -7,13 +7,14 @@
     ORG    $1000
 START:                  ; first instruction of program
     *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
-    MOVE.L      #$2000,A1        *set address of register A1
+    
 *----Display input message for mem start-----*
 INPUT_START
     LEA         M_INPUT_START,A1      *load message
     MOVE.B      #14,D0          *display string
     TRAP        #15             *output string
 *----Receive User Input ------
+    MOVE.L      #$0300,A1       *set address of register A1 for string
     MOVE.B      #2,D0           *input string into A1 Trap
     TRAP        #15             *input string from user
     BSR         READ_CHAR       *check for valid input
@@ -28,6 +29,7 @@ INPUT_END
     MOVE.B      #14,D0          *display string
     TRAP        #15             *output string
 *----Receive User Input ------*
+    MOVE.L      #$0300,A1       *set address of register A1 for string
     MOVE.B      #2,D0           *input string into A1 Trap
     TRAP        #15             *input string from user
     BSR         READ_CHAR       *check for valid input
@@ -42,13 +44,24 @@ GET_NEXT_INPUT
 *----make sure that start value is valid----*
 READ_CHAR                       *verify that string is valid (all hexadecimal digits)
     CLR         D3              *D3 will act as the total result
-    MOVE.L      #$A1,A4         *the stop address
-    MOVE.B      #7,D2           *put 7 in D2
-    ADD.W       D2,A4           *A4 is now the stop address
-
+    MOVE.L      A1,A4           *the stop address
+    MOVE.B      #6,D2           *put 6 in D2
+    ADD.W       D2,A4           *A4 is now the stop address(A4)
+    
+REMOVE_ZEROES
+    CLR.L       D1              *D1 will act as the temporary value
+    MOVE.B      (A1),D1         *read the byte from string
+    MOVE.B      #$30,D2         *put ascii zero in D2
+    CMP.B       D2,D1           *compare ascii zero and value of D1
+    BEQ         REMOVE_ZERO     *skip over that character   
+    BRA         READ_CHAR_LOOP  *begin converting characters to numerical values
+REMOVE_ZERO
+    ADD.L       #1,A1           *increment string start address
+    ADD.L       #1,A4           *increment string end address
+    BRA         REMOVE_ZEROES   *loop back and keep removing zeroes
 *----Convert String To Hex-----*
 READ_CHAR_LOOP     
-    CLR.L       D1              *D2 will act as the temporary value
+    CLR.L       D1              *D1 will act as the temporary value
     MOVE.B      (A1),D1         *read the byte from string
 *----check if the value is exaclty 00 (NULL)
     CMP         #0,D1           *compare 00 (NULL) and the byte ascii value in D1
@@ -56,11 +69,11 @@ READ_CHAR_LOOP
     
     MOVE.B      #$30,D2         *put ascii zero in D2
     CMP.B       D2,D1           *compare ascii zero and value of D1
-    BLT         ERROR           *branch on invalid (too small) ascii value   
+    BLT         INVALID_CHAR_ERROR *branch on invalid (too small) ascii value   
 *------Result is greater than ascii 0--------*
     MOVE.B      #$46,D2         *put ascii F in D2
     CMP.B       D2,D1           *compare ascii F and value of D1
-    BGT.B       ERROR           *branch on invalid ascii value
+    BGT.B       INVALID_CHAR_ERROR *branch on invalid ascii value
 *------Result is between 0 and F---------*
     MOVE.B      #$41,D2         *put ascii A in D2
     CMP.B       D2,D1           *compare ascii A and value of D1
@@ -69,9 +82,9 @@ READ_CHAR_LOOP
     MOVE.B      #$39,D2         *put ascii 9 in D2
     CMP.B       D2,D1           *compare ascii 9 and value of D1
     BLE         VALID_NUMBER    *value between 0 and 9. Loop back.    
-    BRA         ERROR           *value is between 9 and A (invalid)     
+    BRA         INVALID_CHAR_ERROR           *value is between 9 and A (invalid)     
     
-ERROR   
+INVALID_CHAR_ERROR   
     LEA         M_INVALID,A1    *load error message
     MOVE.B      #14,D0          *display string trap
     TRAP        #15             *output error message
@@ -91,14 +104,50 @@ VALID_CHAR
     LSL.L       #4,D3           *put hex digit in proper place
     ADD.L       D1,D3           *put new total in D3
     ADD.L       #1,A1           *increment address
-    CMP         A1,A4           *if A3 > A4
-    BLT         READ_CHAR_LOOP  *begin converting to float    
+    CMP         A1,A4           *if A1 > A4
+    BGT         READ_CHAR_LOOP  *begin converting to float    
     RTS                         *loop back to INPUT_START || INPUT_END   
-    
+   
 READ_MEMORY   
     MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
     MOVEA.L     MEM_END,A3      *A3 will act as the ending address
+    
+VALIDATE_START_END
+    MOVE.L      A2,D1           *copy start address into D1
+    MOVE.L      A3,D2           *copy end address into D2
+    CMP         D1,D2           *compare start and end values
+    BEQ         EQUAL_ERROR     *Start address is equal to end address
+    BGT         SWAP_VALUES     *Start address is larger than end address
+    BRA         READ_MEMORY_LOOP    *begin reading memory
+    
+EQUAL_ERROR
+    LEA         M_EQUAL,A1      *load error message
+    MOVE.B      #14,D0          *display string trap
+    TRAP        #15             *output error message
+    BRA         INPUT_START     *restart program (request ui again)
+    
+SWAP_VALUES
+    MOVE.L      MEM_START,D1    *put starting address in D1
+    MOVE.L      MEM_END,D2      *put ending address in D2
+    MOVE.L      D2,MEM_START    *swap the two values in memory
+    MOVE.L      D1,MEM_END
+    MOVEA.L     D2,A2           *A2 will be the starting/current address
+    MOVEA.L     D1,A3           *A3 will act as the ending address
 READ_MEMORY_LOOP
+    MOVE.L      MEM_START,D1
+    MOVE.B      #15,D0
+    MOVE.B      #16,D2
+    TRAP        #15
+    LEA         M_SPACE,A1      *load new line
+    MOVE.B      #14,D0          *load message
+    TRAP        #15             *display message
+    MOVE.L      MEM_END,D1
+    MOVE.B      #15,D0
+    MOVE.B      #16,D2
+    TRAP        #15
+    BRA         END
+             
+READ_MEMORY_LOOPY
     CMP         A2,A3           *compare the incrementing address and the end address
     BEQ         END             *stop if the end address is reached
     MOVE.B      (A2)+,D2        *get the value from incrementing address
@@ -113,8 +162,7 @@ READ_MEMORY_LOOP
     BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
     BSR         OUTPUT_CHAR   *print the char in D1
 *---print a space----*
-    BSR         SPACE
-    
+    BSR         SPACE    
     ADD.B       #1,D4           *increment D4
     CMP.B       #15,D4          *look at value in D4
     BGT         NEW_LINE        *add new line
@@ -129,12 +177,12 @@ NUMERIC_CHAR
     RTS                         *continue converting
 ALPH_CHAR
     ADD.B       #55,D1          *convert to ascii value
-    RTS                         *continue converting
-            
+    RTS                         *continue converting            
 OUTPUT_CHAR
     MOVE.B      #6,D0  
     TRAP        #15
     RTS
+    
 NEW_LINE
     MOVE.B      #0,D4           *reset counter
     LEA         M_SPACE,A1      *load new line
@@ -146,6 +194,7 @@ SPACE
     MOVE.B      #6,D0
     TRAP        #15
     RTS
+    
 END
 
     SIMHALT             ; halt simulator
@@ -156,12 +205,15 @@ LF          EQU     $0A
 M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
 M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
 M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
+M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
 M_SPACE       DC.B ' ',CR,LF,0
 
 MEM_START       EQU     $0100
 MEM_END         EQU     $0200
 
     END    START        ; last line of source
+
+
 
 
 *~Font name~Courier New~
