@@ -71,34 +71,42 @@ READ_CHAR_LOOP
     CMP.B       D2,D1           *compare ascii zero and value of D1
     BLT         INVALID_CHAR_ERROR *branch on invalid (too small) ascii value   
 *------Result is greater than ascii 0--------*
-    MOVE.B      #$46,D2         *put ascii F in D2
-    CMP.B       D2,D1           *compare ascii F and value of D1
+    MOVE.B      #$66,D2         *put ascii f in D2
+    CMP.B       D2,D1           *compare ascii f and value of D1
     BGT.B       INVALID_CHAR_ERROR *branch on invalid ascii value
-*------Result is between 0 and F---------*
-    MOVE.B      #$41,D2         *put ascii A in D2
-    CMP.B       D2,D1           *compare ascii A and value of D1
-    BGE         VALID_LETTER    *value is between A and F. Loop back.
+*------Result is between ascii 0 and f---------*
+    MOVE.B      #$61,D2         *put ascii a in D2
+    CMP.B       D2,D1           *compare ascii a and value of D1
+    BGE         VALID_LETTER_LC *value is between a and f. Loop back.
     
     MOVE.B      #$39,D2         *put ascii 9 in D2
     CMP.B       D2,D1           *compare ascii 9 and value of D1
-    BLE         VALID_NUMBER    *value between 0 and 9. Loop back.    
-    BRA         INVALID_CHAR_ERROR           *value is between 9 and A (invalid)     
+    BLE         VALID_NUMBER    *value between 0 and 9. Loop back.
+
+    MOVE.B      #$41,D2         *put ascii A into D2
+    CMP.B       D2,D1           *compare ascii A and value of D1
+    BLT         INVALID_CHAR_ERROR    *value between 9 and A (Invalid)
     
+    MOVE.B      #$46,D2         *put ascii F into D2
+    CMP.B       D2,D1           *compare ascii F and value of D1
+    BGT         INVALID_CHAR_ERROR    *value between F and a (Invalid)
+         
+    BRA         VALID_LETTER_UC *value is between A and F        
 INVALID_CHAR_ERROR   
     LEA         M_INVALID,A1    *load error message
     MOVE.B      #14,D0          *display string trap
     TRAP        #15             *output error message
     MOVE.B      #1,D4           *put invalid output in result register
     RTS
-
 VALID_NUMBER
     SUB.B       #$30,D1         *get actual value from ascii value
     BRA         VALID_CHAR      *read the next char in string
-
-VALID_LETTER
+VALID_LETTER_UC
     SUB.B       #$37,D1         *get actual value from ascii value
-    BRA         VALID_CHAR      *read the next char in string
-   
+    BRA         VALID_CHAR      *read the next char in string    
+VALID_LETTER_LC
+    SUB.B       #$57,D1         *get actual value from ascii value
+    BRA         VALID_CHAR      *read the next char in string   
 VALID_CHAR
     MOVE.B      #0,D4           *return valid value entry in D4    
     LSL.L       #4,D3           *put hex digit in proper place
@@ -117,7 +125,7 @@ VALIDATE_START_END
     MOVE.L      A3,D2           *copy end address into D2
     CMP         D1,D2           *compare start and end values
     BEQ         EQUAL_ERROR     *Start address is equal to end address
-    BGT         SWAP_VALUES     *Start address is larger than end address
+    BLT         SWAP_VALUES     *Start address is larger than end address
     BRA         READ_MEMORY_LOOP    *begin reading memory
     
 EQUAL_ERROR
@@ -133,21 +141,25 @@ SWAP_VALUES
     MOVE.L      D1,MEM_END
     MOVEA.L     D2,A2           *A2 will be the starting/current address
     MOVEA.L     D1,A3           *A3 will act as the ending address
-READ_MEMORY_LOOP
-    MOVE.L      MEM_START,D1
-    MOVE.B      #15,D0
-    MOVE.B      #16,D2
-    TRAP        #15
-    LEA         M_SPACE,A1      *load new line
-    MOVE.B      #14,D0          *load message
-    TRAP        #15             *display message
-    MOVE.L      MEM_END,D1
-    MOVE.B      #15,D0
-    MOVE.B      #16,D2
-    TRAP        #15
-    BRA         END
+    
+*READ_MEMORY_LOOP
+**-----print the memory start address----*
+*    MOVE.L      MEM_START,D1    
+*    MOVE.B      #15,D0
+*    MOVE.B      #16,D2
+*    TRAP        #15
+**-----print new line-----*
+*    LEA         M_SPACE,A1      *load new line
+*    MOVE.B      #14,D0          *load message
+*    TRAP        #15             *display message
+**-----print ending address-----*
+*    MOVE.L      MEM_END,D1
+*    MOVE.B      #15,D0
+*    MOVE.B      #16,D2
+*    TRAP        #15
+*    BRA         END
              
-READ_MEMORY_LOOPY
+READ_MEMORY_LOOP
     CMP         A2,A3           *compare the incrementing address and the end address
     BEQ         END             *stop if the end address is reached
     MOVE.B      (A2)+,D2        *get the value from incrementing address
@@ -169,7 +181,7 @@ READ_MEMORY_LOOPY
     BRA         READ_MEMORY_LOOP
     
 CONVERT_TO_ASCII
-    CMP         #9,D1           *compare value with 9
+    CMP.B       #9,D1           *compare value with 9
     BGT         ALPH_CHAR    *convert to numeric ascii
     BRA         NUMERIC_CHAR       *convert to alphabetical ascii
 NUMERIC_CHAR        
@@ -212,6 +224,7 @@ MEM_START       EQU     $0100
 MEM_END         EQU     $0200
 
     END    START        ; last line of source
+
 
 
 
