@@ -40,15 +40,40 @@ OP_JTAB
 *        ADDI                                                            *
 **************************************************************************
 OP0000
-    *DO SOME THINGS
+    *SINGLE CODE, BEGIN OUTPUT
+    
+    MOVE.B *A CHAR TO ADDRESS REGISTER
+    MOVE.B *D CHAR TO ADDRESS REGISTER
+    MOVE.B *D CHAR TO ADDRESS REGISTER
+    MOVE.B *I CHAR TO ADDRESS REGISTER
+
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
+
 
 **************************************************************************
 *        OP0001 - Subroutine for operations beginning with 0001          *
 *        MOVE.B                                                          *
 **************************************************************************
 OP0001
-    *DO SOME THINGS
+    *SINGLE CODE, BEGIN OUTPUT
+    
+    MOVE.B *M CHAR TO ADDRESS REGISTER
+    MOVE.B *O CHAR TO ADDRESS REGISTER
+    MOVE.B *V CHAR TO ADDRESS REGISTER
+    MOVE.B *E CHAR TO ADDRESS REGISTER
+    MOVE.B *. CHAR TO ADDRESS REGISTER
+    MOVE.B *B CHAR TO ADDRESS REGISTER
+
+    *KNOW THE SIZE ALREADY, NO SIZE_JTAB NEEDED
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR?)
+    
     RTS
 
 **************************************************************************
@@ -56,7 +81,18 @@ OP0001
 *        MOVE.W, MOVEA(WORD)                                             *
 **************************************************************************
 OP0010
-    *DO SOME THINGS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
+
+    *KNOW THE SIZE ALREADY, NO SIZE_JTAB NEEDED
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
 
 **************************************************************************
@@ -64,7 +100,18 @@ OP0010
 *        MOVE.L, MOVEA(LONG)                                             *
 **************************************************************************
 OP0011
-    *DO SOME THINGS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
+
+    *KNOW THE SIZE ALREADY, NO SIZE_JTAB NEEDED
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
 
 **************************************************************************
@@ -72,31 +119,75 @@ OP0011
 *        NOP, MOVEM, MULS(LONG), DIVU(LONG), LEA, CLR, JSR, RTS          *
 **************************************************************************
 OP0100
-    *DO SOME THINGS
-    RTS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
 
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
+    RTS
+    
 **************************************************************************
 *        OP0101 - Subroutine for operations beginning with 0101          *
 *        ADDQ                                                            *
 **************************************************************************
 OP0101
-    *DO SOME THINGS
+    *SINGLE CODE, BEGIN OUTPUT
+    
+    MOVE.B *A CHAR TO ADDRESS REGISTER
+    MOVE.B *D CHAR TO ADDRESS REGISTER
+    MOVE.B *D CHAR TO ADDRESS REGISTER
+    MOVE.B *Q CHAR TO ADDRESS REGISTER
+    
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
-
+    
 **************************************************************************
 *        OP0110 - Subroutine for operations beginning with 0110          *
 *        MOVEQ, Bcc                                                      *
 **************************************************************************
 OP0110
-    *DO SOME THINGS
-    RTS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
 
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
+    RTS
+    
 **************************************************************************
 *        OP1000 - Subroutine for operations beginning with 1000          *
 *        DIVU(WORD), OR                                                  *
 **************************************************************************
 OP1000
-    *DO SOME THINGS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
+    
+    *NO SIZE_JTAB NEEDED
+
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
 
 **************************************************************************
@@ -104,40 +195,97 @@ OP1000
 *        SUB                                                             *
 **************************************************************************
 OP1001
-    *DO SOME THINGS
+    *SINGLE CODE, BEGIN OUTPUT
+    
+    MOVE.B *S CHAR TO ADDRESS REGISTER
+    MOVE.B *U CHAR TO ADDRESS REGISTER
+    MOVE.B *B CHAR TO ADDRESS REGISTER
+    
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
+    
 
 **************************************************************************
 *        OP1011 - Subroutine for operations beginning with 1011          *
 *        CMP                                                             *
 **************************************************************************
 OP1011
-    *DO SOME THINGS
+    *SINGLE CODE, BEGIN OUTPUT
+    
+    MOVE.B *C CHAR TO ADDRESS REGISTER
+    MOVE.B *M CHAR TO ADDRESS REGISTER
+    MOVE.B *P CHAR TO ADDRESS REGISTER
+    
+    *NO SIZE_JTAB NEEDED
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
+
 
 **************************************************************************
 *        OP1100 - Subroutine for operations beginning with 1100          *
 *        MULS(WORD), AND                                                 *
 **************************************************************************
 OP1100
-    *DO SOME THINGS
-    RTS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
 
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
+    RTS
+    
 **************************************************************************
 *        OP1101 - Subroutine for operations beginning with 1101          *
 *        ADD, ADDA                                                       *
 **************************************************************************
 OP1101
-    *DO SOME THINGS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
+
+    JSR     SIZE_JTAB   *Jump to the size table
+    
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
+    
     
 **************************************************************************
 *        OP1110 - Subroutine for operations beginning with 1110          *
 *        LSR, LSL, ASR, ASL, ROL, ROR                                    *
 **************************************************************************
 OP1110
-    *DO SOME THINGS
+    *MULTIPLE CODE, STORE AND CHECK NEXT
+    
+    *MOVE THE DATA TO REGISTER
+    LSR.W   #$4, DXXXXX     *Shift left four bits
+    ANDI.W  #$000F, DXXXXX  *Get the first four bits
+    MULU    #4, DXXXXX      *Get the offset
+
+    *NO SIZE_JTAB NEEDED
+
+    *LEA NEXT SUBROUTINE
+    *JUMP TO APPROPRIATE SUBROUTINE BY CMP (AND JSR? BEQ?)
+    
     RTS
+
 
 
 
