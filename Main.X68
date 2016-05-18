@@ -7,7 +7,7 @@
     ORG    $1000
 START:                  ; first instruction of program
     *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
-    
+    BRA         TEST
 *----Display input message for mem start-----*
 INPUT_START
     LEA         M_INPUT_START,A1      *load message
@@ -116,6 +116,9 @@ VALID_CHAR
     BGT         READ_CHAR_LOOP  *begin converting to float    
     RTS                         *loop back to INPUT_START || INPUT_END   
    
+TEST
+    MOVE.L      #$1000,MEM_START
+    MOVE.L      #$1100,MEM_END
 READ_MEMORY   
     MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
     MOVEA.L     MEM_END,A3      *A3 will act as the ending address
@@ -126,7 +129,7 @@ VALIDATE_START_END
     CMP         D1,D2           *compare start and end values
     BEQ         EQUAL_ERROR     *Start address is equal to end address
     BLT         SWAP_VALUES     *Start address is larger than end address
-    BRA         READ_MEMORY_LOOP    *begin reading memory
+    BRA         PRE_READ_MEMORY *begin reading memory
     
 EQUAL_ERROR
     LEA         M_EQUAL,A1      *load error message
@@ -141,49 +144,97 @@ SWAP_VALUES
     MOVE.L      D1,MEM_END
     MOVEA.L     D2,A2           *A2 will be the starting/current address
     MOVEA.L     D1,A3           *A3 will act as the ending address
-    
-*READ_MEMORY_LOOP
-**-----print the memory start address----*
-*    MOVE.L      MEM_START,D1    
-*    MOVE.B      #15,D0
-*    MOVE.B      #16,D2
-*    TRAP        #15
-**-----print new line-----*
-*    LEA         M_SPACE,A1      *load new line
-*    MOVE.B      #14,D0          *load message
-*    TRAP        #15             *display message
-**-----print ending address-----*
-*    MOVE.L      MEM_END,D1
-*    MOVE.B      #15,D0
-*    MOVE.B      #16,D2
-*    TRAP        #15
-*    BRA         END
-             
+PRE_READ_MEMORY
+    MOVE.L      A2,A6           *A6 will act as the current address for Data               
 READ_MEMORY_LOOP
-    CMP         A2,A3           *compare the incrementing address and the end address
-    BEQ         END             *stop if the end address is reached
-    MOVE.B      (A2)+,D2        *get the value from incrementing address
-    MOVE.B      D2,D1           *copy value in D2 to D1
-    LSR.B       #4,D1           *get rid of right nibble
-    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-    BSR         OUTPUT_CHAR     *output the char in D1
-        
-    MOVE.B      D2,D1           *copy D2 to D1
-    LSL.B       #4,D1           *get rid of left nibble
-    LSR.B       #4,D1
-    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-    BSR         OUTPUT_CHAR   *print the char in D1
-*---print a space----*
-    BSR         SPACE    
-    ADD.B       #1,D4           *increment D4
-    CMP.B       #15,D4          *look at value in D4
-    BGT         NEW_LINE        *add new line
-    BRA         READ_MEMORY_LOOP
+    MOVE.L      MEM_END,A3        *put ending address in A3
+    CMP         A2,A3             *compare the incrementing address and the end address
+    BEQ         END               *stop if the end address is reached
+    MOVE.B      (A2)+,D0          *get the value from incrementing address 
+    LSL.W       #8,D0             *make room for the next byte of A2
+    MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
+
     
+VERIFY_OPCODE
+*-------------------------------------*
+*BEGIN
+*D0 will contain word with decodable opcode
+*A2 will act as the current address
+*if at any time the result is not an opcode,
+*branch to "INVALID_OPCODE"
+*-----Put opcode decode here----------*
+*END
+*A7 will be the address of the string that opcode is saved to
+*A6 will be the start of the DATA address
+*-------------------------------------*
+
+EFFECTIVE_ADDRESSING
+*-------------------------------------*
+*BEGIN
+*D0 will contain word with decodable opcode
+*A2 will act as the current address
+*if at any time the result is not an opcode,
+*branch to "INVALID_OPCODE"
+*-----Put opcode decode here----------*
+*END
+*A7 will be the address of the string that opcode is saved to 
+*A5 will be the start of the DATA address
+*-------------------------------------*
+
+*word != opcode
+INVALID_OPCODE
+    CMP         #8,D6               *check the loop increment counter
+    BGE         PRINT_DATA          *long amount of data. print it.
+    ADD.L       #1,A2               *increment current address  
+    ADD.B       #1,D6               *increment counter
+    BRA         READ_MEMORY_LOOP    *data cap not reached. read next byte.    
+    
+PRINT_DATA
+    MOVE.B      #00,D6              *reset the increment counter
+    BSR         PRINT_ADDRESS       *print the data address
+    BSR         TAB                 *insert a space
+    BSR         DATA                *print 'DATA'   
+    BRA         PRINT_DATA_LOOP     *print the data
+*print whatever's in D1
+PRINT_ADDRESS
+    MOVE.L      A6,D4               *put the address in D4
+    CLR         D3                  *counter for long
+    
+PRINT_ADDRESS_LOOP
+    CMP         #4,D3               *if long reached
+    BGE         RETURN_TO_SUBROUTINE *exit loop
+    ROL.L       #8,D4               *put ending byte at beginning
+    MOVE.B      D4,D1               *put byte in D1 for printing
+    BSR         OUTPUT_D1B          *print the bytes 
+    ADD.B       #1,D3               *increment D3 (loop counter)
+    BRA         PRINT_ADDRESS_LOOP  *repeat loop         
+         
+RETURN_TO_SUBROUTINE
+    RTS
+PRINT_DATA_LOOP
+    MOVE.B      (A6)+,D1            *get the data
+    MOVE.B      D1,D2               *copy the data to D2
+    CMP.L       A2,A6               *if current address reached
+    BGT         END_PRINT_DATA_LOOP *continue reading addresses 
+                                    *otherwise keep printing the data
+    BSR         OUTPUT_D1B          *print byte in D1 in hex
+    *---print a space----*
+    BSR         SPACE               *print a space                                
+    BRA         PRINT_DATA_LOOP     *repeat loop
+
+END_PRINT_DATA_LOOP
+    MOVE.L      A2,A6               *set new address for data/opcode
+    BSR         NEW_LINE            *end line
+    BRA         READ_MEMORY_LOOP    *repeat loop    
+   
+VALID_OPCODE 
+
+  
+*------Convert Number in D1 to ASCII------*
 CONVERT_TO_ASCII
     CMP.B       #9,D1           *compare value with 9
-    BGT         ALPH_CHAR    *convert to numeric ascii
-    BRA         NUMERIC_CHAR       *convert to alphabetical ascii
+    BGT         ALPH_CHAR       *convert to numeric ascii
+    BRA         NUMERIC_CHAR    *convert to alphabetical ascii
 NUMERIC_CHAR        
     ADD.B       #48,D1          *convert to ascii value
     RTS                         *continue converting
@@ -191,8 +242,21 @@ ALPH_CHAR
     ADD.B       #55,D1          *convert to ascii value
     RTS                         *continue converting            
 OUTPUT_CHAR
-    MOVE.B      #6,D0  
+    MOVE.B      #6,D0           *output whatever's in D1
     TRAP        #15
+    RTS
+OUTPUT_D1B
+    *print the left character
+    MOVE.B      D1,D2               *copy D1 to D2
+    LSR.B       #4,D1               *get rid of right nibble  
+    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+    BSR         OUTPUT_CHAR         *print the char in D1
+    *print the right character
+    LSL.B       #4,D2               *get rid of left nibble
+    LSR.B       #4,D2               *put right nibble in place
+    MOVE.B      D2,D1               *put right nibble in D1
+    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+    BSR         OUTPUT_CHAR         *print the char in D1
     RTS
     
 NEW_LINE
@@ -200,12 +264,23 @@ NEW_LINE
     LEA         M_SPACE,A1      *load new line
     MOVE.B      #14,D0          *load message
     TRAP        #15             *display message
-    BRA         READ_MEMORY_LOOP    
+    RTS
 SPACE
     MOVE.B      #32,D1
     MOVE.B      #6,D0
     TRAP        #15
     RTS
+TAB
+    LEA         M_TAB,A1
+    MOVE.B      #14,D0
+    TRAP        #15
+    RTS
+DATA
+    LEA         M_DATA,A1
+    MOVE.B      #14,D0
+    TRAP        #15
+    RTS
+
     
 END
 
@@ -219,11 +294,21 @@ M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
 M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
 M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
 M_SPACE       DC.B ' ',CR,LF,0
+M_DATA        DC.B 'DATA    ',0
+M_TAB         DC.B '    ',0
+
+STRING_START    EQU     $0500
+DATA_START      EQU     $0400
 
 MEM_START       EQU     $0100
 MEM_END         EQU     $0200
 
     END    START        ; last line of source
+
+
+
+
+
 
 
 
