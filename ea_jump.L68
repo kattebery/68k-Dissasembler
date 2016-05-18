@@ -1,0 +1,240 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 5/18/2016 11:55:12 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  ea jump tables
+00000000                             3  * Written by :  john, blake, kristen
+00000000                             4  * Date       :  5/17/16
+00000000                             5  * Description:  jump tables for ea's
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00001000                             8      ORG     $1000
+00001000                             9  START:
+00001000                            10  
+00001000                            11  EA_JUMP
+00001000  6000 0002                 12      BRA     ADDQ_JUMP
+00001004                            13  
+00001004                            14      
+00001004                            15  *ASSUMING THAT THE WORD ADDQ HAS BEEN PRINTED
+00001004                            16  *-----------------------------------------------------------------------*
+00001004                            17  ADDQ_JUMP   *EXAMPLE: ADDQ.W  #1, (A6)     AUT* DAT * SZ EAM EAR
+00001004                            18              *                              0101 001 0 01 010 110  ->5256
+00001004                            19        
+00001004                            20        
+00001004  3C3C 5256                 21      MOVE.W      #$5256, D6  *D6 = <00005246> *SIMULATING ADDQ.W #1, (A6)
+00001008  3A06                      22      MOVE.W      D6, D5      
+0000100A  E94D                      23      LSL.W       #4, D5      *D5 = <00002460> *GOT RID OF LEFT 4 BITS
+0000100C  E04D                      24      LSR.W       #8, D5      *D5 = <00000024> *GOT RID OF RIGHT 8
+0000100E  EA4D                      25      LSR.W       #5, D5      *D5 = <0000000 1> GOT RID OF RIGHT 5
+00001010                            26      *D5 NOW HOLDS DAT
+00001010                            27      
+00001010  1806                      28      MOVE.B      D6, D4      *D4 = <000000 46> ONLY LAST BYTE OF D6
+00001012  EC0C                      29      LSR.B       #6, D4      *D4 = <0000000 1> GOT RID OF RIGHT 6
+00001014                            30      *D4 NOW HOLDS SIZE IN ITS LAST BYTE (BYTE, WORD, LONG)
+00001014                            31      
+00001014  1606                      32      MOVE.B      D6, D3      *D3 = <000000 46>
+00001016  E50B                      33      LSL.B       #2, D3      *D3 = <000000 18>
+00001018  EA0B                      34      LSR.B       #5, D3      *D3 = <0000000 0> 
+0000101A                            35      *D3 NOW HOLDS MODE IN ITS LAST BYTE
+0000101A                            36      
+0000101A  EB0E                      37      LSL.B       #5, D6      *D6 = <000000 C0>
+0000101C  EA0E                      38      LSR.B       #5, D6      *D6 = <000000 06>
+0000101E                            39      *D6 NOW HOLDS REGISTER IN ITS LAST BYTE
+0000101E                            40      
+0000101E  4EB9 00001072             41      JSR GET_SIZE
+00001024  4EB9 0000114E             42      JSR SPACE
+0000102A  4EB9 0000109E             43      JSR POUND
+00001030  4EB9 00001056             44      JSR GET_DATA
+00001036  4EB9 00001090             45      JSR COMMA
+0000103C  4EB9 0000114E             46      JSR SPACE
+00001042                            47  
+00001042                            48      *for now this works, albeit only with data registers
+00001042                            49          *.... i need to implement a mode choosing thing
+00001042                            50      *subroutine that determines mode 
+00001042                            51          *...and get reg needs to go inside the dreg thing
+00001042                            52      
+00001042                            53      *JSR DREG  -> WORKS
+00001042                            54      *JSR AREG  -> WORKS
+00001042  4EB9 00001140             55      JSR AIND
+00001048                            56      
+00001048  FFFF FFFF                 57     SIMHALT
+0000104C                            58  
+0000104C                            59  GET_REG
+0000104C  1206                      60      MOVE.B      D6, D1
+0000104E  303C 0003                 61      MOVE        #3, D0
+00001052  4E4F                      62      TRAP        #15
+00001054  4E75                      63      RTS
+00001056                            64      
+00001056                            65  GET_DATA
+00001056  BA3C 0000                 66      CMP.B       #$0, D5
+0000105A  6700 000C                 67      BEQ         PRINT_8
+0000105E  2205                      68      MOVE.L      D5, D1
+00001060  303C 0003                 69      MOVE        #3, D0
+00001064  4E4F                      70      TRAP        #15
+00001066  4E75                      71      RTS
+00001068                            72      
+00001068                            73  PRINT_8
+00001068  7208                      74      MOVE.L      #8, D1
+0000106A  303C 0003                 75      MOVE        #3, D0
+0000106E  4E4F                      76      TRAP        #15
+00001070  4E75                      77      RTS
+00001072                            78       
+00001072                            79  GET_SIZE
+00001072  4EB9 000010AC             80      JSR         DOT
+00001078  B83C 0000                 81      CMP.B       #00, D4
+0000107C  6700 004A                 82      BEQ         BYTE
+00001080  B83C 0001                 83      CMP.B       #01, D4
+00001084  6700 0034                 84      BEQ         WORD
+00001088  B83C 000A                 85      CMP.B       #10, D4
+0000108C  6700 0048                 86      BEQ         LONG
+00001090                            87      
+00001090                            88  COMMA
+00001090  43F9 0000115E             89      LEA         M_COMMA, A1
+00001096  303C 000E                 90      MOVE        #14, D0
+0000109A  4E4F                      91      TRAP        #15
+0000109C  4E75                      92      RTS
+0000109E                            93      
+0000109E                            94  POUND
+0000109E  43F9 00001160             95      LEA         M_POUND, A1
+000010A4  303C 000E                 96      MOVE        #14, D0
+000010A8  4E4F                      97      TRAP        #15
+000010AA  4E75                      98      RTS
+000010AC                            99          
+000010AC                           100  DOT
+000010AC  43F9 00001162            101      LEA         M_DOT, A1
+000010B2  303C 000E                102      MOVE        #14, D0
+000010B6  4E4F                     103      TRAP        #15 
+000010B8  4E75                     104      RTS   
+000010BA                           105  
+000010BA                           106  WORD
+000010BA  43F9 00001164            107      LEA         M_WORD, A1
+000010C0  303C 000E                108      MOVE        #14, D0
+000010C4  4E4F                     109      TRAP        #15
+000010C6  4E75                     110      RTS
+000010C8                           111  
+000010C8                           112  BYTE
+000010C8  43F9 00001166            113      LEA         M_BYTE, A1
+000010CE  303C 000E                114      MOVE        #14, D0
+000010D2  4E4F                     115      TRAP        #15
+000010D4  4E75                     116      RTS
+000010D6                           117      
+000010D6                           118  LONG
+000010D6  43F9 00001168            119      LEA         M_LONG, A1
+000010DC  303C 000E                120      MOVE        #14, D0
+000010E0  4E4F                     121      TRAP        #15
+000010E2  4E75                     122      RTS
+000010E4                           123      
+000010E4                           124  OPEN
+000010E4  43F9 0000116A            125      LEA         M_OPEN, A1
+000010EA  303C 000E                126      MOVE        #14, D0
+000010EE  4E4F                     127      TRAP        #15
+000010F0  4E75                     128      RTS
+000010F2                           129  
+000010F2                           130  CLOSE
+000010F2  43F9 0000116C            131      LEA         M_CLOSE, A1
+000010F8  303C 000E                132      MOVE        #14, D0
+000010FC  4E4F                     133      TRAP        #15
+000010FE  4E75                     134      RTS
+00001100                           135      
+00001100                           136  PLUS
+00001100  43F9 0000116E            137      LEA         M_PLUS, A1
+00001106  303C 000E                138      MOVE        #14, D0
+0000110A  4E4F                     139      TRAP        #15
+0000110C  4E75                     140      RTS
+0000110E                           141      
+0000110E                           142  SUB
+0000110E  43F9 00001170            143      LEA         M_SUB, A1
+00001114  303C 000E                144      MOVE        #14, D0
+00001118  4E4F                     145      TRAP        #15
+0000111A  4E75                     146      RTS
+0000111C                           147      
+0000111C                           148  DREG
+0000111C  43F9 00001172            149      LEA         M_DREG, A1
+00001122  303C 000E                150      MOVE        #14, D0
+00001126  4E4F                     151      TRAP        #15
+00001128  4EB8 104C                152      JSR GET_REG
+0000112C  4E75                     153      RTS
+0000112E                           154      
+0000112E                           155  AREG
+0000112E  43F9 00001174            156      LEA         M_AREG, A1
+00001134  303C 000E                157      MOVE        #14, D0
+00001138  4E4F                     158      TRAP        #15
+0000113A  4EB8 104C                159      JSR GET_REG
+0000113E  4E75                     160      RTS
+00001140                           161      
+00001140                           162  AIND
+00001140  4EB8 10E4                163      JSR OPEN
+00001144  4EB8 112E                164      JSR AREG
+00001148  4EB8 10F2                165      JSR CLOSE
+0000114C  4E75                     166      RTS
+0000114E                           167             
+0000114E                           168  SPACE
+0000114E  43F9 0000115C            169      LEA         M_SPACE, A1
+00001154  303C 000E                170      MOVE        #14, D0
+00001158  4E4F                     171      TRAP        #15
+0000115A  4E75                     172      RTS
+0000115C                           173  
+0000115C                           174      
+0000115C  =0000000D                175  CR      EQU     $0D
+0000115C  =0000000A                176  LF      EQU     $0A
+0000115C                           177  
+0000115C= 20 00                    178  M_SPACE DC.B ' ',0
+0000115E= 2C 00                    179  M_COMMA DC.B ',',0
+00001160= 23 00                    180  M_POUND DC.B '#',0
+00001162= 2E 00                    181  M_DOT   DC.B '.',0
+00001164= 57 00                    182  M_WORD  DC.B 'W',0
+00001166= 42 00                    183  M_BYTE  DC.B 'B',0
+00001168= 4C 00                    184  M_LONG  DC.B 'L',0
+0000116A= 28 00                    185  M_OPEN  DC.B '(',0
+0000116C= 29 00                    186  M_CLOSE DC.B ')',0
+0000116E= 2B 00                    187  M_PLUS  DC.B '+',0
+00001170= 2D 00                    188  M_SUB   DC.B '-',0
+00001172= 44 00                    189  M_DREG  DC.B 'D',0
+00001174= 41 00                    190  M_AREG  DC.B 'A',0
+00001176                           191      
+00001176                           192      END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADDQ_JUMP           1004
+AIND                1140
+AREG                112E
+BYTE                10C8
+CLOSE               10F2
+COMMA               1090
+CR                  D
+DOT                 10AC
+DREG                111C
+EA_JUMP             1000
+GET_DATA            1056
+GET_REG             104C
+GET_SIZE            1072
+LF                  A
+LONG                10D6
+M_AREG              1174
+M_BYTE              1166
+M_CLOSE             116C
+M_COMMA             115E
+M_DOT               1162
+M_DREG              1172
+M_LONG              1168
+M_OPEN              116A
+M_PLUS              116E
+M_POUND             1160
+M_SPACE             115C
+M_SUB               1170
+M_WORD              1164
+OPEN                10E4
+PLUS                1100
+POUND               109E
+PRINT_8             1068
+SPACE               114E
+START               1000
+SUB                 110E
+WORD                10BA
