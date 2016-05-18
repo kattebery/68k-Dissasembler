@@ -1,5 +1,6 @@
     **Call GET4 here, reference to jump table and begin cycle
 
+
 **************************************************************************
 *               Jump table 1. Determine OP code.                         *
 *        Analyzes the first four bits within the instruction             *
@@ -342,9 +343,9 @@ _LSR
     BRA     EA_LSR
 LSR     DC.B    "LSR"
 
-********* ASd *************      ****BROKEN****  
+********* ASd *************
 _ASd
-    CMP     #%XXX,DXXXX        
+    CMP     #%000,DXXXX        
     BEQ     _ASR
     BRA     _ASL
 
@@ -357,36 +358,59 @@ _ASR
     LEA     ASR,(AXXXX)+
     BRA     EA_ASR
 ASR     DC.B    "ASR"
-********* ROd *************      ****BROKEN****  
+
+********* ROd *************
 _ROd
+    CMP     #%011,DXXXX        
+    BEQ     _ROR
+    BRA     _ROL
+_ROL    
+    LEA     ROL,(AXXXX)+
+    BRA     EA_ROL
+ROL     DC.B    "ROL"
 
-_LSL    
-    LEA     LSL,(AXXXX)+
-    BRA     EA_LSL
-LSL     DC.B    "LSL"
-
-_LSR
-    LEA     LSR,(AXXXX)+
-    BRA     EA_LSR
-LSR     DC.B    "LSR"
+_ROR
+    LEA     ROR,(AXXXX)+
+    BRA     EA_ROR
+ROR     DC.B    "ROR"
 
 **************************************************************************
 **************************************************************************
-*              *
-*                                           *
+*              SUBROUTINES FOR ISOLATING BITS                            *
+*                                                                        *
 **************************************************************************
 **************************************************************************
+
+
+
+
+**************************************************************************
+*                     GET4                                               *
+*                ISOLATES THE FIRST FOUR BITS                            *
+**************************************************************************
+
 GET4  
-    MOVE.W  Dg,D5   *Copy instruction for modification
-    LSL.W   #4,D5   *Shift left four bits
+    MOVE.W  DXX,DXX   *Copy instruction for modification
+    ROL.W   #4,DXX    *Rotate left four bits
+    ANDI.W  #$F,DXX   *Keep only four bits
 
-
-    LEA OP_JTAB,A0
-    JSR A0,D5
+    LEA OP_JTAB,AXX    *Load and jump to the jump table
+    JSR AXX,DXX
     RTS
 
-GET3
+
+**************************************************************************
+*                     GET3                                               *
+*                ISOLATES THE NEXT THREE BITS                            *
+**************************************************************************
+GET3 ***NOT SURE ON THE LOGIC IN THIS ONE****
+    MOVE.W  DXX,DXX   *Copy instruction for modification
+    ROL.W   #3,DXX    *Rotate left four bits
+    ANDI.W  #$E,DXX   *Keep only four bits
+
     RTS
+
+
 
 
 *~Font name~Courier New~
