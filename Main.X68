@@ -118,7 +118,7 @@ VALID_CHAR
    
 TEST
     MOVE.L      #$1000,MEM_START
-    MOVE.L      #$1100,MEM_END
+    MOVE.L      #$1300,MEM_END
 READ_MEMORY   
     MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
     MOVEA.L     MEM_END,A3      *A3 will act as the ending address
@@ -150,11 +150,19 @@ READ_MEMORY_LOOP
     MOVE.L      MEM_END,A3        *put ending address in A3
     CMP         A2,A3             *compare the incrementing address and the end address
     BEQ         END               *stop if the end address is reached
+    
+    ROR         #8,D6               *select correct byte
+    CMP.B       #60,D6              *see if maximum lines printed
+    BGE         PRESS_TO_CONTINUE
+    ROL         #8,D6
+READ_MEMORY_CONT                    *continue reading memory (if branched)  
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
     MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
+    BRA         INVALID_OPCODE      *DELETE THIS LATER
 
-    
+
+        
 VERIFY_OPCODE
 *-------------------------------------*
 *BEGIN
@@ -181,9 +189,26 @@ EFFECTIVE_ADDRESSING
 *A5 will be the start of the DATA address
 *-------------------------------------*
 
+
+PRESS_TO_CONTINUE
+    MOVE.B      #00,D6              *reset counter
+    ROL.L       #8,D6               *put byte back in place
+    LEA         M_PRESS_CONT,A1     *load press key to continue messageu
+    MOVE.B      #14,D0              *load into D0
+    TRAP        #15                 *display message
+    MOVE.B      #5,D0               *read single character from keyboard
+    TRAP        #15    
+    BSR         NEW_LINE            *add new line
+    BRA         READ_MEMORY_CONT    *continue reading loop
+    
+INCREMENT_LINE
+    ROR.L       #8,D6               *select correct byte
+    ADD.B       #1,D6               *increment counter
+    ROL.L       #8,D6               *put byte back in place
+    RTS 
 *word != opcode
 INVALID_OPCODE
-    CMP         #8,D6               *check the loop increment counter
+    CMP.B       #8,D6               *check the loop increment counter
     BGE         PRINT_DATA          *long amount of data. print it.
     ADD.L       #1,A2               *increment current address  
     ADD.B       #1,D6               *increment counter
@@ -194,6 +219,7 @@ PRINT_DATA
     BSR         PRINT_ADDRESS       *print the data address
     BSR         TAB                 *insert a space
     BSR         DATA                *print 'DATA'   
+    BSR         INCREMENT_LINE      *increment line counter (line was printed)
     BRA         PRINT_DATA_LOOP     *print the data
 *print whatever's in D1
 PRINT_ADDRESS
@@ -205,7 +231,7 @@ PRINT_ADDRESS_LOOP
     BGE         RETURN_TO_SUBROUTINE *exit loop
     ROL.L       #8,D4               *put ending byte at beginning
     MOVE.B      D4,D1               *put byte in D1 for printing
-    BSR         OUTPUT_D1B          *print the bytes 
+    BSR         OUTPUT_D1B          *print the first byte of D1
     ADD.B       #1,D3               *increment D3 (loop counter)
     BRA         PRINT_ADDRESS_LOOP  *repeat loop         
          
@@ -225,10 +251,24 @@ PRINT_DATA_LOOP
 END_PRINT_DATA_LOOP
     MOVE.L      A2,A6               *set new address for data/opcode
     BSR         NEW_LINE            *end line
-    BRA         READ_MEMORY_LOOP    *repeat loop    
-   
+    BSR         INCREMENT_LINE      *increment line printing counter
+    BRA         READ_MEMORY_LOOP    *repeat loop   
+ 
+OUTPUT_D1B
+    *print the left character
+    MOVE.B      D1,D2               *copy D1 to D2
+    LSR.B       #4,D1               *get rid of right nibble  
+    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+    BSR         OUTPUT_CHAR         *print the char in D1
+    *print the right character
+    LSL.B       #4,D2               *get rid of left nibble
+    LSR.B       #4,D2               *put right nibble in place
+    MOVE.B      D2,D1               *put right nibble in D1
+    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+    BSR         OUTPUT_CHAR         *print the char in D1
+    RTS
 VALID_OPCODE 
-
+    
   
 *------Convert Number in D1 to ASCII------*
 CONVERT_TO_ASCII
@@ -245,22 +285,8 @@ OUTPUT_CHAR
     MOVE.B      #6,D0           *output whatever's in D1
     TRAP        #15
     RTS
-OUTPUT_D1B
-    *print the left character
-    MOVE.B      D1,D2               *copy D1 to D2
-    LSR.B       #4,D1               *get rid of right nibble  
-    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-    BSR         OUTPUT_CHAR         *print the char in D1
-    *print the right character
-    LSL.B       #4,D2               *get rid of left nibble
-    LSR.B       #4,D2               *put right nibble in place
-    MOVE.B      D2,D1               *put right nibble in D1
-    BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-    BSR         OUTPUT_CHAR         *print the char in D1
-    RTS
     
 NEW_LINE
-    MOVE.B      #0,D4           *reset counter
     LEA         M_SPACE,A1      *load new line
     MOVE.B      #14,D0          *load message
     TRAP        #15             *display message
@@ -296,6 +322,7 @@ M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF
 M_SPACE       DC.B ' ',CR,LF,0
 M_DATA        DC.B 'DATA    ',0
 M_TAB         DC.B '    ',0
+M_PRESS_CONT  DC.B 'Press any key to continue',0
 
 STRING_START    EQU     $0500
 DATA_START      EQU     $0400
@@ -304,6 +331,7 @@ MEM_START       EQU     $0100
 MEM_END         EQU     $0200
 
     END    START        ; last line of source
+
 
 
 
