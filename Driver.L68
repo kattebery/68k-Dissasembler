@@ -1,0 +1,885 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 5/31/2016 1:29:50 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  MAIN:                  ; first instruction of program
+00001000  6000 0FFE                  9      BRA             INPUT_START
+00001004                            10      
+00001004                            11      INCLUDE         'Main.X68'
+00002000                            12      ORG    $2000
+00002000                            13  
+00002000                            14      *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
+00002000                            15  
+00002000                            16  INPUT_START
+00002000  43F9 0000227A             17      LEA         M_INPUT_START,A1      *load message
+00002006  103C 000E                 18      MOVE.B      #14,D0          *display string
+0000200A  4E4F                      19      TRAP        #15             *output string
+0000200C  227C 00000300             20      MOVE.L      #$0300,A1       *set address of register A1 for string
+00002012  103C 0002                 21      MOVE.B      #2,D0           *input string into A1 Trap
+00002016  4E4F                      22      TRAP        #15             *input string from user
+00002018  6100 0040                 23      BSR         READ_CHAR       *check for valid input
+0000201C  23C3 00000100             24      MOVE.L      D3,MEM_START    *put the starting address in memory
+00002022  B87C 0000                 25      CMP         #0,D4           *check the result register (D4)
+00002026  6700 0004                 26      BEQ         INPUT_END       *valid value. read the ending value
+0000202A  60D4                      27      BRA         INPUT_START     *invalid value. try inputting start value again    
+0000202C                            28      
+0000202C                            29  INPUT_END
+0000202C  43F9 000022B1             30      LEA         M_INPUT_END,A1  *load message
+00002032  103C 000E                 31      MOVE.B      #14,D0          *display string
+00002036  4E4F                      32      TRAP        #15             *output string
+00002038  227C 00000300             33      MOVE.L      #$0300,A1       *set address of register A1 for string
+0000203E  103C 0002                 34      MOVE.B      #2,D0           *input string into A1 Trap
+00002042  4E4F                      35      TRAP        #15             *input string from user
+00002044  6100 0014                 36      BSR         READ_CHAR       *check for valid input
+00002048  23C3 00000200             37      MOVE.L      D3,MEM_END      *put ending address into memory
+0000204E  B87C 0000                 38      CMP         #0,D4           *check the result register (D4)
+00002052  6700 00BE                 39      BEQ         READ_MEMORY     *valid value. read the ending value
+00002056  60D4                      40      BRA         INPUT_END       *invalid value. try inputting start value again    
+00002058                            41      
+00002058                            42  GET_NEXT_INPUT
+00002058  4E75                      43      RTS
+0000205A                            44  
+0000205A                            45  READ_CHAR                       *verify that string is valid (all hexadecimal digits)
+0000205A  4243                      46      CLR         D3              *D3 will act as the total result
+0000205C  2849                      47      MOVE.L      A1,A4           *the stop address
+0000205E  143C 0006                 48      MOVE.B      #6,D2           *put 6 in D2
+00002062  D8C2                      49      ADD.W       D2,A4           *A4 is now the stop address(A4)
+00002064                            50      
+00002064                            51  REMOVE_ZEROES
+00002064  4281                      52      CLR.L       D1              *D1 will act as the temporary value
+00002066  1211                      53      MOVE.B      (A1),D1         *read the byte from string
+00002068  143C 0030                 54      MOVE.B      #$30,D2         *put ascii zero in D2
+0000206C  B202                      55      CMP.B       D2,D1           *compare ascii zero and value of D1
+0000206E  6700 0006                 56      BEQ         REMOVE_ZERO     *skip over that character   
+00002072  6000 0008                 57      BRA         READ_CHAR_LOOP  *begin converting characters to numerical values
+00002076                            58  REMOVE_ZERO
+00002076  5289                      59      ADD.L       #1,A1           *increment string start address
+00002078  528C                      60      ADD.L       #1,A4           *increment string end address
+0000207A  60E8                      61      BRA         REMOVE_ZEROES   *loop back and keep removing zeroes
+0000207C                            62  READ_CHAR_LOOP     
+0000207C  4281                      63      CLR.L       D1              *D1 will act as the temporary value
+0000207E  1211                      64      MOVE.B      (A1),D1         *read the byte from string
+00002080  B27C 0000                 65      CMP         #0,D1           *compare 00 (NULL) and the byte ascii value in D1
+00002084  67D2                      66      BEQ         GET_NEXT_INPUT    *if you reached the end of the string, end loop
+00002086                            67      
+00002086  143C 0030                 68      MOVE.B      #$30,D2         *put ascii zero in D2
+0000208A  B202                      69      CMP.B       D2,D1           *compare ascii zero and value of D1
+0000208C  6D00 0036                 70      BLT         INVALID_CHAR_ERROR *branch on invalid (too small) ascii value   
+00002090  143C 0066                 71      MOVE.B      #$66,D2         *put ascii f in D2
+00002094  B202                      72      CMP.B       D2,D1           *compare ascii f and value of D1
+00002096  6E2C                      73      BGT.B       INVALID_CHAR_ERROR *branch on invalid ascii value
+00002098  143C 0061                 74      MOVE.B      #$61,D2         *put ascii a in D2
+0000209C  B202                      75      CMP.B       D2,D1           *compare ascii a and value of D1
+0000209E  6C00 0046                 76      BGE         VALID_LETTER_LC *value is between a and f. Loop back.
+000020A2                            77      
+000020A2  143C 0039                 78      MOVE.B      #$39,D2         *put ascii 9 in D2
+000020A6  B202                      79      CMP.B       D2,D1           *compare ascii 9 and value of D1
+000020A8  6F00 002C                 80      BLE         VALID_NUMBER    *value between 0 and 9. Loop back.
+000020AC                            81  
+000020AC  143C 0041                 82      MOVE.B      #$41,D2         *put ascii A into D2
+000020B0  B202                      83      CMP.B       D2,D1           *compare ascii A and value of D1
+000020B2  6D00 0010                 84      BLT         INVALID_CHAR_ERROR    *value between 9 and A (Invalid)
+000020B6                            85      
+000020B6  143C 0046                 86      MOVE.B      #$46,D2         *put ascii F into D2
+000020BA  B202                      87      CMP.B       D2,D1           *compare ascii F and value of D1
+000020BC  6E00 0006                 88      BGT         INVALID_CHAR_ERROR    *value between F and a (Invalid)
+000020C0                            89           
+000020C0  6000 001C                 90      BRA         VALID_LETTER_UC *value is between A and F        
+000020C4                            91  INVALID_CHAR_ERROR   
+000020C4  43F9 000022E6             92      LEA         M_INVALID,A1    *load error message
+000020CA  103C 000E                 93      MOVE.B      #14,D0          *display string trap
+000020CE  4E4F                      94      TRAP        #15             *output error message
+000020D0  183C 0001                 95      MOVE.B      #1,D4           *put invalid output in result register
+000020D4  4E75                      96      RTS
+000020D6                            97  VALID_NUMBER
+000020D6  0401 0030                 98      SUB.B       #$30,D1         *get actual value from ascii value
+000020DA  6000 0012                 99      BRA         VALID_CHAR      *read the next char in string
+000020DE                           100  VALID_LETTER_UC
+000020DE  0401 0037                101      SUB.B       #$37,D1         *get actual value from ascii value
+000020E2  6000 000A                102      BRA         VALID_CHAR      *read the next char in string    
+000020E6                           103  VALID_LETTER_LC
+000020E6  0401 0057                104      SUB.B       #$57,D1         *get actual value from ascii value
+000020EA  6000 0002                105      BRA         VALID_CHAR      *read the next char in string   
+000020EE                           106  VALID_CHAR
+000020EE  183C 0000                107      MOVE.B      #0,D4           *return valid value entry in D4    
+000020F2  E98B                     108      LSL.L       #4,D3           *put hex digit in proper place
+000020F4  D681                     109      ADD.L       D1,D3           *put new total in D3
+000020F6  5289                     110      ADD.L       #1,A1           *increment address
+000020F8  B8C9                     111      CMP         A1,A4           *if A1 > A4
+000020FA  6E80                     112      BGT         READ_CHAR_LOOP  *begin converting to float    
+000020FC  4E75                     113      RTS                         *loop back to INPUT_START || INPUT_END   
+000020FE                           114     
+000020FE                           115  TEST
+000020FE  23FC 00001000 00000100   116      MOVE.L      #$1000,MEM_START
+00002108  23FC 00001300 00000200   117      MOVE.L      #$1300,MEM_END
+00002112                           118  READ_MEMORY   
+00002112  2479 00000100            119      MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
+00002118  2679 00000200            120      MOVEA.L     MEM_END,A3      *A3 will act as the ending address
+0000211E                           121      
+0000211E                           122  VALIDATE_START_END
+0000211E  220A                     123      MOVE.L      A2,D1           *copy start address into D1
+00002120  240B                     124      MOVE.L      A3,D2           *copy end address into D2
+00002122  B441                     125      CMP         D1,D2           *compare start and end values
+00002124  6700 000A                126      BEQ         EQUAL_ERROR     *Start address is equal to end address
+00002128  6D00 0016                127      BLT         SWAP_VALUES     *Start address is larger than end address
+0000212C  6000 002E                128      BRA         PRE_READ_MEMORY *begin reading memory
+00002130                           129      
+00002130                           130  EQUAL_ERROR
+00002130  43F9 00002314            131      LEA         M_EQUAL,A1      *load error message
+00002136  103C 000E                132      MOVE.B      #14,D0          *display string trap
+0000213A  4E4F                     133      TRAP        #15             *output error message
+0000213C  6000 FEC2                134      BRA         INPUT_START     *restart program (request ui again)
+00002140                           135      
+00002140                           136  SWAP_VALUES
+00002140  2239 00000100            137      MOVE.L      MEM_START,D1    *put starting address in D1
+00002146  2439 00000200            138      MOVE.L      MEM_END,D2      *put ending address in D2
+0000214C  23C2 00000100            139      MOVE.L      D2,MEM_START    *swap the two values in memory
+00002152  23C1 00000200            140      MOVE.L      D1,MEM_END
+00002158  2442                     141      MOVEA.L     D2,A2           *A2 will be the starting/current address
+0000215A  2641                     142      MOVEA.L     D1,A3           *A3 will act as the ending address
+0000215C                           143  PRE_READ_MEMORY
+0000215C  2C4A                     144      MOVE.L      A2,A6           *A6 will act as the current address for Data               
+0000215E                           145  READ_MEMORY_LOOP
+0000215E  2679 00000200            146      MOVE.L      MEM_END,A3        *put ending address in A3
+00002164  B6CA                     147      CMP         A2,A3             *compare the incrementing address and the end address
+00002166  6700 010E                148      BEQ         END               *stop if the end address is reached
+0000216A                           149      
+0000216A  E05E                     150      ROR         #8,D6               *select correct byte
+0000216C  BC3C 003C                151      CMP.B       #60,D6              *see if maximum lines printed
+00002170  6C00 000E                152      BGE         PRESS_TO_CONTINUE
+00002174  E15E                     153      ROL         #8,D6
+00002176                           154  READ_MEMORY_CONT                    *continue reading memory (if branched)  
+00002176  101A                     155      MOVE.B      (A2)+,D0          *get the value from incrementing address 
+00002178  E148                     156      LSL.W       #8,D0             *make room for the next byte of A2
+0000217A  1022                     157      MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
+0000217C  6000 0028                158      BRA         INVALID_OPCODE      *DELETE THIS LATER
+00002180                           159  
+00002180                           160  
+00002180                           161          
+00002180                           162  VERIFY_OPCODE        
+00002180                           163  
+00002180                           164  
+00002180                           165  
+00002180                           166  EFFECTIVE_ADDRESSING
+00002180                           167  
+00002180                           168  
+00002180                           169  PRESS_TO_CONTINUE
+00002180  1C3C 0000                170      MOVE.B      #00,D6              *reset counter
+00002184  E19E                     171      ROL.L       #8,D6               *put byte back in place
+00002186  43F9 0000235E            172      LEA         M_PRESS_CONT,A1     *load press key to continue messageu
+0000218C  103C 000E                173      MOVE.B      #14,D0              *load into D0
+00002190  4E4F                     174      TRAP        #15                 *display message
+00002192  103C 0005                175      MOVE.B      #5,D0               *read single character from keyboard
+00002196  4E4F                     176      TRAP        #15    
+00002198  6100 00A6                177      BSR         NEW_LINE            *add new line
+0000219C  60D8                     178      BRA         READ_MEMORY_CONT    *continue reading loop
+0000219E                           179      
+0000219E                           180  INCREMENT_LINE
+0000219E  E09E                     181      ROR.L       #8,D6               *select correct byte
+000021A0  5206                     182      ADD.B       #1,D6               *increment counter
+000021A2  E19E                     183      ROL.L       #8,D6               *put byte back in place
+000021A4  4E75                     184      RTS 
+000021A6                           185  INVALID_OPCODE
+000021A6  BC3C 0008                186      CMP.B       #8,D6               *check the loop increment counter
+000021AA  6C00 0008                187      BGE         PRINT_DATA          *long amount of data. print it.
+000021AE  528A                     188      ADD.L       #1,A2               *increment current address  
+000021B0  5206                     189      ADD.B       #1,D6               *increment counter
+000021B2  60AA                     190      BRA         READ_MEMORY_LOOP    *data cap not reached. read next byte.    
+000021B4                           191      
+000021B4                           192  PRINT_DATA
+000021B4  1C3C 0000                193      MOVE.B      #00,D6              *reset the increment counter
+000021B8  6100 0010                194      BSR         PRINT_ADDRESS       *print the data address
+000021BC  6100 009C                195      BSR         TAB                 *insert a space
+000021C0  6100 00A6                196      BSR         DATA                *print 'DATA'   
+000021C4  61D8                     197      BSR         INCREMENT_LINE      *increment line counter (line was printed)
+000021C6  6000 001C                198      BRA         PRINT_DATA_LOOP     *print the data
+000021CA                           199  PRINT_ADDRESS
+000021CA  280E                     200      MOVE.L      A6,D4               *put the address in D4
+000021CC  4243                     201      CLR         D3                  *counter for long
+000021CE                           202      
+000021CE                           203  PRINT_ADDRESS_LOOP
+000021CE  B67C 0004                204      CMP         #4,D3               *if long reached
+000021D2  6C00 000E                205      BGE         RETURN_TO_SUBROUTINE *exit loop
+000021D6  E19C                     206      ROL.L       #8,D4               *put ending byte at beginning
+000021D8  1204                     207      MOVE.B      D4,D1               *put byte in D1 for printing
+000021DA  6100 0028                208      BSR         OUTPUT_D1B          *print the first byte of D1
+000021DE  5203                     209      ADD.B       #1,D3               *increment D3 (loop counter)
+000021E0  60EC                     210      BRA         PRINT_ADDRESS_LOOP  *repeat loop         
+000021E2                           211           
+000021E2                           212  RETURN_TO_SUBROUTINE
+000021E2  4E75                     213      RTS
+000021E4                           214  PRINT_DATA_LOOP
+000021E4  121E                     215      MOVE.B      (A6)+,D1            *get the data
+000021E6  1401                     216      MOVE.B      D1,D2               *copy the data to D2
+000021E8  BDCA                     217      CMP.L       A2,A6               *if current address reached
+000021EA  6E00 000C                218      BGT         END_PRINT_DATA_LOOP *continue reading addresses 
+000021EE                           219                                      *otherwise keep printing the data
+000021EE  6100 0014                220      BSR         OUTPUT_D1B          *print byte in D1 in hex
+000021F2                           221      *---print a space----*
+000021F2  6100 005A                222      BSR         SPACE               *print a space                                
+000021F6  60EC                     223      BRA         PRINT_DATA_LOOP     *repeat loop
+000021F8                           224  
+000021F8                           225  END_PRINT_DATA_LOOP
+000021F8  2C4A                     226      MOVE.L      A2,A6               *set new address for data/opcode
+000021FA  6100 0044                227      BSR         NEW_LINE            *end line
+000021FE  619E                     228      BSR         INCREMENT_LINE      *increment line printing counter
+00002200  6000 FF5C                229      BRA         READ_MEMORY_LOOP    *repeat loop   
+00002204                           230   
+00002204                           231  OUTPUT_D1B
+00002204                           232      *print the left character
+00002204  1401                     233      MOVE.B      D1,D2               *copy D1 to D2
+00002206  E809                     234      LSR.B       #4,D1               *get rid of right nibble  
+00002208  6100 0016                235      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+0000220C  6100 002A                236      BSR         OUTPUT_CHAR         *print the char in D1
+00002210                           237      *print the right character
+00002210  E90A                     238      LSL.B       #4,D2               *get rid of left nibble
+00002212  E80A                     239      LSR.B       #4,D2               *put right nibble in place
+00002214  1202                     240      MOVE.B      D2,D1               *put right nibble in D1
+00002216  6100 0008                241      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+0000221A  6100 001C                242      BSR         OUTPUT_CHAR         *print the char in D1
+0000221E  4E75                     243      RTS
+00002220                           244  VALID_OPCODE 
+00002220                           245      
+00002220                           246    
+00002220                           247  CONVERT_TO_ASCII
+00002220  B23C 0009                248      CMP.B       #9,D1           *compare value with 9
+00002224  6E00 000C                249      BGT         ALPH_CHAR       *convert to numeric ascii
+00002228  6000 0002                250      BRA         NUMERIC_CHAR    *convert to alphabetical ascii
+0000222C                           251  NUMERIC_CHAR        
+0000222C  0601 0030                252      ADD.B       #48,D1          *convert to ascii value
+00002230  4E75                     253      RTS                         *continue converting
+00002232                           254  ALPH_CHAR
+00002232  0601 0037                255      ADD.B       #55,D1          *convert to ascii value
+00002236  4E75                     256      RTS                         *continue converting            
+00002238                           257  OUTPUT_CHAR
+00002238  103C 0006                258      MOVE.B      #6,D0           *output whatever's in D1
+0000223C  4E4F                     259      TRAP        #15
+0000223E  4E75                     260      RTS
+00002240                           261      
+00002240                           262  NEW_LINE
+00002240  43F9 0000234C            263      LEA         M_SPACE,A1      *load new line
+00002246  103C 000E                264      MOVE.B      #14,D0          *load message
+0000224A  4E4F                     265      TRAP        #15             *display message
+0000224C  4E75                     266      RTS
+0000224E                           267  SPACE
+0000224E  123C 0020                268      MOVE.B      #32,D1
+00002252  103C 0006                269      MOVE.B      #6,D0
+00002256  4E4F                     270      TRAP        #15
+00002258  4E75                     271      RTS
+0000225A                           272  TAB
+0000225A  43F9 00002359            273      LEA         M_TAB,A1
+00002260  103C 000E                274      MOVE.B      #14,D0
+00002264  4E4F                     275      TRAP        #15
+00002266  4E75                     276      RTS
+00002268                           277  DATA
+00002268  43F9 00002350            278      LEA         M_DATA,A1
+0000226E  103C 000E                279      MOVE.B      #14,D0
+00002272  4E4F                     280      TRAP        #15
+00002274  4E75                     281      RTS
+00002276                           282  
+00002276                           283      
+00002276                           284  END
+00002276                           285  
+00002276                           286  
+00002276  FFFF FFFF                287      SIMHALT
+0000227A                           288  
+0000227A  =0000000D                289  CR          EQU     $0D
+0000227A  =0000000A                290  LF          EQU     $0A
+0000227A                           291  
+0000227A= 50 6C 65 61 73 65 ...    292  M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
+000022B1= 50 6C 65 61 73 65 ...    293  M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
+000022E6= 49 6E 76 61 6C 69 ...    294  M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
+00002314= 45 71 75 61 6C 20 ...    295  M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
+0000234C= 20 0D 0A 00              296  M_SPACE       DC.B ' ',CR,LF,0
+00002350= 44 41 54 41 20 20 ...    297  M_DATA        DC.B 'DATA    ',0
+00002359= 20 20 20 20 00           298  M_TAB         DC.B '    ',0
+0000235E= 50 72 65 73 73 20 ...    299  M_PRESS_CONT  DC.B 'Press any key to continue',0
+00002378                           300  
+00002378  =00000500                301  STRING_START    EQU     $0500
+00002378  =00000400                302  DATA_START      EQU     $0400
+00002378                           303  
+00002378  =00000100                304  MEM_START       EQU     $0100
+00002378  =00000200                305  MEM_END         EQU     $0200
+00002378                           306  
+00002378                           307  
+00002378                           308  
+00002378                           309  
+00002378                           310  
+00002378                           311  
+00002378                           312  
+00002378                           313  
+00002378                           314  
+00002378                           315  
+00002378                           316  
+00002378                           317  
+00002378                           318  
+00002378                           319  
+00002378                           320  
+00002378                           321  -------------------- end include --------------------
+00002378                           322      INCLUDE         'OP_jumpTable.X68'
+00003000                           323      ORG       $3000
+00003000                           324  OP_JTAB
+00003000  4EF9 0000304E            325      JMP     OP0000      *Subroutine for operations beginning with 0000
+00003006  4EF9 00003059            326      JMP     OP0001      *Subroutine for operations beginning with 0001
+0000300C  4EF9 00003067            327      JMP     OP0010      *Subroutine for operations beginning with 0010
+00003012  4EF9 0000309E            328      JMP     OP0011      *Subroutine for operations beginning with 0011
+00003018  4EF9 000030D4            329      JMP     OP0100      *Subroutine for operations beginning with 0100
+0000301E  4EF9 00003172            330      JMP     OP0101      *Subroutine for operations beginning with 0101
+00003024  4EF9 0000317D            331      JMP     OP0110      *Subroutine for operations beginning with 0110
+0000302A  4EF9 00003194            332      JMP     OP1000      *Subroutine for operations beginning with 1000
+00003030  4EF9 000031C7            333      JMP     OP1001      *Subroutine for operations beginning with 1001
+00003036  4EF9 000031D2            334      JMP     OP1011      *Subroutine for operations beginning with 1011
+0000303C  4EF9 000031DC            335      JMP     OP1100      *Subroutine for operations beginning with 1100
+00003042  4EF9 00003210            336      JMP     OP1101      *Subroutine for operations beginning with 1101
+00003048  4EF9 00003249            337      JMP     OP1110      *Subroutine for operations beginning with 1110
+0000304E                           338      
+0000304E                           339  
+0000304E                           340  
+0000304E                           341  OP0000
+0000304E                           342      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+0000304E                           343      *BEGIN OUTPUT
+0000304E                           344      
+0000304E  12F9 00003054            345      MOVE.B  ADDI,(A1)+      *Load 'ADDI' to Add Reg 1 and then increment
+00003054                           346  
+00003054= 41 44 44 49 00           347  ADDI    DC.B    'ADDI',0
+00003059                           348  
+00003059                           349  OP0001
+00003059                           350      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00003059                           351      *BEGIN OUTPUT
+00003059                           352  
+0000305A  12F9 00003060            353      MOVE.B  MOVEB,(A1)+     *Load 'MOVE.B' to Add Reg 1 and then increment
+00003060                           354      
+00003060= 4D 4F 56 45 2E 42 00     355  MOVEB   DC.B    'MOVE.B',0
+00003067                           356  
+00003067                           357  OP0010
+00003067                           358      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+00003067                           359      
+00003067                           360      **ISOLATE NEXT BITS TO CHECK**
+00003067                           361      **Look to 2/4 as both contain Xn in 1/4
+00003068  3200                     362      MOVE.W  D0,D1           *Copy instruction for modification
+0000306A  E949                     363      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+0000306C  E949                     364      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+0000306E  E849                     365      LSR.W   #4,D1           *Rotate left four bits
+00003070  E049                     366      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00003072  0241 000F                367      ANDI.W  #$00F,D1        *Keep only three bits
+00003076                           368      
+00003076                           369      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS       
+00003076  B27C 0001                370      CMP     #%001,D1        *Check for 001 to eliminate MOVEA.W
+0000307A  6700 0013                371      BEQ     _MOVEAW         *If equal, branch to MOVEA.W
+0000307E  6000 0002                372      BRA     _MOVEW          *Else must be MOVE.W. branch.
+00003082                           373      
+00003082                           374  _MOVEW
+00003082  12F9 00003088            375      MOVE.B  MOVEW,(A1)+     *Load 'MOVE.W' to Add Reg 1 and then increment
+00003088= 4D 4F 56 45 2E 57 00     376  MOVEW     DC.B    'MOVE.W',0
+0000308F                           377  
+0000308F                           378  _MOVEAW
+00003090  12F9 00003096            379      MOVE.B  MOVEAW,(A1)+    *Load 'MOVEA.W' to Add Reg 1 and then increment
+00003096= 4D 4F 56 45 41 2E ...    380  MOVEAW     DC.B    'MOVEA.W',0
+0000309E                           381  
+0000309E                           382  
+0000309E                           383  OP0011
+0000309E                           384      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+0000309E                           385  
+0000309E                           386      **ISOLATE NEXT BITS TO CHECK**
+0000309E                           387      **Look to 2/4 as both contain Xn in 1/4
+0000309E  3200                     388      MOVE.W  D0,D1           *Copy instruction for modification
+000030A0  E949                     389      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000030A2  E949                     390      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000030A4  E849                     391      LSR.W   #4,D1           *Rotate left four bits
+000030A6  E049                     392      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000030A8  0241 000F                393      ANDI.W  #$00F,D1        *Keep only three bits
+000030AC                           394      
+000030AC                           395      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS            
+000030AC  B27C 0001                396      CMP     #%001,D1        *Check for 001 to eliminate MOVEA.W
+000030B0  6700 0013                397      BEQ     _MOVEAL         *If equal, branch to MOVEA.L
+000030B4  6000 0002                398      BRA     _MOVEL          *Else must be MOVEL, branch
+000030B8                           399      
+000030B8                           400  _MOVEL
+000030B8  12F9 000030BE            401      MOVE.B  MOVEL,(A1)+     *Load 'MOVE.L' to Add Reg 1 and then increment
+000030BE= 4D 4F 56 45 2E 4C 00     402  MOVEL     DC.B    'MOVE.L',0
+000030C5                           403  
+000030C5                           404  _MOVEAL
+000030C6  12F9 000030CC            405      MOVE.B  MOVEAL,(A1)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
+000030CC= 4D 4F 56 45 41 2E ...    406  MOVEAL     DC.B    'MOVEA.L',0
+000030D4                           407  
+000030D4                           408  OP0100
+000030D4                           409      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+000030D4                           410      
+000030D4                           411      **ISOLATE NEXT BITS TO CHECK**    
+000030D4  3200                     412      MOVE.W  D0,D1           *Copy instruction for modification
+000030D6  E949                     413      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000030D8  E849                     414      LSR.W   #4,D1           *Rotate left four bits
+000030DA  E049                     415      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000030DC  0241 000F                416      ANDI.W  #$00F,D1        *Keep only three bits
+000030E0                           417  
+000030E0                           418      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS
+000030E0  B27C 0001                419      CMP     #%001,D1        *Check for 001 to eliminate CLR
+000030E4  6700 004E                420      BEQ     _CLR            *If equal, branch to CLR
+000030E8  6000 0002                421      BRA     OP0100_1        *Else continue checking
+000030EC                           422  
+000030EC                           423  OP0100_1 **Could be MOVEM, LEA, NOP, JSR, or RTS**
+000030EC                           424  
+000030EC                           425      **ISOLATE NEXT BITS TO CHECK**
+000030EC                           426      **Look to 2/4 as 1/4 already checked
+000030EC  3200                     427      MOVE.W  D0,D1           *Copy instruction for modification
+000030EE  E949                     428      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000030F0  E949                     429      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000030F2  E849                     430      LSR.W   #4,D1           *Rotate left four bits
+000030F4  E049                     431      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000030F6  0241 000F                432      ANDI.W  #$00F,D1        *Keep only three bits
+000030FA                           433      
+000030FA                           434      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS
+000030FA  B27C 0007                435      CMP     #%111,D1        *Check for 111 to eliminate LEA
+000030FE  6700 003E                436      BEQ     _LEA            *If equal, branch to LEA
+00003102                           437                              
+00003102  B27C 0002                438      CMP     #%010,D1        *Else check for 010 to eliminate JSR
+00003106  6700 0040                439      BEQ     _JSR            *If equal, branch to JSR
+0000310A                           440      
+0000310A  6000 0002                441      BRA     OP0100_2        *Else continue checking
+0000310E                           442  
+0000310E                           443  OP0100_2 **Could be MOVEM, NOP, or RTS**
+0000310E                           444  
+0000310E                           445      **ISOLATE NEXT BITS TO CHECK**
+0000310E                           446      **Look to 4/4 as 1/4,2/4 already checked
+0000310E                           447      **and NOP and RTS both contain 110 in 3/4
+0000310E  3200                     448      MOVE.W  D0,D1           *Copy instruction for modification
+00003110  E949                     449      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00003112  E949                     450      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00003114  E949                     451      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+00003116  E949                     452      LSL.W   #4,D1           *Shift left to grab 3 bits (4/4 'chunks')
+00003118  E849                     453      LSR.W   #4,D1           *Rotate left four bits
+0000311A  E049                     454      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000311C  0241 000F                455      ANDI.W  #$00F,D1        *Keep only three bits
+00003120                           456  
+00003120                           457      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS    
+00003120  B27C 0001                458      CMP     #%001,D1        *Check for 001 to eliminate NOP
+00003124  6700 002C                459      BEQ     _NOP            *If equal, branch to NOP
+00003128                           460      
+00003128  B27C 0005                461      CMP     #%101,D1        *Else Check for 101 to eliminate RTS
+0000312C  6700 002E                462      BEQ     _RTS            *If equal, branch to RTS
+00003130                           463      
+00003130  6000 0034                464      BRA     _MOVEM          *Else by process of elimination it must be MOVEM    
+00003134                           465      
+00003134                           466  _CLR
+00003134  12F9 0000313A            467      MOVE.B  OPCLR,(A1)+     *Load 'CLR' to Add Reg 1 and then increment
+0000313A= 43 4C 52 00              468  OPCLR     DC.B    'CLR',0
+0000313E                           469  
+0000313E                           470  _LEA
+0000313E  12F9 00003144            471      MOVE.B  OPLEA,(A1)+     *Load 'LEA' to Add Reg 1 and then increment
+00003144= 4C 45 41 00              472  OPLEA     DC.B    'LEA',0
+00003148                           473  
+00003148                           474  _JSR
+00003148  12F9 0000314E            475      MOVE.B  OPJSR,(A1)+     *Load 'JSR' to Add Reg 1 and then increment
+0000314E= 4A 53 52 00              476  OPJSR     DC.B    'JSR',0
+00003152                           477  
+00003152                           478  _NOP
+00003152  12F9 00003158            479      MOVE.B  OPNOP,(A1)+     *Load 'NOP' to Add Reg 1 and then increment    
+00003158= 4E 4F 50 00              480  OPNOP     DC.B    'NOP',0
+0000315C                           481  
+0000315C                           482  _RTS
+0000315C  12F9 00003162            483      MOVE.B  OPRTS,(A1)+     *Load 'RTS' to Add Reg 1 and then increment
+00003162= 52 54 53 00              484  OPRTS     DC.B    'RTS',0
+00003166                           485  
+00003166                           486  _MOVEM
+00003166  12F9 0000316C            487      MOVE.B  MOVEM,(A1)+     *Load 'MOVEM' to Add Reg 1 and then increment
+0000316C= 4D 4F 56 45 4D 00        488  MOVEM     DC.B    'MOVEM',0
+00003172                           489      
+00003172                           490  OP0101
+00003172                           491      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00003172                           492      *BEGIN OUTPUT
+00003172                           493      
+00003172  12F9 00003178            494      MOVE.B  ADDQ,(A1)+      *Load 'AddQ' to Add Reg 1 and then increment
+00003178                           495      
+00003178= 41 44 44 51 00           496  ADDQ   DC.B    'ADDQ',0
+0000317D                           497      
+0000317D                           498  OP0110
+0000317D                           499      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+0000317D                           500      *BEGIN OUTPUT
+0000317D                           501      
+0000317E  12F9 00003184            502      MOVE.B  Bcc,(A1)+       *Load 'Bcc' to Add Reg 1 and then increment
+00003184                           503      
+00003184= 42 63 63 00              504  Bcc  DC.B    'Bcc',0
+00003188                           505  
+00003188                           506  OP0111
+00003188                           507      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00003188                           508      *BEGIN OUTPUT
+00003188                           509      
+00003188  12F9 0000318E            510      MOVE.B  MOVEQ,(A1)+     *Load 'MOVEQ' to Add Reg 1 and then increment
+0000318E                           511      
+0000318E= 4D 4F 56 45 51 00        512  MOVEQ   DC.B    'MOVEQ',0
+00003194                           513      
+00003194                           514  OP1000
+00003194                           515      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+00003194                           516      
+00003194                           517      **ISOLATE NEXT BITS TO CHECK**
+00003194                           518      **Look to 2/4 as both contain Xn in 1/4
+00003194  3200                     519      MOVE.W  D0,D1           *Copy instruction for modification
+00003196  E949                     520      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00003198  E949                     521      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+0000319A  E849                     522      LSR.W   #4,D1           *Rotate left four bits
+0000319C  E049                     523      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000319E  0241 000F                524      ANDI.W  #$00F,D1        *Keep only three bits
+000031A2                           525      
+000031A2                           526      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS           
+Line 527 ERROR: Undefined symbol
+000031A2  0C79 0003 00544498       527      CMP     #%011,D1X    *Check for 011 to eliminate DIVU
+000031AA  6700 0006                528      BEQ     _DIVU        *If equal, branch to DIVU
+000031AE  6000 000D                529      BRA     _OR          *Else must be OR, branch
+000031B2                           530      
+000031B2                           531  _DIVU
+000031B2  12F9 000031B8            532      MOVE.B  DIVU,(A1)+      *Load 'DIVU' to Add Reg 1 and then increment
+000031B8= 44 49 56 55 00           533  DIVU     DC.B    'DIVU',0
+000031BD                           534  
+000031BD                           535  _OR
+000031BE  12F9 000031C4            536      MOVE.B  OR,(A1)+        *Load 'OR' to Add Reg 1 and then increment
+000031C4= 4F 52 00                 537  OR       DC.B    'OR',0
+000031C7                           538  
+000031C7                           539  OP1001
+000031C7                           540      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+000031C7                           541      *BEGIN OUTPUT
+000031C7                           542      
+000031C8  12F9 000031CE            543      MOVE.B  SUB,(A1)+     *Load 'SUB' to Add Reg 1 and then increment
+000031CE                           544  
+000031CE= 53 55 42 00              545  SUB     DC.B    'SUB',0
+000031D2                           546  
+000031D2                           547  OP1011
+000031D2                           548      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+000031D2                           549      *BEGIN OUTPUT
+000031D2  12F9 000031D8            550      MOVE.B  CMP,(A1)+     *Load 'CMP' to Add Reg 1 and then increment
+000031D8                           551  
+000031D8= 43 4D 50 00              552  CMP     DC.B    'CMP',0
+000031DC                           553  
+000031DC                           554  OP1100
+000031DC                           555      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+000031DC                           556   
+000031DC                           557      **ISOLATE NEXT BITS TO CHECK**
+000031DC                           558      **Look to 2/4 as both contain Xn in 1/4
+000031DC  3200                     559      MOVE.W  D0,D1           *Copy instruction for modification
+000031DE  E949                     560      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000031E0  E949                     561      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000031E2  E849                     562      LSR.W   #4,D1           *Rotate left four bits
+000031E4  E049                     563      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000031E6  0241 000F                564      ANDI.W  #$00F,D1        *Keep only three bits
+000031EA                           565      
+000031EA                           566      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS          
+Line 567 ERROR: Undefined symbol
+000031EA  0C79 0007 00544498       567      CMP     #%111,D1X       *Check for 111 to eliminate MULS
+000031F2  6700 0006                568      BEQ     _MULS           *If equal, branch to MULS
+000031F6  6000 000D                569      BRA     _AND            *Else must be AND, branch
+000031FA                           570      
+000031FA                           571  _MULS
+000031FA  12F9 00003200            572      MOVE.B  MULS,(A1)+      *Load 'MULS' to Add Reg 1 and then increment
+00003200= 4D 55 4C 53 00           573  MULS     DC.B    'MULS',0
+00003205                           574  
+00003205                           575  _AND
+00003206  12F9 0000320C            576      MOVE.B  AND,(A1)+       *Load 'AND' to Add Reg 1 and then increment
+0000320C= 41 4E 44 00              577  AND       DC.B    'AND',0
+00003210                           578      
+00003210                           579  OP1101
+00003210                           580      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS  
+00003210                           581      
+00003210                           582      **ISOLATE NEXT BITS TO CHECK**
+00003210                           583      **Look to 2/4 as both contain Xn in 1/4
+00003210  3200                     584      MOVE.W  D0,D1           *Copy instruction for modification
+00003212  E949                     585      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00003214  E949                     586      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00003216  E849                     587      LSR.W   #4,D1           *Rotate left four bits
+00003218  E049                     588      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000321A  0241 000F                589      ANDI.W  #$00F,D1        *Keep only three bits
+0000321E                           590      
+0000321E                           591      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS             
+Line 592 ERROR: Undefined symbol
+0000321E  0C79 0003 0054449C       592      CMP     #%011,D1X       *Check for 011 to eliminate ADDA (Size dependant)
+00003226  6700 0016                593      BEQ     _ADDA           *If equal, branch to ADDA
+0000322A  B27C 0007                594      CMP     #%111,D1        *Else check for 111 to eliminate ADDA (Size dependant)
+0000322E  6700 000E                595      BEQ     _ADDA           *If equal, branch to ADDA
+00003232  60D1                     596      BRA     _AND            *Else must be AND, branch
+00003234                           597      
+00003234                           598  _ADD
+00003234  12F9 0000323A            599      MOVE.B  ADD,(A1)+       *Load 'ADD' to Add Reg 1 and then increment
+0000323A= 41 44 44 00              600  ADD     DC.B    'ADD',0
+0000323E                           601  
+0000323E                           602  _ADDA
+0000323E  12F9 00003244            603      MOVE.B  ADDA,(A1)+      *Load 'ADDA' to Add Reg 1 and then increment
+00003244= 41 44 44 41 00           604  ADDA      DC.B    'ADDA',0
+00003249                           605      
+00003249                           606  OP1110
+00003249                           607      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+00003249                           608      
+00003249                           609      **ISOLATE NEXT BITS TO CHECK**    
+0000324A  3200                     610      MOVE.W  D0,D1           *Copy instruction for modification
+0000324C  E949                     611      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+0000324E  E849                     612      LSR.W   #4,D1           *Rotate left four bits
+00003250  E049                     613      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00003252  0241 000F                614      ANDI.W  #$00F,D1        *Keep only three bits
+00003256                           615  
+00003256                           616                    
+Line 617 ERROR: Undefined symbol
+00003256  0C79 0001 0054449C       617      CMP     #%001,D1X       *Check for 001 to eliminate LSd instructions
+0000325E  6700 0030                618      BEQ     _LSd            *If equal, branch to LSd to determine LSR or LSL
+00003262  6000 0002                619      BRA     OP1110_1
+00003266                           620      
+00003266                           621  OP1110_1
+00003266                           622      **ISOLATE NEXT BITS TO CHECK**
+00003266                           623      **Look to 3/4 as 1/4 has been checked and 2/4 is ambiguous
+00003266  3200                     624      MOVE.W  D0,D1           *Copy instruction for modification
+00003268  E949                     625      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+0000326A  E949                     626      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+0000326C  E849                     627      LSR.W   #4,D1           *Rotate left four bits
+0000326E  E049                     628      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00003270  0241 000F                629      ANDI.W  #$00F,D1        *Keep only three bits
+00003274                           630      
+00003274                           631      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS                   
+Line 632 ERROR: Undefined symbol
+00003274  0C79 0000 0054449C       632      CMP     #%000,D1X       *Check for 000 to eliminate ASd (Rotation dependant)
+0000327C  6700 0040                633      BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
+Line 634 ERROR: Undefined symbol
+00003280  0C79 0004 0054449C       634      CMP     #%100,D1X       *Check for 100 to eliminate ASd (Rotation dependant)
+00003288  6700 0034                635      BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
+Line 636 ERROR: Undefined symbol
+0000328C  6000 8900                636      BRA     ROd             *Else must be a ROd instruction, branch to determine
+00003290                           637      
+00003290                           638  _LSd    
+00003290                           639      **ISOLATE NEXT BITS TO CHECK**  
+00003290                           640      **Look to 2/4 as 1/4 has been checked
+00003290  3200                     641      MOVE.W  D0,D1           *Copy instruction for modification
+00003292  E949                     642      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00003294  E949                     643      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00003296  E849                     644      LSR.W   #4,D1           *Rotate left four bits
+00003298  E049                     645      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000329A  0241 000F                646      ANDI.W  #$00F,D1        *Keep only three bits
+0000329E                           647  
+0000329E                           648      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS          
+0000329E  B27C 0003                649      CMP     #%011,D1        *Check for 011 to eliminate LSR
+000032A2  6700 0010                650      BEQ     _LSR            *If equal, branch to LSR
+000032A6  6000 0002                651      BRA     _LSL            *Else must be LSL, branch
+000032AA                           652  
+000032AA                           653  _LSL    
+000032AA  12F9 000032B0            654      MOVE.B  LSL,(A1)+       *Load 'LSL' to Add Reg 1 and then increment
+000032B0= 4C 53 4C 00              655  LSL     DC.B    'LSL',0
+000032B4                           656  
+000032B4                           657  _LSR
+000032B4  12F9 000032BA            658      MOVE.B  LSR,(A1)+       *Load 'LSR' to Add Reg 1 and then increment
+000032BA= 4C 53 52 00              659  LSR     DC.B    'LSR',0
+000032BE                           660  
+000032BE                           661  _ASd
+000032BE                           662      **ISOLATE NEXT BITS TO CHECK**
+000032BE                           663      **Look to 3/4 as 1/4,2/4 already checked
+000032BE  3200                     664      MOVE.W  D0,D1           *Copy instruction for modification
+000032C0  E949                     665      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000032C2  E949                     666      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000032C4  E949                     667      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+000032C6  E849                     668      LSR.W   #4,D1           *Rotate left four bits
+000032C8  E049                     669      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000032CA  0241 000F                670      ANDI.W  #$00F,D1        *Keep only three bits
+000032CE                           671  
+000032CE                           672      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS       
+000032CE  B27C 0000                673      CMP     #%000,D1        *Check for 000 to eliminate ASR
+000032D2  6700 0010                674      BEQ     _ASR            *If equal, branch to ASR
+000032D6  6000 0002                675      BRA     _ASL            *Else must be ASL, branch
+000032DA                           676  
+000032DA                           677  _ASL    
+000032DA  12F9 000032E0            678      MOVE.B  ASL,(A1)+       *Load 'ASL' to Add Reg 1 and then increment
+000032E0= 41 53 4C 00              679  ASL     DC.B    'ASL',0
+000032E4                           680  
+000032E4                           681  _ASR
+000032E4  12F9 000032EA            682      MOVE.B  ASR,(A1)+       *Load 'ASR' to Add Reg 1 and then increment
+000032EA= 41 53 52 00              683  ASR     DC.B    'ASR',0
+000032EE                           684  
+000032EE                           685  _ROd
+000032EE                           686      **ISOLATE NEXT BITS TO CHECK**
+000032EE                           687      **Look to 3/4 as 1/4,2/4 already checked
+000032EE  3200                     688      MOVE.W  D0,D1           *Copy instruction for modification
+000032F0  E949                     689      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000032F2  E949                     690      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000032F4  E949                     691      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+000032F6  E849                     692      LSR.W   #4,D1           *Rotate left four bits
+000032F8  E049                     693      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000032FA  0241 000F                694      ANDI.W  #$00F,D1        *Keep only three bits
+000032FE                           695  
+000032FE                           696      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
+000032FE  B27C 0003                697      CMP     #%011,D1        *Check for 011 to eliminate ROR
+00003302  6700 0010                698      BEQ     _ROR            *If equal, branch to ROR
+00003306  6000 0002                699      BRA     _ROL            *Else must be ROL, branch
+0000330A                           700      
+0000330A                           701  _ROL    
+0000330A  12F9 00003310            702      MOVE.B  ROL,(A1)+       *Load 'ROL' to Add Reg 1 and then increment
+00003310= 52 4F 4C 00              703  ROL     DC.B    'ROL',0
+00003314                           704  
+00003314                           705  _ROR
+00003314  12F9 0000331A            706      MOVE.B  ROR,(A1)+       *Load 'ROR' to Add Reg 1 and then increment
+0000331A= 52 4F 52 00              707  ROR     DC.B    'ROR',0
+0000331E                           708  
+0000331E                           709  
+0000331E  FFFF FFFF                710      SIMHALT
+00003322                           711  
+00003322                           712  
+00003322                           713  
+00003322                           714  
+00003322                           715  
+00003322                           716  
+00003322                           717  
+00003322                           718  
+00003322                           719  
+00003322                           720  
+00003322                           721  
+00003322                           722  
+00003322                           723  
+00003322                           724  
+00003322                           725  
+00003322                           726  
+00003322                           727  
+00003322                           728  -------------------- end include --------------------
+00003322                           729  *    INCLUDE         'EFFECTIVE_ADDRESSES_2.o.X68'
+00003322                           730  
+00003322  FFFF FFFF                731      SIMHALT             ; halt simulator
+00003326                           732  
+00003326                           733  * Put variables and constants here
+00003326                           734  
+00003326                           735  STOP:
+00003326                           736      END    MAIN
+
+7 errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADD                 323A
+ADDA                3244
+ADDI                3054
+ADDQ                3178
+ALPH_CHAR           2232
+AND                 320C
+ASL                 32E0
+ASR                 32EA
+BCC                 3184
+CMP                 31D8
+CONVERT_TO_ASCII    2220
+CR                  D
+DATA                2268
+DATA_START          400
+DIVU                31B8
+EFFECTIVE_ADDRESSING  2180
+END                 2276
+END_PRINT_DATA_LOOP  21F8
+EQUAL_ERROR         2130
+GET_NEXT_INPUT      2058
+INCREMENT_LINE      219E
+INPUT_END           202C
+INPUT_START         2000
+INVALID_CHAR_ERROR  20C4
+INVALID_OPCODE      21A6
+LF                  A
+LSL                 32B0
+LSR                 32BA
+MAIN                1000
+MEM_END             200
+MEM_START           100
+MOVEAL              30CC
+MOVEAW              3096
+MOVEB               3060
+MOVEL               30BE
+MOVEM               316C
+MOVEQ               318E
+MOVEW               3088
+MULS                3200
+M_DATA              2350
+M_EQUAL             2314
+M_INPUT_END         22B1
+M_INPUT_START       227A
+M_INVALID           22E6
+M_PRESS_CONT        235E
+M_SPACE             234C
+M_TAB               2359
+NEW_LINE            2240
+NUMERIC_CHAR        222C
+OP0000              304E
+OP0001              3059
+OP0010              3067
+OP0011              309E
+OP0100              30D4
+OP0100_1            30EC
+OP0100_2            310E
+OP0101              3172
+OP0110              317D
+OP0111              3188
+OP1000              3194
+OP1001              31C7
+OP1011              31D2
+OP1100              31DC
+OP1101              3210
+OP1110              3249
+OP1110_1            3266
+OPCLR               313A
+OPJSR               314E
+OPLEA               3144
+OPNOP               3158
+OPRTS               3162
+OP_JTAB             3000
+OR                  31C4
+OUTPUT_CHAR         2238
+OUTPUT_D1B          2204
+PRESS_TO_CONTINUE   2180
+PRE_READ_MEMORY     215C
+PRINT_ADDRESS       21CA
+PRINT_ADDRESS_LOOP  21CE
+PRINT_DATA          21B4
+PRINT_DATA_LOOP     21E4
+READ_CHAR           205A
+READ_CHAR_LOOP      207C
+READ_MEMORY         2112
+READ_MEMORY_CONT    2176
+READ_MEMORY_LOOP    215E
+REMOVE_ZERO         2076
+REMOVE_ZEROES       2064
+RETURN_TO_SUBROUTINE  21E2
+ROL                 3310
+ROR                 331A
+SPACE               224E
+STOP                3326
+STRING_START        500
+SUB                 31CE
+SWAP_VALUES         2140
+TAB                 225A
+TEST                20FE
+VALIDATE_START_END  211E
+VALID_CHAR          20EE
+VALID_LETTER_LC     20E6
+VALID_LETTER_UC     20DE
+VALID_NUMBER        20D6
+VALID_OPCODE        2220
+VERIFY_OPCODE       2180
+_ADD                3234
+_ADDA               323E
+_AND                3205
+_ASD                32BE
+_ASL                32DA
+_ASR                32E4
+_CLR                3134
+_DIVU               31B2
+_JSR                3148
+_LEA                313E
+_LSD                3290
+_LSL                32AA
+_LSR                32B4
+_MOVEAL             30C5
+_MOVEAW             308F
+_MOVEL              30B8
+_MOVEM              3166
+_MOVEW              3082
+_MULS               31FA
+_NOP                3152
+_OR                 31BD
+_ROD                32EE
+_ROL                330A
+_ROR                3314
+_RTS                315C
