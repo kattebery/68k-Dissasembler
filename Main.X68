@@ -4,12 +4,12 @@
 * Date       :4/29/2016
 * Description:
 *-----------------------------------------------------------
-    ORG    $1000
-START:                  ; first instruction of program
+
     *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
     BRA         TEST
 *----Display input message for mem start-----*
 INPUT_START
+    BRA         TEST
     LEA         M_INPUT_START,A1      *load message
     MOVE.B      #14,D0          *display string
     TRAP        #15             *output string
@@ -155,15 +155,17 @@ READ_MEMORY_LOOP
     CMP.B       #60,D6              *see if maximum lines printed
     BGE         PRESS_TO_CONTINUE
     ROL         #8,D6
+
+    
 READ_MEMORY_CONT                    *continue reading memory (if branched)  
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
     MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
-    BRA         INVALID_OPCODE      *DELETE THIS LATER
-
-
+    BRA         VERIFY_OPCODE
+    
+    
         
-VERIFY_OPCODE
+*VERIFY_OPCODE
 *-------------------------------------*
 *BEGIN
 *D0 will contain word with decodable opcode
@@ -189,7 +191,7 @@ EFFECTIVE_ADDRESSING
 *A5 will be the start of the DATA address
 *-------------------------------------*
 
-
+    
 PRESS_TO_CONTINUE
     MOVE.B      #00,D6              *reset counter
     ROL.L       #8,D6               *put byte back in place
@@ -198,7 +200,7 @@ PRESS_TO_CONTINUE
     TRAP        #15                 *display message
     MOVE.B      #5,D0               *read single character from keyboard
     TRAP        #15    
-    BSR         NEW_LINE            *add new line
+    BSR         IM_NEW_LINE            *add new line
     BRA         READ_MEMORY_CONT    *continue reading loop
     
 INCREMENT_LINE
@@ -206,6 +208,7 @@ INCREMENT_LINE
     ADD.B       #1,D6               *increment counter
     ROL.L       #8,D6               *put byte back in place
     RTS 
+    
 *word != opcode
 INVALID_OPCODE
     CMP.B       #8,D6               *check the loop increment counter
@@ -245,12 +248,12 @@ PRINT_DATA_LOOP
                                     *otherwise keep printing the data
     BSR         OUTPUT_D1B          *print byte in D1 in hex
     *---print a space----*
-    BSR         SPACE               *print a space                                
+    BSR         IM_SPACE               *print a space                                
     BRA         PRINT_DATA_LOOP     *repeat loop
 
 END_PRINT_DATA_LOOP
     MOVE.L      A2,A6               *set new address for data/opcode
-    BSR         NEW_LINE            *end line
+    BSR         IM_NEW_LINE            *end line
     BSR         INCREMENT_LINE      *increment line printing counter
     BRA         READ_MEMORY_LOOP    *repeat loop   
  
@@ -285,13 +288,13 @@ OUTPUT_CHAR
     MOVE.B      #6,D0           *output whatever's in D1
     TRAP        #15
     RTS
-    
-NEW_LINE
+
+IM_NEW_LINE
     LEA         M_SPACE,A1      *load new line
     MOVE.B      #14,D0          *load message
     TRAP        #15             *display message
     RTS
-SPACE
+IM_SPACE
     MOVE.B      #32,D1
     MOVE.B      #6,D0
     TRAP        #15
@@ -306,7 +309,6 @@ DATA
     MOVE.B      #14,D0
     TRAP        #15
     RTS
-
     
 END
 
@@ -319,7 +321,6 @@ M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,
 M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
 M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
 M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
-M_SPACE       DC.B ' ',CR,LF,0
 M_DATA        DC.B 'DATA    ',0
 M_TAB         DC.B '    ',0
 M_PRESS_CONT  DC.B 'Press any key to continue',0
@@ -330,7 +331,8 @@ DATA_START      EQU     $0400
 MEM_START       EQU     $0100
 MEM_END         EQU     $0200
 
-    END    START        ; last line of source
+
+
 
 
 

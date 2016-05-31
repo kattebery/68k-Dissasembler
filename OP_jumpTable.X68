@@ -9,7 +9,8 @@ VERIFY_OPCODE
     BRA     OP_JTAB
 *    LEA     OP_JTAB, A1 
 *    JSR     0(A1,D1)    
-
+PRINT
+    RTS
 
 
 **************************************************************************
@@ -78,7 +79,7 @@ OP_JTAB
     CMP     #$1110,D1
     BEQ     OP1000
     
-    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+*    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
     RTS
 
 
@@ -92,7 +93,7 @@ OP0000
     
     MOVE.B  ADDI,(A3) *(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_ADDI         *Branch to EA analysis of the command
+    BRA     EA_ADDI         *Branch to EA analysis of the command
 
 ADDI    DC.B    'ADDI',0
 **************************************************************************
@@ -103,7 +104,7 @@ OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING *BEGIN OUTPUT
     
     MOVE.B  MOVEB,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_MOVE        *Branch to EA analysis of the command
+    BRA     EA_MOVE        *Branch to EA analysis of the command
     
 MOVEB   DC.B    'MOVE',0
 
@@ -132,14 +133,14 @@ OP0010
 _MOVEW
     MOVE.B  MOVEW,(A3) *(A3)+     *Load 'MOVE.W' to Add Reg 1 and then increment
     BRA     PRINT   
-    *BRA     EA_MOVE        *Branch to EA analysis of the command
+    BRA     EA_MOVE        *Branch to EA analysis of the command
 MOVEW     DC.B    'MOVE',0
 
 ********* MOVEAW *************        
 _MOVEAW
     MOVE.B  MOVEAW,(A3) *(A3)+    *Load 'MOVEA.W' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_MOVEA       *Branch to EA analysis of the command      
+    BRA     EA_MOVEA       *Branch to EA analysis of the command      
 MOVEAW     DC.B    'MOVEA',0
 
 
@@ -168,14 +169,14 @@ OP0011
 _MOVEL
     MOVE.B  MOVEL,(A3) *(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment
     BRA     PRINT    
-    *BRA     EA_MOVE        *Branch to EA analysis of the command
+    BRA     EA_MOVE        *Branch to EA analysis of the command
 MOVEL     DC.B    'MOVE',0
 
 ********* MOVEAL *************        
 _MOVEAL
     MOVE.B  MOVEAL,(A3) *(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_MOVEA       *Branch to EA analysis of the command
+    BRA     EA_MOVEA       *Branch to EA analysis of the command
 MOVEAL     DC.B    'MOVEA',0
 
 **************************************************************************
@@ -244,42 +245,42 @@ OP0100_2 **Could be MOVEM, NOP, or RTS**
 _CLR
     MOVE.B  OPCLR,(A3) *(A3)+     *Load 'CLR' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_CLR          *Branch to EA analysis of the command
+    BRA     EA_CLR          *Branch to EA analysis of the command
 OPCLR     DC.B    'CLR',0
 
 ********* LEA *************        
 _LEA
     MOVE.B  OPLEA,(A3) *(A3)+     *Load 'LEA' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_LEA          *Branch to EA analysis of the command
+    BRA     EA_LEA          *Branch to EA analysis of the command
 OPLEA     DC.B    'LEA',0
 
 ********* JSR *************     
 _JSR
     MOVE.B  OPJSR,(A3) *(A3)+     *Load 'JSR' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_JSR          *Branch to EA analysis of the command
+    BRA     EA_JSR          *Branch to EA analysis of the command
 OPJSR     DC.B    'JSR',0
 
 ********* NOP *************     
 _NOP
     MOVE.B  OPNOP,(A3) *(A3)+     *Load 'NOP' to Add Reg 1 and then increment    
     BRA     PRINT
-    *BRA     EA_NOP          *Branch to EA analysis of the command      ****************Marked to show change
+*    BRA     EA_NOP          *Branch to EA analysis of the command      ****************Marked to show change
 OPNOP     DC.B    'NOP',0
 
 ********* RTS *************     
 _RTS
     MOVE.B  OPRTS,(A3) *(A3)+     *Load 'RTS' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_RTS          *Branch to EA analysis of the command      ****************Marked to show change
+*    BRA     EA_RTS          *Branch to EA analysis of the command      ****************Marked to show change
 OPRTS     DC.B    'RTS',0
 
 ********* MOVEM *************     
 _MOVEM
     MOVE.B  MOVEM,(A3) *(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_MOVEM        *Branch to EA analysis of the command
+    BRA     EA_MOVEM        *Branch to EA analysis of the command
 MOVEM     DC.B    'MOVEM',0
     
 **************************************************************************
@@ -292,7 +293,7 @@ OP0101
     
     MOVE.B  ADDQ,(A3) *(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_ADDQ         *Branch to EA analysis of the command
+    BRA     EA_ADDQ         *Branch to EA analysis of the command
     
 ADDQ   DC.B    'ADDQ',0
     
@@ -306,7 +307,7 @@ OP0110
     
     *MOVE.B  Bcc,(A3) *(A3)+       *Load 'Bcc' to Add Reg 1 and then increment       ******************I don't THINK I need this line
     BRA     PRINT
-    *BRA     EA_BCC          *Branch to EA analysis of the command
+    BRA     EA_BCC          *Branch to EA analysis of the command
     
 Bcc  DC.B    'Bcc',0
 
@@ -320,7 +321,7 @@ OP0111
     
     MOVE.B  MOVEQ,(A3) *(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
     BRA     PRINT
-    *BRA     EA_MOVEQ        *Branch to EA analysis of the command
+    BRA     EA_MOVEQ        *Branch to EA analysis of the command
     
 MOVEQ   DC.B    'MOVEQ',0
     
@@ -350,14 +351,14 @@ OP1000
 _DIVU
     MOVE.B  DIVU,(A3) *(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_MULS         *Branch to EA analysis of the command
+    BRA     EA_MULS         *Branch to EA analysis of the command
 DIVU     DC.B    'DIVU',0
 
 ********* OR *************        
 _OR
     MOVE.B  OR,(A3) *(A3)+        *Load 'OR' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_ADD           *Branch to EA analysis of the command
+    BRA     EA_ADD           *Branch to EA analysis of the command
 OR       DC.B    'OR',0
 
 **************************************************************************
@@ -370,7 +371,7 @@ OP1001
     
     MOVE.B  _SUB,(A3) *(A3)+     *Load 'SUB' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_ADD          *Branch to EA analysis of the command
+    BRA     EA_ADD          *Branch to EA analysis of the command
 
 _SUB     DC.B    'SUB',0
 **************************************************************************
@@ -382,7 +383,7 @@ OP1011
     *BEGIN OUTPUT
     MOVE.B  CMP,(A3) *(A3)+     *Load 'CMP' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_CMP          *Branch to EA analysis of the command
+    BRA     EA_CMP          *Branch to EA analysis of the command
 
 CMP     DC.B    'CMP',0
 
@@ -411,14 +412,14 @@ OP1100
 _MULS
     MOVE.B  MULS,(A3) *(A3)+      *Load 'MULS' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_MULS         *Branch to EA analysis of the command
+    BRA     EA_MULS         *Branch to EA analysis of the command
 MULS     DC.B    'MULS',0
 
 ********* AND *************        
 _AND
     MOVE.B  AND,(A3) *(A3)+       *Load 'AND' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_ADD          *Branch to EA analysis of the command
+    BRA     EA_ADD          *Branch to EA analysis of the command
 AND       DC.B    'AND',0
     
 **************************************************************************
@@ -448,14 +449,14 @@ OP1101
 _ADD
     MOVE.B  ADD,(A3) *(A3)+       *Load 'ADD' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_ADD          *Branch to EA analysis of the command
+    BRA     EA_ADD          *Branch to EA analysis of the command
 ADD     DC.B    'ADD',0
 
 ********* AND *************        
 _ADDA
     MOVE.B  ADDA,(A3) *(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
     BRA     PRINT
-*    BRA     EA_ADDA         *Branch to EA analysis of the command
+    BRA     EA_ADDA         *Branch to EA analysis of the command
 ADDA      DC.B    'ADDA',0
     
 **************************************************************************
@@ -513,13 +514,13 @@ _LSd
 _LSL    
     MOVE.B  LSL,(A3) *(A3)+       *Load 'LSL' to Add Reg 1 and then increment
         BRA     PRINT
-*BRA     EA_LSD         *Branch to EA analysis of the command
+    BRA     EA_LSD         *Branch to EA analysis of the command
 LSL     DC.B    'LSL',0
 
 _LSR
     MOVE.B  LSR,(A3) *(A3)+       *Load 'LSR' to Add Reg 1 and then increment
         BRA     PRINT
-*BRA     EA_LSD          *Branch to EA analysis of the command
+    BRA     EA_LSD          *Branch to EA analysis of the command
 LSR     DC.B    'LSR',0
 
 ********* ASd *************
@@ -541,12 +542,12 @@ _ASd
 
 _ASL    
     MOVE.B  ASL,(A3) *(A3)+       *Load 'ASL' to Add Reg 1 and then increment
-    *BRA     EA_LSD          *Branch to EA analysis of the command
+    BRA     EA_LSD          *Branch to EA analysis of the command
 ASL     DC.B    'ASL',0
 
 _ASR
     MOVE.B  ASR,(A3) *(A3)+       *Load 'ASR' to Add Reg 1 and then increment
-    *BRA     EA_LSD          *Branch to EA analysis of the command
+    BRA     EA_LSD          *Branch to EA analysis of the command
 ASR     DC.B    'ASR',0
 
 ********* ROd *************
@@ -564,17 +565,19 @@ _ROd
     **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
     CMP     #%011,D1        *Check for 011 to eliminate ROR
     BEQ     _ROR            *If equal, branch to ROR
-    *BRA     _ROL            *Else must be ROL, branch
+    BRA     _ROL            *Else must be ROL, branch
     
 _ROL    
     MOVE.B  ROL,(A3) *(A3)+       *Load 'ROL' to Add Reg 1 and then increment
-    *BRA     EA_LSD          *Branch to EA analysis of the command
+    BRA     EA_LSD          *Branch to EA analysis of the command
 ROL     DC.B    'ROL',0
 
 _ROR
     MOVE.B  ROR,(A3) *(A3)+       *Load 'ROR' to Add Reg 1 and then increment
-    *BRA     EA_LSD          *Branch to EA analysis of the command
+    BRA     EA_LSD          *Branch to EA analysis of the command
 ROR     DC.B    'ROR',0
+
+
 
 *~Font name~Courier New~
 *~Font size~10~

@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 5/20/2016 2:36:08 AM
+Created On: 5/31/2016 2:08:13 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :Disassembler.Main
@@ -8,395 +8,407 @@ Created On: 5/20/2016 2:36:08 AM
 00000000                             4  * Date       :4/29/2016
 00000000                             5  * Description:
 00000000                             6  *-----------------------------------------------------------
-00001000                             7      ORG    $1000
-00001000                             8  START:                  ; first instruction of program
-00001000                             9      *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
-00001000  6000 0100                 10      BRA         TEST
-00001004                            11  *----Display input message for mem start-----*
-00001004                            12  INPUT_START
-00001004  43F9 0000127E             13      LEA         M_INPUT_START,A1      *load message
-0000100A  103C 000E                 14      MOVE.B      #14,D0          *display string
-0000100E  4E4F                      15      TRAP        #15             *output string
-00001010                            16  *----Receive User Input ------
-00001010  227C 00000300             17      MOVE.L      #$0300,A1       *set address of register A1 for string
-00001016  103C 0002                 18      MOVE.B      #2,D0           *input string into A1 Trap
-0000101A  4E4F                      19      TRAP        #15             *input string from user
-0000101C  6100 0040                 20      BSR         READ_CHAR       *check for valid input
-00001020  23C3 00000100             21      MOVE.L      D3,MEM_START    *put the starting address in memory
-00001026  B87C 0000                 22      CMP         #0,D4           *check the result register (D4)
-0000102A  6700 0004                 23      BEQ         INPUT_END       *valid value. read the ending value
-0000102E  60D4                      24      BRA         INPUT_START     *invalid value. try inputting start value again    
-00001030                            25      
-00001030                            26  *----Display input message for mem end-----*
-00001030                            27  INPUT_END
-00001030  43F9 000012B5             28      LEA         M_INPUT_END,A1  *load message
-00001036  103C 000E                 29      MOVE.B      #14,D0          *display string
-0000103A  4E4F                      30      TRAP        #15             *output string
-0000103C                            31  *----Receive User Input ------*
-0000103C  227C 00000300             32      MOVE.L      #$0300,A1       *set address of register A1 for string
-00001042  103C 0002                 33      MOVE.B      #2,D0           *input string into A1 Trap
-00001046  4E4F                      34      TRAP        #15             *input string from user
-00001048  6100 0014                 35      BSR         READ_CHAR       *check for valid input
-0000104C  23C3 00000200             36      MOVE.L      D3,MEM_END      *put ending address into memory
-00001052  B87C 0000                 37      CMP         #0,D4           *check the result register (D4)
-00001056  6700 00BE                 38      BEQ         READ_MEMORY     *valid value. read the ending value
-0000105A  60D4                      39      BRA         INPUT_END       *invalid value. try inputting start value again    
-0000105C                            40      
-0000105C                            41  GET_NEXT_INPUT
-0000105C  4E75                      42      RTS
-0000105E                            43  
-0000105E                            44  *----make sure that start value is valid----*
-0000105E                            45  READ_CHAR                       *verify that string is valid (all hexadecimal digits)
-0000105E  4243                      46      CLR         D3              *D3 will act as the total result
-00001060  2849                      47      MOVE.L      A1,A4           *the stop address
-00001062  143C 0006                 48      MOVE.B      #6,D2           *put 6 in D2
-00001066  D8C2                      49      ADD.W       D2,A4           *A4 is now the stop address(A4)
-00001068                            50      
-00001068                            51  REMOVE_ZEROES
-00001068  4281                      52      CLR.L       D1              *D1 will act as the temporary value
-0000106A  1211                      53      MOVE.B      (A1),D1         *read the byte from string
-0000106C  143C 0030                 54      MOVE.B      #$30,D2         *put ascii zero in D2
-00001070  B202                      55      CMP.B       D2,D1           *compare ascii zero and value of D1
-00001072  6700 0006                 56      BEQ         REMOVE_ZERO     *skip over that character   
-00001076  6000 0008                 57      BRA         READ_CHAR_LOOP  *begin converting characters to numerical values
-0000107A                            58  REMOVE_ZERO
-0000107A  5289                      59      ADD.L       #1,A1           *increment string start address
-0000107C  528C                      60      ADD.L       #1,A4           *increment string end address
-0000107E  60E8                      61      BRA         REMOVE_ZEROES   *loop back and keep removing zeroes
-00001080                            62  *----Convert String To Hex-----*
-00001080                            63  READ_CHAR_LOOP     
-00001080  4281                      64      CLR.L       D1              *D1 will act as the temporary value
-00001082  1211                      65      MOVE.B      (A1),D1         *read the byte from string
-00001084                            66  *----check if the value is exaclty 00 (NULL)
-00001084  B27C 0000                 67      CMP         #0,D1           *compare 00 (NULL) and the byte ascii value in D1
-00001088  67D2                      68      BEQ         GET_NEXT_INPUT    *if you reached the end of the string, end loop
-0000108A                            69      
-0000108A  143C 0030                 70      MOVE.B      #$30,D2         *put ascii zero in D2
-0000108E  B202                      71      CMP.B       D2,D1           *compare ascii zero and value of D1
-00001090  6D00 0036                 72      BLT         INVALID_CHAR_ERROR *branch on invalid (too small) ascii value   
-00001094                            73  *------Result is greater than ascii 0--------*
-00001094  143C 0066                 74      MOVE.B      #$66,D2         *put ascii f in D2
-00001098  B202                      75      CMP.B       D2,D1           *compare ascii f and value of D1
-0000109A  6E2C                      76      BGT.B       INVALID_CHAR_ERROR *branch on invalid ascii value
-0000109C                            77  *------Result is between ascii 0 and f---------*
-0000109C  143C 0061                 78      MOVE.B      #$61,D2         *put ascii a in D2
-000010A0  B202                      79      CMP.B       D2,D1           *compare ascii a and value of D1
-000010A2  6C00 0046                 80      BGE         VALID_LETTER_LC *value is between a and f. Loop back.
-000010A6                            81      
-000010A6  143C 0039                 82      MOVE.B      #$39,D2         *put ascii 9 in D2
-000010AA  B202                      83      CMP.B       D2,D1           *compare ascii 9 and value of D1
-000010AC  6F00 002C                 84      BLE         VALID_NUMBER    *value between 0 and 9. Loop back.
-000010B0                            85  
-000010B0  143C 0041                 86      MOVE.B      #$41,D2         *put ascii A into D2
-000010B4  B202                      87      CMP.B       D2,D1           *compare ascii A and value of D1
-000010B6  6D00 0010                 88      BLT         INVALID_CHAR_ERROR    *value between 9 and A (Invalid)
-000010BA                            89      
-000010BA  143C 0046                 90      MOVE.B      #$46,D2         *put ascii F into D2
-000010BE  B202                      91      CMP.B       D2,D1           *compare ascii F and value of D1
-000010C0  6E00 0006                 92      BGT         INVALID_CHAR_ERROR    *value between F and a (Invalid)
-000010C4                            93           
-000010C4  6000 001C                 94      BRA         VALID_LETTER_UC *value is between A and F        
-000010C8                            95  INVALID_CHAR_ERROR   
-000010C8  43F9 000012EA             96      LEA         M_INVALID,A1    *load error message
-000010CE  103C 000E                 97      MOVE.B      #14,D0          *display string trap
-000010D2  4E4F                      98      TRAP        #15             *output error message
-000010D4  183C 0001                 99      MOVE.B      #1,D4           *put invalid output in result register
-000010D8  4E75                     100      RTS
-000010DA                           101  VALID_NUMBER
-000010DA  0401 0030                102      SUB.B       #$30,D1         *get actual value from ascii value
-000010DE  6000 0012                103      BRA         VALID_CHAR      *read the next char in string
-000010E2                           104  VALID_LETTER_UC
-000010E2  0401 0037                105      SUB.B       #$37,D1         *get actual value from ascii value
-000010E6  6000 000A                106      BRA         VALID_CHAR      *read the next char in string    
-000010EA                           107  VALID_LETTER_LC
-000010EA  0401 0057                108      SUB.B       #$57,D1         *get actual value from ascii value
-000010EE  6000 0002                109      BRA         VALID_CHAR      *read the next char in string   
-000010F2                           110  VALID_CHAR
-000010F2  183C 0000                111      MOVE.B      #0,D4           *return valid value entry in D4    
-000010F6  E98B                     112      LSL.L       #4,D3           *put hex digit in proper place
-000010F8  D681                     113      ADD.L       D1,D3           *put new total in D3
-000010FA  5289                     114      ADD.L       #1,A1           *increment address
-000010FC  B8C9                     115      CMP         A1,A4           *if A1 > A4
-000010FE  6E80                     116      BGT         READ_CHAR_LOOP  *begin converting to float    
-00001100  4E75                     117      RTS                         *loop back to INPUT_START || INPUT_END   
-00001102                           118     
-00001102                           119  TEST
-00001102  23FC 00001000 00000100   120      MOVE.L      #$1000,MEM_START
-0000110C  23FC 00001300 00000200   121      MOVE.L      #$1300,MEM_END
-00001116                           122  READ_MEMORY   
-00001116  2479 00000100            123      MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
-0000111C  2679 00000200            124      MOVEA.L     MEM_END,A3      *A3 will act as the ending address
-00001122                           125      
-00001122                           126  VALIDATE_START_END
-00001122  220A                     127      MOVE.L      A2,D1           *copy start address into D1
-00001124  240B                     128      MOVE.L      A3,D2           *copy end address into D2
-00001126  B441                     129      CMP         D1,D2           *compare start and end values
-00001128  6700 000A                130      BEQ         EQUAL_ERROR     *Start address is equal to end address
-0000112C  6D00 0016                131      BLT         SWAP_VALUES     *Start address is larger than end address
-00001130  6000 002E                132      BRA         PRE_READ_MEMORY *begin reading memory
-00001134                           133      
-00001134                           134  EQUAL_ERROR
-00001134  43F9 00001318            135      LEA         M_EQUAL,A1      *load error message
-0000113A  103C 000E                136      MOVE.B      #14,D0          *display string trap
-0000113E  4E4F                     137      TRAP        #15             *output error message
-00001140  6000 FEC2                138      BRA         INPUT_START     *restart program (request ui again)
-00001144                           139      
-00001144                           140  SWAP_VALUES
-00001144  2239 00000100            141      MOVE.L      MEM_START,D1    *put starting address in D1
-0000114A  2439 00000200            142      MOVE.L      MEM_END,D2      *put ending address in D2
-00001150  23C2 00000100            143      MOVE.L      D2,MEM_START    *swap the two values in memory
-00001156  23C1 00000200            144      MOVE.L      D1,MEM_END
-0000115C  2442                     145      MOVEA.L     D2,A2           *A2 will be the starting/current address
-0000115E  2641                     146      MOVEA.L     D1,A3           *A3 will act as the ending address
-00001160                           147  PRE_READ_MEMORY
-00001160  2C4A                     148      MOVE.L      A2,A6           *A6 will act as the current address for Data               
-00001162                           149  READ_MEMORY_LOOP
-00001162  2679 00000200            150      MOVE.L      MEM_END,A3        *put ending address in A3
-00001168  B6CA                     151      CMP         A2,A3             *compare the incrementing address and the end address
-0000116A  6700 010E                152      BEQ         END               *stop if the end address is reached
-0000116E                           153      
-0000116E  E05E                     154      ROR         #8,D6               *select correct byte
-00001170  BC3C 003C                155      CMP.B       #60,D6              *see if maximum lines printed
-00001174  6C00 000E                156      BGE         PRESS_TO_CONTINUE
-00001178  E15E                     157      ROL         #8,D6
-0000117A                           158  READ_MEMORY_CONT                    *continue reading memory (if branched)  
-0000117A  101A                     159      MOVE.B      (A2)+,D0          *get the value from incrementing address 
-0000117C  E148                     160      LSL.W       #8,D0             *make room for the next byte of A2
-0000117E  1022                     161      MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
-00001180  6000 0028                162      BRA         INVALID_OPCODE      *DELETE THIS LATER
-00001184                           163  
-00001184                           164  
-00001184                           165          
-00001184                           166  VERIFY_OPCODE
-00001184                           167  *-------------------------------------*
-00001184                           168  *BEGIN
-00001184                           169  *D0 will contain word with decodable opcode
-00001184                           170  *A2 will act as the current address
-00001184                           171  *if at any time the result is not an opcode,
-00001184                           172  *branch to "INVALID_OPCODE"
-00001184                           173  *-----Put opcode decode here----------*
-00001184                           174  *END
-00001184                           175  *A7 will be the address of the string that opcode is saved to
-00001184                           176  *A6 will be the start of the DATA address
-00001184                           177  *-------------------------------------*
-00001184                           178  
-00001184                           179  EFFECTIVE_ADDRESSING
-00001184                           180  *-------------------------------------*
-00001184                           181  *BEGIN
-00001184                           182  *D0 will contain word with decodable opcode
-00001184                           183  *A2 will act as the current address
-00001184                           184  *if at any time the result is not an opcode,
-00001184                           185  *branch to "INVALID_OPCODE"
-00001184                           186  *-----Put opcode decode here----------*
-00001184                           187  *END
-00001184                           188  *A7 will be the address of the string that opcode is saved to 
-00001184                           189  *A5 will be the start of the DATA address
-00001184                           190  *-------------------------------------*
-00001184                           191  
-00001184                           192  
-00001184                           193  PRESS_TO_CONTINUE
-00001184  1C3C 0000                194      MOVE.B      #00,D6              *reset counter
-00001188  E19E                     195      ROL.L       #8,D6               *put byte back in place
-0000118A  43F9 00001362            196      LEA         M_PRESS_CONT,A1     *load press key to continue messageu
-00001190  103C 000E                197      MOVE.B      #14,D0              *load into D0
-00001194  4E4F                     198      TRAP        #15                 *display message
-00001196  103C 0005                199      MOVE.B      #5,D0               *read single character from keyboard
-0000119A  4E4F                     200      TRAP        #15    
-0000119C  6100 00A6                201      BSR         NEW_LINE            *add new line
-000011A0  60D8                     202      BRA         READ_MEMORY_CONT    *continue reading loop
-000011A2                           203      
-000011A2                           204  INCREMENT_LINE
-000011A2  E09E                     205      ROR.L       #8,D6               *select correct byte
-000011A4  5206                     206      ADD.B       #1,D6               *increment counter
-000011A6  E19E                     207      ROL.L       #8,D6               *put byte back in place
-000011A8  4E75                     208      RTS 
-000011AA                           209  *word != opcode
-000011AA                           210  INVALID_OPCODE
-000011AA  BC3C 0008                211      CMP.B       #8,D6               *check the loop increment counter
-000011AE  6C00 0008                212      BGE         PRINT_DATA          *long amount of data. print it.
-000011B2  528A                     213      ADD.L       #1,A2               *increment current address  
-000011B4  5206                     214      ADD.B       #1,D6               *increment counter
-000011B6  60AA                     215      BRA         READ_MEMORY_LOOP    *data cap not reached. read next byte.    
-000011B8                           216      
-000011B8                           217  PRINT_DATA
-000011B8  1C3C 0000                218      MOVE.B      #00,D6              *reset the increment counter
-000011BC  6100 0010                219      BSR         PRINT_ADDRESS       *print the data address
-000011C0  6100 009C                220      BSR         TAB                 *insert a space
-000011C4  6100 00A6                221      BSR         DATA                *print 'DATA'   
-000011C8  61D8                     222      BSR         INCREMENT_LINE      *increment line counter (line was printed)
-000011CA  6000 001C                223      BRA         PRINT_DATA_LOOP     *print the data
-000011CE                           224  *print whatever's in D1
-000011CE                           225  PRINT_ADDRESS
-000011CE  280E                     226      MOVE.L      A6,D4               *put the address in D4
-000011D0  4243                     227      CLR         D3                  *counter for long
-000011D2                           228      
-000011D2                           229  PRINT_ADDRESS_LOOP
-000011D2  B67C 0004                230      CMP         #4,D3               *if long reached
-000011D6  6C00 000E                231      BGE         RETURN_TO_SUBROUTINE *exit loop
-000011DA  E19C                     232      ROL.L       #8,D4               *put ending byte at beginning
-000011DC  1204                     233      MOVE.B      D4,D1               *put byte in D1 for printing
-000011DE  6100 0028                234      BSR         OUTPUT_D1B          *print the first byte of D1
-000011E2  5203                     235      ADD.B       #1,D3               *increment D3 (loop counter)
-000011E4  60EC                     236      BRA         PRINT_ADDRESS_LOOP  *repeat loop         
-000011E6                           237           
-000011E6                           238  RETURN_TO_SUBROUTINE
-000011E6  4E75                     239      RTS
-000011E8                           240  PRINT_DATA_LOOP
-000011E8  121E                     241      MOVE.B      (A6)+,D1            *get the data
-000011EA  1401                     242      MOVE.B      D1,D2               *copy the data to D2
-000011EC  BDCA                     243      CMP.L       A2,A6               *if current address reached
-000011EE  6E00 000C                244      BGT         END_PRINT_DATA_LOOP *continue reading addresses 
-000011F2                           245                                      *otherwise keep printing the data
-000011F2  6100 0014                246      BSR         OUTPUT_D1B          *print byte in D1 in hex
-000011F6                           247      *---print a space----*
-000011F6  6100 005A                248      BSR         SPACE               *print a space                                
-000011FA  60EC                     249      BRA         PRINT_DATA_LOOP     *repeat loop
-000011FC                           250  
-000011FC                           251  END_PRINT_DATA_LOOP
-000011FC  2C4A                     252      MOVE.L      A2,A6               *set new address for data/opcode
-000011FE  6100 0044                253      BSR         NEW_LINE            *end line
-00001202  619E                     254      BSR         INCREMENT_LINE      *increment line printing counter
-00001204  6000 FF5C                255      BRA         READ_MEMORY_LOOP    *repeat loop   
-00001208                           256   
-00001208                           257  OUTPUT_D1B
-00001208                           258      *print the left character
-00001208  1401                     259      MOVE.B      D1,D2               *copy D1 to D2
-0000120A  E809                     260      LSR.B       #4,D1               *get rid of right nibble  
-0000120C  6100 0016                261      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-00001210  6100 002A                262      BSR         OUTPUT_CHAR         *print the char in D1
-00001214                           263      *print the right character
-00001214  E90A                     264      LSL.B       #4,D2               *get rid of left nibble
-00001216  E80A                     265      LSR.B       #4,D2               *put right nibble in place
-00001218  1202                     266      MOVE.B      D2,D1               *put right nibble in D1
-0000121A  6100 0008                267      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
-0000121E  6100 001C                268      BSR         OUTPUT_CHAR         *print the char in D1
-00001222  4E75                     269      RTS
-00001224                           270  VALID_OPCODE 
-00001224                           271      
-00001224                           272    
-00001224                           273  *------Convert Number in D1 to ASCII------*
-00001224                           274  CONVERT_TO_ASCII
-00001224  B23C 0009                275      CMP.B       #9,D1           *compare value with 9
-00001228  6E00 000C                276      BGT         ALPH_CHAR       *convert to numeric ascii
-0000122C  6000 0002                277      BRA         NUMERIC_CHAR    *convert to alphabetical ascii
-00001230                           278  NUMERIC_CHAR        
-00001230  0601 0030                279      ADD.B       #48,D1          *convert to ascii value
-00001234  4E75                     280      RTS                         *continue converting
-00001236                           281  ALPH_CHAR
-00001236  0601 0037                282      ADD.B       #55,D1          *convert to ascii value
-0000123A  4E75                     283      RTS                         *continue converting            
-0000123C                           284  OUTPUT_CHAR
-0000123C  103C 0006                285      MOVE.B      #6,D0           *output whatever's in D1
-00001240  4E4F                     286      TRAP        #15
-00001242  4E75                     287      RTS
-00001244                           288      
-00001244                           289  NEW_LINE
-00001244  43F9 00001350            290      LEA         M_SPACE,A1      *load new line
-0000124A  103C 000E                291      MOVE.B      #14,D0          *load message
-0000124E  4E4F                     292      TRAP        #15             *display message
-00001250  4E75                     293      RTS
-00001252                           294  SPACE
-00001252  123C 0020                295      MOVE.B      #32,D1
-00001256  103C 0006                296      MOVE.B      #6,D0
-0000125A  4E4F                     297      TRAP        #15
-0000125C  4E75                     298      RTS
-0000125E                           299  TAB
-0000125E  43F9 0000135D            300      LEA         M_TAB,A1
-00001264  103C 000E                301      MOVE.B      #14,D0
-00001268  4E4F                     302      TRAP        #15
-0000126A  4E75                     303      RTS
-0000126C                           304  DATA
-0000126C  43F9 00001354            305      LEA         M_DATA,A1
-00001272  103C 000E                306      MOVE.B      #14,D0
-00001276  4E4F                     307      TRAP        #15
-00001278  4E75                     308      RTS
-0000127A                           309  
-0000127A                           310      
-0000127A                           311  END
-0000127A                           312  
-0000127A  FFFF FFFF                313      SIMHALT             ; halt simulator
-0000127E                           314  
-0000127E  =0000000D                315  CR          EQU     $0D
-0000127E  =0000000A                316  LF          EQU     $0A
-0000127E                           317  
-0000127E= 50 6C 65 61 73 65 ...    318  M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
-000012B5= 50 6C 65 61 73 65 ...    319  M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
-000012EA= 49 6E 76 61 6C 69 ...    320  M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
-00001318= 45 71 75 61 6C 20 ...    321  M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
-00001350= 20 0D 0A 00              322  M_SPACE       DC.B ' ',CR,LF,0
-00001354= 44 41 54 41 20 20 ...    323  M_DATA        DC.B 'DATA    ',0
-0000135D= 20 20 20 20 00           324  M_TAB         DC.B '    ',0
-00001362= 50 72 65 73 73 20 ...    325  M_PRESS_CONT  DC.B 'Press any key to continue',0
-0000137C                           326  
-0000137C  =00000500                327  STRING_START    EQU     $0500
-0000137C  =00000400                328  DATA_START      EQU     $0400
-0000137C                           329  
-0000137C  =00000100                330  MEM_START       EQU     $0100
-0000137C  =00000200                331  MEM_END         EQU     $0200
-0000137C                           332  
-0000137C                           333      END    START        ; last line of source
+00000000                             7  
+00000000                             8      *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
+00000000  6000 0104                  9      BRA         TEST
+00000004                            10  *----Display input message for mem start-----*
+00000004                            11  INPUT_START
+00000004  6000 0100                 12      BRA         TEST
+00000008  43F9 00000282             13      LEA         M_INPUT_START,A1      *load message
+0000000E  103C 000E                 14      MOVE.B      #14,D0          *display string
+00000012  4E4F                      15      TRAP        #15             *output string
+00000014                            16  *----Receive User Input ------
+00000014  227C 00000300             17      MOVE.L      #$0300,A1       *set address of register A1 for string
+0000001A  103C 0002                 18      MOVE.B      #2,D0           *input string into A1 Trap
+0000001E  4E4F                      19      TRAP        #15             *input string from user
+00000020  6100 0040                 20      BSR         READ_CHAR       *check for valid input
+00000024  23C3 00000100             21      MOVE.L      D3,MEM_START    *put the starting address in memory
+0000002A  B87C 0000                 22      CMP         #0,D4           *check the result register (D4)
+0000002E  6700 0004                 23      BEQ         INPUT_END       *valid value. read the ending value
+00000032  60D0                      24      BRA         INPUT_START     *invalid value. try inputting start value again    
+00000034                            25      
+00000034                            26  *----Display input message for mem end-----*
+00000034                            27  INPUT_END
+00000034  43F9 000002B9             28      LEA         M_INPUT_END,A1  *load message
+0000003A  103C 000E                 29      MOVE.B      #14,D0          *display string
+0000003E  4E4F                      30      TRAP        #15             *output string
+00000040                            31  *----Receive User Input ------*
+00000040  227C 00000300             32      MOVE.L      #$0300,A1       *set address of register A1 for string
+00000046  103C 0002                 33      MOVE.B      #2,D0           *input string into A1 Trap
+0000004A  4E4F                      34      TRAP        #15             *input string from user
+0000004C  6100 0014                 35      BSR         READ_CHAR       *check for valid input
+00000050  23C3 00000200             36      MOVE.L      D3,MEM_END      *put ending address into memory
+00000056  B87C 0000                 37      CMP         #0,D4           *check the result register (D4)
+0000005A  6700 00BE                 38      BEQ         READ_MEMORY     *valid value. read the ending value
+0000005E  60D4                      39      BRA         INPUT_END       *invalid value. try inputting start value again    
+00000060                            40      
+00000060                            41  GET_NEXT_INPUT
+00000060  4E75                      42      RTS
+00000062                            43  
+00000062                            44  *----make sure that start value is valid----*
+00000062                            45  READ_CHAR                       *verify that string is valid (all hexadecimal digits)
+00000062  4243                      46      CLR         D3              *D3 will act as the total result
+00000064  2849                      47      MOVE.L      A1,A4           *the stop address
+00000066  143C 0006                 48      MOVE.B      #6,D2           *put 6 in D2
+0000006A  D8C2                      49      ADD.W       D2,A4           *A4 is now the stop address(A4)
+0000006C                            50      
+0000006C                            51  REMOVE_ZEROES
+0000006C  4281                      52      CLR.L       D1              *D1 will act as the temporary value
+0000006E  1211                      53      MOVE.B      (A1),D1         *read the byte from string
+00000070  143C 0030                 54      MOVE.B      #$30,D2         *put ascii zero in D2
+00000074  B202                      55      CMP.B       D2,D1           *compare ascii zero and value of D1
+00000076  6700 0006                 56      BEQ         REMOVE_ZERO     *skip over that character   
+0000007A  6000 0008                 57      BRA         READ_CHAR_LOOP  *begin converting characters to numerical values
+0000007E                            58  REMOVE_ZERO
+0000007E  5289                      59      ADD.L       #1,A1           *increment string start address
+00000080  528C                      60      ADD.L       #1,A4           *increment string end address
+00000082  60E8                      61      BRA         REMOVE_ZEROES   *loop back and keep removing zeroes
+00000084                            62  *----Convert String To Hex-----*
+00000084                            63  READ_CHAR_LOOP     
+00000084  4281                      64      CLR.L       D1              *D1 will act as the temporary value
+00000086  1211                      65      MOVE.B      (A1),D1         *read the byte from string
+00000088                            66  *----check if the value is exaclty 00 (NULL)
+00000088  B27C 0000                 67      CMP         #0,D1           *compare 00 (NULL) and the byte ascii value in D1
+0000008C  67D2                      68      BEQ         GET_NEXT_INPUT    *if you reached the end of the string, end loop
+0000008E                            69      
+0000008E  143C 0030                 70      MOVE.B      #$30,D2         *put ascii zero in D2
+00000092  B202                      71      CMP.B       D2,D1           *compare ascii zero and value of D1
+00000094  6D00 0036                 72      BLT         INVALID_CHAR_ERROR *branch on invalid (too small) ascii value   
+00000098                            73  *------Result is greater than ascii 0--------*
+00000098  143C 0066                 74      MOVE.B      #$66,D2         *put ascii f in D2
+0000009C  B202                      75      CMP.B       D2,D1           *compare ascii f and value of D1
+0000009E  6E2C                      76      BGT.B       INVALID_CHAR_ERROR *branch on invalid ascii value
+000000A0                            77  *------Result is between ascii 0 and f---------*
+000000A0  143C 0061                 78      MOVE.B      #$61,D2         *put ascii a in D2
+000000A4  B202                      79      CMP.B       D2,D1           *compare ascii a and value of D1
+000000A6  6C00 0046                 80      BGE         VALID_LETTER_LC *value is between a and f. Loop back.
+000000AA                            81      
+000000AA  143C 0039                 82      MOVE.B      #$39,D2         *put ascii 9 in D2
+000000AE  B202                      83      CMP.B       D2,D1           *compare ascii 9 and value of D1
+000000B0  6F00 002C                 84      BLE         VALID_NUMBER    *value between 0 and 9. Loop back.
+000000B4                            85  
+000000B4  143C 0041                 86      MOVE.B      #$41,D2         *put ascii A into D2
+000000B8  B202                      87      CMP.B       D2,D1           *compare ascii A and value of D1
+000000BA  6D00 0010                 88      BLT         INVALID_CHAR_ERROR    *value between 9 and A (Invalid)
+000000BE                            89      
+000000BE  143C 0046                 90      MOVE.B      #$46,D2         *put ascii F into D2
+000000C2  B202                      91      CMP.B       D2,D1           *compare ascii F and value of D1
+000000C4  6E00 0006                 92      BGT         INVALID_CHAR_ERROR    *value between F and a (Invalid)
+000000C8                            93           
+000000C8  6000 001C                 94      BRA         VALID_LETTER_UC *value is between A and F        
+000000CC                            95  INVALID_CHAR_ERROR   
+000000CC  43F9 000002EE             96      LEA         M_INVALID,A1    *load error message
+000000D2  103C 000E                 97      MOVE.B      #14,D0          *display string trap
+000000D6  4E4F                      98      TRAP        #15             *output error message
+000000D8  183C 0001                 99      MOVE.B      #1,D4           *put invalid output in result register
+000000DC  4E75                     100      RTS
+000000DE                           101  VALID_NUMBER
+000000DE  0401 0030                102      SUB.B       #$30,D1         *get actual value from ascii value
+000000E2  6000 0012                103      BRA         VALID_CHAR      *read the next char in string
+000000E6                           104  VALID_LETTER_UC
+000000E6  0401 0037                105      SUB.B       #$37,D1         *get actual value from ascii value
+000000EA  6000 000A                106      BRA         VALID_CHAR      *read the next char in string    
+000000EE                           107  VALID_LETTER_LC
+000000EE  0401 0057                108      SUB.B       #$57,D1         *get actual value from ascii value
+000000F2  6000 0002                109      BRA         VALID_CHAR      *read the next char in string   
+000000F6                           110  VALID_CHAR
+000000F6  183C 0000                111      MOVE.B      #0,D4           *return valid value entry in D4    
+000000FA  E98B                     112      LSL.L       #4,D3           *put hex digit in proper place
+000000FC  D681                     113      ADD.L       D1,D3           *put new total in D3
+000000FE  5289                     114      ADD.L       #1,A1           *increment address
+00000100  B8C9                     115      CMP         A1,A4           *if A1 > A4
+00000102  6E80                     116      BGT         READ_CHAR_LOOP  *begin converting to float    
+00000104  4E75                     117      RTS                         *loop back to INPUT_START || INPUT_END   
+00000106                           118     
+00000106                           119  TEST
+00000106  23FC 00001000 00000100   120      MOVE.L      #$1000,MEM_START
+00000110  23FC 00001300 00000200   121      MOVE.L      #$1300,MEM_END
+0000011A                           122  READ_MEMORY   
+0000011A  2479 00000100            123      MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
+00000120  2679 00000200            124      MOVEA.L     MEM_END,A3      *A3 will act as the ending address
+00000126                           125      
+00000126                           126  VALIDATE_START_END
+00000126  220A                     127      MOVE.L      A2,D1           *copy start address into D1
+00000128  240B                     128      MOVE.L      A3,D2           *copy end address into D2
+0000012A  B441                     129      CMP         D1,D2           *compare start and end values
+0000012C  6700 000A                130      BEQ         EQUAL_ERROR     *Start address is equal to end address
+00000130  6D00 0016                131      BLT         SWAP_VALUES     *Start address is larger than end address
+00000134  6000 002E                132      BRA         PRE_READ_MEMORY *begin reading memory
+00000138                           133      
+00000138                           134  EQUAL_ERROR
+00000138  43F9 0000031C            135      LEA         M_EQUAL,A1      *load error message
+0000013E  103C 000E                136      MOVE.B      #14,D0          *display string trap
+00000142  4E4F                     137      TRAP        #15             *output error message
+00000144  6000 FEBE                138      BRA         INPUT_START     *restart program (request ui again)
+00000148                           139      
+00000148                           140  SWAP_VALUES
+00000148  2239 00000100            141      MOVE.L      MEM_START,D1    *put starting address in D1
+0000014E  2439 00000200            142      MOVE.L      MEM_END,D2      *put ending address in D2
+00000154  23C2 00000100            143      MOVE.L      D2,MEM_START    *swap the two values in memory
+0000015A  23C1 00000200            144      MOVE.L      D1,MEM_END
+00000160  2442                     145      MOVEA.L     D2,A2           *A2 will be the starting/current address
+00000162  2641                     146      MOVEA.L     D1,A3           *A3 will act as the ending address
+00000164                           147  PRE_READ_MEMORY
+00000164  2C4A                     148      MOVE.L      A2,A6           *A6 will act as the current address for Data               
+00000166                           149  READ_MEMORY_LOOP
+00000166  2679 00000200            150      MOVE.L      MEM_END,A3        *put ending address in A3
+0000016C  B6CA                     151      CMP         A2,A3             *compare the incrementing address and the end address
+0000016E  6700 010E                152      BEQ         END               *stop if the end address is reached
+00000172                           153      
+00000172  E05E                     154      ROR         #8,D6               *select correct byte
+00000174  BC3C 003C                155      CMP.B       #60,D6              *see if maximum lines printed
+00000178  6C00 000E                156      BGE         PRESS_TO_CONTINUE
+0000017C  E15E                     157      ROL         #8,D6
+0000017E                           158  
+0000017E                           159      
+0000017E                           160  READ_MEMORY_CONT                    *continue reading memory (if branched)  
+0000017E  101A                     161      MOVE.B      (A2)+,D0          *get the value from incrementing address 
+00000180  E148                     162      LSL.W       #8,D0             *make room for the next byte of A2
+00000182  1022                     163      MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
+Line 164 ERROR: Undefined symbol
+00000184  6000 BA08                164      BRA         VERIFY_OPCODE
+00000188                           165      
+00000188                           166      
+00000188                           167          
+00000188                           168  *VERIFY_OPCODE
+00000188                           169  *-------------------------------------*
+00000188                           170  *BEGIN
+00000188                           171  *D0 will contain word with decodable opcode
+00000188                           172  *A2 will act as the current address
+00000188                           173  *if at any time the result is not an opcode,
+00000188                           174  *branch to "INVALID_OPCODE"
+00000188                           175  *-----Put opcode decode here----------*
+00000188                           176  *END
+00000188                           177  *A7 will be the address of the string that opcode is saved to
+00000188                           178  *A6 will be the start of the DATA address
+00000188                           179  *-------------------------------------*
+00000188                           180  
+00000188                           181  EFFECTIVE_ADDRESSING
+00000188                           182  *-------------------------------------*
+00000188                           183  *BEGIN
+00000188                           184  *D0 will contain word with decodable opcode
+00000188                           185  *A2 will act as the current address
+00000188                           186  *if at any time the result is not an opcode,
+00000188                           187  *branch to "INVALID_OPCODE"
+00000188                           188  *-----Put opcode decode here----------*
+00000188                           189  *END
+00000188                           190  *A7 will be the address of the string that opcode is saved to 
+00000188                           191  *A5 will be the start of the DATA address
+00000188                           192  *-------------------------------------*
+00000188                           193  
+00000188                           194      
+00000188                           195  PRESS_TO_CONTINUE
+00000188  1C3C 0000                196      MOVE.B      #00,D6              *reset counter
+0000018C  E19E                     197      ROL.L       #8,D6               *put byte back in place
+0000018E  43F9 00000362            198      LEA         M_PRESS_CONT,A1     *load press key to continue messageu
+00000194  103C 000E                199      MOVE.B      #14,D0              *load into D0
+00000198  4E4F                     200      TRAP        #15                 *display message
+0000019A  103C 0005                201      MOVE.B      #5,D0               *read single character from keyboard
+0000019E  4E4F                     202      TRAP        #15    
+000001A0  6100 00A6                203      BSR         IM_NEW_LINE            *add new line
+000001A4  60D8                     204      BRA         READ_MEMORY_CONT    *continue reading loop
+000001A6                           205      
+000001A6                           206  INCREMENT_LINE
+000001A6  E09E                     207      ROR.L       #8,D6               *select correct byte
+000001A8  5206                     208      ADD.B       #1,D6               *increment counter
+000001AA  E19E                     209      ROL.L       #8,D6               *put byte back in place
+000001AC  4E75                     210      RTS 
+000001AE                           211      
+000001AE                           212  *word != opcode
+000001AE                           213  INVALID_OPCODE
+000001AE  BC3C 0008                214      CMP.B       #8,D6               *check the loop increment counter
+000001B2  6C00 0008                215      BGE         PRINT_DATA          *long amount of data. print it.
+000001B6  528A                     216      ADD.L       #1,A2               *increment current address  
+000001B8  5206                     217      ADD.B       #1,D6               *increment counter
+000001BA  60AA                     218      BRA         READ_MEMORY_LOOP    *data cap not reached. read next byte.    
+000001BC                           219      
+000001BC                           220  PRINT_DATA
+000001BC  1C3C 0000                221      MOVE.B      #00,D6              *reset the increment counter
+000001C0  6100 0010                222      BSR         PRINT_ADDRESS       *print the data address
+000001C4  6100 009C                223      BSR         TAB                 *insert a space
+000001C8  6100 00A6                224      BSR         DATA                *print 'DATA'   
+000001CC  61D8                     225      BSR         INCREMENT_LINE      *increment line counter (line was printed)
+000001CE  6000 001C                226      BRA         PRINT_DATA_LOOP     *print the data
+000001D2                           227  *print whatever's in D1
+000001D2                           228  PRINT_ADDRESS
+000001D2  280E                     229      MOVE.L      A6,D4               *put the address in D4
+000001D4  4243                     230      CLR         D3                  *counter for long
+000001D6                           231      
+000001D6                           232  PRINT_ADDRESS_LOOP
+000001D6  B67C 0004                233      CMP         #4,D3               *if long reached
+000001DA  6C00 000E                234      BGE         RETURN_TO_SUBROUTINE *exit loop
+000001DE  E19C                     235      ROL.L       #8,D4               *put ending byte at beginning
+000001E0  1204                     236      MOVE.B      D4,D1               *put byte in D1 for printing
+000001E2  6100 0028                237      BSR         OUTPUT_D1B          *print the first byte of D1
+000001E6  5203                     238      ADD.B       #1,D3               *increment D3 (loop counter)
+000001E8  60EC                     239      BRA         PRINT_ADDRESS_LOOP  *repeat loop         
+000001EA                           240           
+000001EA                           241  RETURN_TO_SUBROUTINE
+000001EA  4E75                     242      RTS
+000001EC                           243  PRINT_DATA_LOOP
+000001EC  121E                     244      MOVE.B      (A6)+,D1            *get the data
+000001EE  1401                     245      MOVE.B      D1,D2               *copy the data to D2
+000001F0  BDCA                     246      CMP.L       A2,A6               *if current address reached
+000001F2  6E00 000C                247      BGT         END_PRINT_DATA_LOOP *continue reading addresses 
+000001F6                           248                                      *otherwise keep printing the data
+000001F6  6100 0014                249      BSR         OUTPUT_D1B          *print byte in D1 in hex
+000001FA                           250      *---print a space----*
+000001FA  6100 005A                251      BSR         IM_SPACE               *print a space                                
+000001FE  60EC                     252      BRA         PRINT_DATA_LOOP     *repeat loop
+00000200                           253  
+00000200                           254  END_PRINT_DATA_LOOP
+00000200  2C4A                     255      MOVE.L      A2,A6               *set new address for data/opcode
+00000202  6100 0044                256      BSR         IM_NEW_LINE            *end line
+00000206  619E                     257      BSR         INCREMENT_LINE      *increment line printing counter
+00000208  6000 FF5C                258      BRA         READ_MEMORY_LOOP    *repeat loop   
+0000020C                           259   
+0000020C                           260  OUTPUT_D1B
+0000020C                           261      *print the left character
+0000020C  1401                     262      MOVE.B      D1,D2               *copy D1 to D2
+0000020E  E809                     263      LSR.B       #4,D1               *get rid of right nibble  
+00000210  6100 0016                264      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+00000214  6100 002A                265      BSR         OUTPUT_CHAR         *print the char in D1
+00000218                           266      *print the right character
+00000218  E90A                     267      LSL.B       #4,D2               *get rid of left nibble
+0000021A  E80A                     268      LSR.B       #4,D2               *put right nibble in place
+0000021C  1202                     269      MOVE.B      D2,D1               *put right nibble in D1
+0000021E  6100 0008                270      BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
+00000222  6100 001C                271      BSR         OUTPUT_CHAR         *print the char in D1
+00000226  4E75                     272      RTS
+00000228                           273  VALID_OPCODE 
+00000228                           274      
+00000228                           275    
+00000228                           276  *------Convert Number in D1 to ASCII------*
+00000228                           277  CONVERT_TO_ASCII
+00000228  B23C 0009                278      CMP.B       #9,D1           *compare value with 9
+0000022C  6E00 000C                279      BGT         ALPH_CHAR       *convert to numeric ascii
+00000230  6000 0002                280      BRA         NUMERIC_CHAR    *convert to alphabetical ascii
+00000234                           281  NUMERIC_CHAR        
+00000234  0601 0030                282      ADD.B       #48,D1          *convert to ascii value
+00000238  4E75                     283      RTS                         *continue converting
+0000023A                           284  ALPH_CHAR
+0000023A  0601 0037                285      ADD.B       #55,D1          *convert to ascii value
+0000023E  4E75                     286      RTS                         *continue converting            
+00000240                           287  OUTPUT_CHAR
+00000240  103C 0006                288      MOVE.B      #6,D0           *output whatever's in D1
+00000244  4E4F                     289      TRAP        #15
+00000246  4E75                     290      RTS
+00000248                           291  
+00000248                           292  IM_NEW_LINE
+Line 293 ERROR: Undefined symbol
+00000248  43F9 004DBB8E            293      LEA         M_SPACE,A1      *load new line
+0000024E  103C 000E                294      MOVE.B      #14,D0          *load message
+00000252  4E4F                     295      TRAP        #15             *display message
+00000254  4E75                     296      RTS
+00000256                           297  IM_SPACE
+00000256  123C 0020                298      MOVE.B      #32,D1
+0000025A  103C 0006                299      MOVE.B      #6,D0
+0000025E  4E4F                     300      TRAP        #15
+00000260  4E75                     301      RTS
+00000262                           302  TAB
+00000262  43F9 0000035D            303      LEA         M_TAB,A1
+00000268  103C 000E                304      MOVE.B      #14,D0
+0000026C  4E4F                     305      TRAP        #15
+0000026E  4E75                     306      RTS
+00000270                           307  DATA
+00000270  43F9 00000354            308      LEA         M_DATA,A1
+00000276  103C 000E                309      MOVE.B      #14,D0
+0000027A  4E4F                     310      TRAP        #15
+0000027C  4E75                     311      RTS
+0000027E                           312      
+0000027E                           313  END
+0000027E                           314  
+0000027E  FFFF FFFF                315      SIMHALT             ; halt simulator
+00000282                           316  
+00000282  =0000000D                317  CR          EQU     $0D
+00000282  =0000000A                318  LF          EQU     $0A
+00000282                           319  
+00000282= 50 6C 65 61 73 65 ...    320  M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
+000002B9= 50 6C 65 61 73 65 ...    321  M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
+000002EE= 49 6E 76 61 6C 69 ...    322  M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
+0000031C= 45 71 75 61 6C 20 ...    323  M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
+00000354= 44 41 54 41 20 20 ...    324  M_DATA        DC.B 'DATA    ',0
+0000035D= 20 20 20 20 00           325  M_TAB         DC.B '    ',0
+00000362= 50 72 65 73 73 20 ...    326  M_PRESS_CONT  DC.B 'Press any key to continue',0
+0000037C                           327  
+0000037C  =00000500                328  STRING_START    EQU     $0500
+0000037C  =00000400                329  DATA_START      EQU     $0400
+0000037C                           330  
+0000037C  =00000100                331  MEM_START       EQU     $0100
+0000037C  =00000200                332  MEM_END         EQU     $0200
+0000037C                           333  
+0000037C                           334  
+0000037C                           335  
+0000037C                           336  
+0000037C                           337  
+0000037C                           338  
+0000037C                           339  
+0000037C                           340  
+0000037C                           341  
+0000037C                           342  
+0000037C                           343  
+0000037C                           344  
+0000037C                           345  
+Line 346 WARNING: END directive missing, starting address not set
 
-No errors detected
-No warnings generated
+2 errors detected
+1 warning generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-ALPH_CHAR           1236
-CONVERT_TO_ASCII    1224
+ALPH_CHAR           23A
+CONVERT_TO_ASCII    228
 CR                  D
-DATA                126C
+DATA                270
 DATA_START          400
-EFFECTIVE_ADDRESSING  1184
-END                 127A
-END_PRINT_DATA_LOOP  11FC
-EQUAL_ERROR         1134
-GET_NEXT_INPUT      105C
-INCREMENT_LINE      11A2
-INPUT_END           1030
-INPUT_START         1004
-INVALID_CHAR_ERROR  10C8
-INVALID_OPCODE      11AA
+EFFECTIVE_ADDRESSING  188
+END                 27E
+END_PRINT_DATA_LOOP  200
+EQUAL_ERROR         138
+GET_NEXT_INPUT      60
+IM_NEW_LINE         248
+IM_SPACE            256
+INCREMENT_LINE      1A6
+INPUT_END           34
+INPUT_START         4
+INVALID_CHAR_ERROR  CC
+INVALID_OPCODE      1AE
 LF                  A
 MEM_END             200
 MEM_START           100
-M_DATA              1354
-M_EQUAL             1318
-M_INPUT_END         12B5
-M_INPUT_START       127E
-M_INVALID           12EA
-M_PRESS_CONT        1362
-M_SPACE             1350
-M_TAB               135D
-NEW_LINE            1244
-NUMERIC_CHAR        1230
-OUTPUT_CHAR         123C
-OUTPUT_D1B          1208
-PRESS_TO_CONTINUE   1184
-PRE_READ_MEMORY     1160
-PRINT_ADDRESS       11CE
-PRINT_ADDRESS_LOOP  11D2
-PRINT_DATA          11B8
-PRINT_DATA_LOOP     11E8
-READ_CHAR           105E
-READ_CHAR_LOOP      1080
-READ_MEMORY         1116
-READ_MEMORY_CONT    117A
-READ_MEMORY_LOOP    1162
-REMOVE_ZERO         107A
-REMOVE_ZEROES       1068
-RETURN_TO_SUBROUTINE  11E6
-SPACE               1252
-START               1000
+M_DATA              354
+M_EQUAL             31C
+M_INPUT_END         2B9
+M_INPUT_START       282
+M_INVALID           2EE
+M_PRESS_CONT        362
+M_TAB               35D
+NUMERIC_CHAR        234
+OUTPUT_CHAR         240
+OUTPUT_D1B          20C
+PRESS_TO_CONTINUE   188
+PRE_READ_MEMORY     164
+PRINT_ADDRESS       1D2
+PRINT_ADDRESS_LOOP  1D6
+PRINT_DATA          1BC
+PRINT_DATA_LOOP     1EC
+READ_CHAR           62
+READ_CHAR_LOOP      84
+READ_MEMORY         11A
+READ_MEMORY_CONT    17E
+READ_MEMORY_LOOP    166
+REMOVE_ZERO         7E
+REMOVE_ZEROES       6C
+RETURN_TO_SUBROUTINE  1EA
 STRING_START        500
-SWAP_VALUES         1144
-TAB                 125E
-TEST                1102
-VALIDATE_START_END  1122
-VALID_CHAR          10F2
-VALID_LETTER_LC     10EA
-VALID_LETTER_UC     10E2
-VALID_NUMBER        10DA
-VALID_OPCODE        1224
-VERIFY_OPCODE       1184
+SWAP_VALUES         148
+TAB                 262
+TEST                106
+VALIDATE_START_END  126
+VALID_CHAR          F6
+VALID_LETTER_LC     EE
+VALID_LETTER_UC     E6
+VALID_NUMBER        DE
+VALID_OPCODE        228

@@ -1,0 +1,666 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 5/31/2016 1:53:06 PM
+
+00000000                             1  VERIFY_OPCODE
+00000000                             2      *MOVE.W  D0,D1   *Copy instruction for modification
+00000000                             3      
+00000000                             4      **ISOLATE FIRST FOUR BITS**                       ****************Marked to show change                      
+00000000  E849                       5      LSR.W   #4,D1       *Shift left four bits
+00000002  E049                       6      LSR.W   #8,D1       *Shift left again (12 shifts total)
+00000004                             7      *MULU    #6,D1
+00000004  0241 000F                  8      ANDI.W  #$000F,D1   *Keep only four bits
+00000008  6000 0004                  9      BRA     OP_JTAB
+0000000C                            10  *    LEA     OP_JTAB, A1 
+0000000C                            11  *    JSR     0(A1,D1)    
+0000000C                            12  PRINT
+0000000C  4E75                      13      RTS
+0000000E                            14  
+0000000E                            15  
+0000000E                            16  **************************************************************************
+0000000E                            17  *               Jump table 1. Determine OP code.                         *
+0000000E                            18  *        Analyzes the first four bits within the instruction             *
+0000000E                            19  *        and jumps to the corresponding subroutine.                      *
+0000000E                            20  **************************************************************************
+0000000E                            21  *OP_JTAB
+0000000E                            22  *    JMP     OP0000      *Subroutine for operations beginning with 0000
+0000000E                            23  *    JMP     OP0001      *Subroutine for operations beginning with 0001
+0000000E                            24  *    JSR     OP0010      *Subroutine for operations beginning with 0010
+0000000E                            25  *    JMP     OP0011      *Subroutine for operations beginning with 0011
+0000000E                            26  *    JMP     OP0100      *Subroutine for operations beginning with 0100
+0000000E                            27  *    JMP     OP0101      *Subroutine for operations beginning with 0101
+0000000E                            28  *    JMP     OP0110      *Subroutine for operations beginning with 0110
+0000000E                            29  *    JSR     OP1000      *Subroutine for operations beginning with 1000
+0000000E                            30  *    JMP     OP1001      *Subroutine for operations beginning with 1001
+0000000E                            31  *    JMP     OP1011      *Subroutine for operations beginning with 1011
+0000000E                            32  *    JMP     OP1100      *Subroutine for operations beginning with 1100
+0000000E                            33  *    JMP     OP1101      *Subroutine for operations beginning with 1101
+0000000E                            34  *    JMP     OP1110      *Subroutine for operations beginning with 1110
+0000000E                            35  *    
+0000000E                            36  *    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+0000000E                            37  *    RTS
+0000000E                            38  
+0000000E                            39  OP_JTAB
+0000000E  B27C 0000                 40      CMP     #$0000,D1
+00000012  6700 006C                 41      BEQ     OP0000
+00000016                            42      
+00000016  B27C 0001                 43      CMP     #$0001,D1
+0000001A  6700 0071                 44      BEQ     OP0001
+0000001E                            45      
+0000001E  B27C 0010                 46      CMP     #$0010,D1
+00000022  6700 0079                 47      BEQ     OP0010
+00000026                            48      
+00000026  B27C 0011                 49      CMP     #$0011,D1
+0000002A  6700 00AC                 50      BEQ     OP0011
+0000002E                            51      
+0000002E  B27C 0100                 52      CMP     #$0100,D1
+00000032  6700 00DE                 53      BEQ     OP0100
+00000036                            54      
+00000036  B27C 0101                 55      CMP     #$0101,D1
+0000003A  6700 018C                 56      BEQ     OP0101
+0000003E                            57      
+0000003E  B27C 0110                 58      CMP     #$0110,D1
+00000042  6700 0193                 59      BEQ     OP0110
+00000046                            60      
+00000046  B27C 1000                 61      CMP     #$1000,D1
+0000004A  6700 01A4                 62      BEQ     OP1000
+0000004E                            63      
+0000004E  B27C 1001                 64      CMP     #$1001,D1
+00000052  6700 019C                 65      BEQ     OP1000
+00000056                            66      
+00000056  B27C 1010                 67      CMP     #$1010,D1
+0000005A  6700 0194                 68      BEQ     OP1000
+0000005E                            69      
+0000005E  B27C 1011                 70      CMP     #$1011,D1
+00000062  6700 018C                 71      BEQ     OP1000
+00000066                            72      
+00000066  B27C 1100                 73      CMP     #$1100,D1
+0000006A  6700 0184                 74      BEQ     OP1000
+0000006E                            75      
+0000006E  B27C 1101                 76      CMP     #$1101,D1
+00000072  6700 017C                 77      BEQ     OP1000
+00000076                            78      
+00000076  B27C 1110                 79      CMP     #$1110,D1
+0000007A  6700 0174                 80      BEQ     OP1000
+0000007E                            81      
+0000007E                            82  *    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+0000007E  4E75                      83      RTS
+00000080                            84  
+00000080                            85  
+00000080                            86  **************************************************************************
+00000080                            87  *        OP0000 - Subroutine for operations beginning with 0000          *
+00000080                            88  *        ADDI                                                            *
+00000080                            89  **************************************************************************
+00000080                            90  OP0000
+00000080                            91      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00000080                            92      *BEGIN OUTPUT
+00000080                            93      
+00000080  16B9 00000088             94      MOVE.B  ADDI,(A3) *(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
+00000086  6084                      95      BRA     PRINT
+00000088                            96      *BRA     EA_ADDI         *Branch to EA analysis of the command
+00000088                            97  
+00000088= 41 44 44 49 00            98  ADDI    DC.B    'ADDI',0
+0000008D                            99  **************************************************************************
+0000008D                           100  *        OP0001 - Subroutine for operations beginning with 0001          *
+0000008D                           101  *        MOVE.B                                                          *
+0000008D                           102  **************************************************************************
+0000008D                           103  OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING *BEGIN OUTPUT
+0000008D                           104      
+0000008E  16F9 00000098            105      MOVE.B  MOVEB,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
+00000094  6000 FF76                106      BRA     PRINT
+00000098                           107      *BRA     EA_MOVE        *Branch to EA analysis of the command
+00000098                           108      
+00000098= 4D 4F 56 45 00           109  MOVEB   DC.B    'MOVE',0
+0000009D                           110  
+0000009D                           111  **************************************************************************
+0000009D                           112  *        OP0010 - Subroutine for operations beginning with 0010          *
+0000009D                           113  *        MOVE.W, MOVEA(WORD)                                             *
+0000009D                           114  **************************************************************************
+0000009D                           115  OP0010
+0000009D                           116      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+0000009D                           117      
+0000009D                           118      **ISOLATE NEXT BITS TO CHECK**
+0000009D                           119      **Look to 2/4 as both contain Xn in 1/4
+0000009E  3200                     120      MOVE.W  D0,D1           *Copy instruction for modification
+000000A0  E949                     121      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000000A2  E949                     122      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000000A4  E849                     123      LSR.W   #4,D1           *Rotate left four bits
+000000A6  E049                     124      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000000A8  0241 000F                125      ANDI.W  #$00F,D1        *Keep only three bits
+000000AC                           126      
+000000AC                           127      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS       
+000000AC  B27C 0001                128      CMP     #%001,D1        *Check for 001 to eliminate MOVEA.W
+000000B0  6700 0015                129      BEQ     _MOVEAW         *If equal, branch to MOVEA.W
+000000B4  6000 0002                130      BRA     _MOVEW          *Else must be MOVE.W. branch.
+000000B8                           131      
+000000B8                           132  ********* MOVEW *************        
+000000B8                           133  _MOVEW
+000000B8  16B9 000000C2            134      MOVE.B  MOVEW,(A3) *(A3)+     *Load 'MOVE.W' to Add Reg 1 and then increment
+000000BE  6000 FF4C                135      BRA     PRINT   
+000000C2                           136      *BRA     EA_MOVE        *Branch to EA analysis of the command
+000000C2= 4D 4F 56 45 00           137  MOVEW     DC.B    'MOVE',0
+000000C7                           138  
+000000C7                           139  ********* MOVEAW *************        
+000000C7                           140  _MOVEAW
+000000C8  16B9 000000D2            141      MOVE.B  MOVEAW,(A3) *(A3)+    *Load 'MOVEA.W' to Add Reg 1 and then increment
+000000CE  6000 FF3C                142      BRA     PRINT
+000000D2                           143      *BRA     EA_MOVEA       *Branch to EA analysis of the command      
+000000D2= 4D 4F 56 45 41 00        144  MOVEAW     DC.B    'MOVEA',0
+000000D8                           145  
+000000D8                           146  
+000000D8                           147  **************************************************************************
+000000D8                           148  *        OP0011 - Subroutine for operations beginning with 0011          *
+000000D8                           149  *        MOVE.L, MOVEA(LONG)                                             *
+000000D8                           150  **************************************************************************
+000000D8                           151  OP0011
+000000D8                           152      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+000000D8                           153  
+000000D8                           154      **ISOLATE NEXT BITS TO CHECK**
+000000D8                           155      **Look to 2/4 as both contain Xn in 1/4
+000000D8  3200                     156      MOVE.W  D0,D1           *Copy instruction for modification
+000000DA  E949                     157      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000000DC  E949                     158      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000000DE  E849                     159      LSR.W   #4,D1           *Rotate left four bits
+000000E0  E049                     160      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000000E2  0241 000F                161      ANDI.W  #$00F,D1        *Keep only three bits
+000000E6                           162      
+000000E6                           163      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS            
+000000E6  B27C 0001                164      CMP     #%001,D1        *Check for 001 to eliminate MOVEA.W
+000000EA  6700 0015                165      BEQ     _MOVEAL         *If equal, branch to MOVEA.L
+000000EE  6000 0002                166      BRA     _MOVEL          *Else must be MOVEL, branch
+000000F2                           167      
+000000F2                           168  ********* MOVEL *************        
+000000F2                           169  _MOVEL
+000000F2  16B9 000000FC            170      MOVE.B  MOVEL,(A3) *(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment
+000000F8  6000 FF12                171      BRA     PRINT    
+000000FC                           172      *BRA     EA_MOVE        *Branch to EA analysis of the command
+000000FC= 4D 4F 56 45 00           173  MOVEL     DC.B    'MOVE',0
+00000101                           174  
+00000101                           175  ********* MOVEAL *************        
+00000101                           176  _MOVEAL
+00000102  16B9 0000010C            177      MOVE.B  MOVEAL,(A3) *(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
+00000108  6000 FF02                178      BRA     PRINT
+0000010C                           179      *BRA     EA_MOVEA       *Branch to EA analysis of the command
+0000010C= 4D 4F 56 45 41 00        180  MOVEAL     DC.B    'MOVEA',0
+00000112                           181  
+00000112                           182  **************************************************************************
+00000112                           183  *        OP0100 - Subroutine for operations beginning with 0100          *
+00000112                           184  *        NOP, MOVEM, LEA, CLR, JSR, RTS                                  *
+00000112                           185  **************************************************************************
+00000112                           186  OP0100
+00000112                           187      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+00000112                           188      
+00000112                           189      **ISOLATE NEXT BITS TO CHECK**    
+00000112  3200                     190      MOVE.W  D0,D1           *Copy instruction for modification
+00000114  E949                     191      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00000116  E849                     192      LSR.W   #4,D1           *Rotate left four bits
+00000118  E049                     193      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000011A  0241 000F                194      ANDI.W  #$00F,D1        *Keep only three bits
+0000011E                           195  
+0000011E                           196      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS
+0000011E  B27C 0001                197      CMP     #%001,D1        *Check for 001 to eliminate CLR
+00000122  6700 004E                198      BEQ     _CLR            *If equal, branch to CLR
+00000126  6000 0002                199      BRA     OP0100_1        *Else continue checking
+0000012A                           200  
+0000012A                           201  OP0100_1 **Could be MOVEM, LEA, NOP, JSR, or RTS**
+0000012A                           202  
+0000012A                           203      **ISOLATE NEXT BITS TO CHECK**
+0000012A                           204      **Look to 2/4 as 1/4 already checked
+0000012A  3200                     205      MOVE.W  D0,D1           *Copy instruction for modification
+0000012C  E949                     206      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+0000012E  E949                     207      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00000130  E849                     208      LSR.W   #4,D1           *Rotate left four bits
+00000132  E049                     209      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00000134  0241 000F                210      ANDI.W  #$00F,D1        *Keep only three bits
+00000138                           211      
+00000138                           212      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS
+00000138  B27C 0007                213      CMP     #%111,D1        *Check for 111 to eliminate LEA
+0000013C  6700 0042                214      BEQ     _LEA            *If equal, branch to LEA
+00000140                           215                              
+00000140  B27C 0002                216      CMP     #%010,D1        *Else check for 010 to eliminate JSR
+00000144  6700 0048                217      BEQ     _JSR            *If equal, branch to JSR
+00000148                           218      
+00000148  6000 0002                219      BRA     OP0100_2        *Else continue checking
+0000014C                           220  
+0000014C                           221  OP0100_2 **Could be MOVEM, NOP, or RTS**
+0000014C                           222  
+0000014C                           223      **ISOLATE NEXT BITS TO CHECK**
+0000014C                           224      **Look to 4/4 as 1/4,2/4 already checked
+0000014C                           225      **and NOP and RTS both contain 110 in 3/4
+0000014C  3200                     226      MOVE.W  D0,D1           *Copy instruction for modification
+0000014E  E949                     227      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00000150  E949                     228      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00000152  E949                     229      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+00000154  E949                     230      LSL.W   #4,D1           *Shift left to grab 3 bits (4/4 'chunks')
+00000156  E849                     231      LSR.W   #4,D1           *Rotate left four bits
+00000158  E049                     232      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000015A  0241 000F                233      ANDI.W  #$00F,D1        *Keep only three bits
+0000015E                           234  
+0000015E                           235      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS    
+0000015E  B27C 0001                236      CMP     #%001,D1        *Check for 001 to eliminate NOP
+00000162  6700 0038                237      BEQ     _NOP            *If equal, branch to NOP
+00000166                           238      
+00000166  B27C 0005                239      CMP     #%101,D1        *Else Check for 101 to eliminate RTS
+0000016A  6700 003E                240      BEQ     _RTS            *If equal, branch to RTS
+0000016E                           241      
+0000016E  6000 0048                242      BRA     _MOVEM          *Else by process of elimination it must be MOVEM    
+00000172                           243      
+00000172                           244  ********* CLR *************        
+00000172                           245  _CLR
+00000172  16B9 0000017C            246      MOVE.B  OPCLR,(A3) *(A3)+     *Load 'CLR' to Add Reg 1 and then increment
+00000178  6000 FE92                247      BRA     PRINT
+0000017C                           248      *BRA     EA_CLR          *Branch to EA analysis of the command
+0000017C= 43 4C 52 00              249  OPCLR     DC.B    'CLR',0
+00000180                           250  
+00000180                           251  ********* LEA *************        
+00000180                           252  _LEA
+00000180  16B9 0000018A            253      MOVE.B  OPLEA,(A3) *(A3)+     *Load 'LEA' to Add Reg 1 and then increment
+00000186  6000 FE84                254      BRA     PRINT
+0000018A                           255      *BRA     EA_LEA          *Branch to EA analysis of the command
+0000018A= 4C 45 41 00              256  OPLEA     DC.B    'LEA',0
+0000018E                           257  
+0000018E                           258  ********* JSR *************     
+0000018E                           259  _JSR
+0000018E  16B9 00000198            260      MOVE.B  OPJSR,(A3) *(A3)+     *Load 'JSR' to Add Reg 1 and then increment
+00000194  6000 FE76                261      BRA     PRINT
+00000198                           262      *BRA     EA_JSR          *Branch to EA analysis of the command
+00000198= 4A 53 52 00              263  OPJSR     DC.B    'JSR',0
+0000019C                           264  
+0000019C                           265  ********* NOP *************     
+0000019C                           266  _NOP
+0000019C  16B9 000001A6            267      MOVE.B  OPNOP,(A3) *(A3)+     *Load 'NOP' to Add Reg 1 and then increment    
+000001A2  6000 FE68                268      BRA     PRINT
+000001A6                           269      *BRA     EA_NOP          *Branch to EA analysis of the command      ****************Marked to show change
+000001A6= 4E 4F 50 00              270  OPNOP     DC.B    'NOP',0
+000001AA                           271  
+000001AA                           272  ********* RTS *************     
+000001AA                           273  _RTS
+000001AA  16B9 000001B4            274      MOVE.B  OPRTS,(A3) *(A3)+     *Load 'RTS' to Add Reg 1 and then increment
+000001B0  6000 FE5A                275      BRA     PRINT
+000001B4                           276      *BRA     EA_RTS          *Branch to EA analysis of the command      ****************Marked to show change
+000001B4= 52 54 53 00              277  OPRTS     DC.B    'RTS',0
+000001B8                           278  
+000001B8                           279  ********* MOVEM *************     
+000001B8                           280  _MOVEM
+000001B8  16B9 000001C2            281      MOVE.B  MOVEM,(A3) *(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
+000001BE  6000 FE4C                282      BRA     PRINT
+000001C2                           283      *BRA     EA_MOVEM        *Branch to EA analysis of the command
+000001C2= 4D 4F 56 45 4D 00        284  MOVEM     DC.B    'MOVEM',0
+000001C8                           285      
+000001C8                           286  **************************************************************************
+000001C8                           287  *        OP0101 - Subroutine for operations beginning with 0101          *
+000001C8                           288  *        ADDQ                                                            *
+000001C8                           289  **************************************************************************
+000001C8                           290  OP0101
+000001C8                           291      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+000001C8                           292      *BEGIN OUTPUT
+000001C8                           293      
+000001C8  16B9 000001D2            294      MOVE.B  ADDQ,(A3) *(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
+000001CE  6000 FE3C                295      BRA     PRINT
+000001D2                           296      *BRA     EA_ADDQ         *Branch to EA analysis of the command
+000001D2                           297      
+000001D2= 41 44 44 51 00           298  ADDQ   DC.B    'ADDQ',0
+000001D7                           299      
+000001D7                           300  **************************************************************************
+000001D7                           301  *        OP0110 - Subroutine for operations beginning with 0110          *
+000001D7                           302  *        Bcc                                                             *
+000001D7                           303  **************************************************************************
+000001D7                           304  OP0110
+000001D7                           305      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+000001D7                           306      *BEGIN OUTPUT
+000001D7                           307      
+000001D7                           308      *MOVE.B  Bcc,(A3) *(A3)+       *Load 'Bcc' to Add Reg 1 and then increment       ******************I don't THINK I need this line
+000001D8  6000 FE32                309      BRA     PRINT
+000001DC                           310      *BRA     EA_BCC          *Branch to EA analysis of the command
+000001DC                           311      
+000001DC= 42 63 63 00              312  Bcc  DC.B    'Bcc',0
+000001E0                           313  
+000001E0                           314  **************************************************************************
+000001E0                           315  *        OP0111 - Subroutine for operations beginning with 0101          *
+000001E0                           316  *        MOVEQ                                                           *
+000001E0                           317  **************************************************************************
+000001E0                           318  OP0111
+000001E0                           319      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+000001E0                           320      *BEGIN OUTPUT
+000001E0                           321      
+000001E0  16B9 000001EA            322      MOVE.B  MOVEQ,(A3) *(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
+000001E6  6000 FE24                323      BRA     PRINT
+000001EA                           324      *BRA     EA_MOVEQ        *Branch to EA analysis of the command
+000001EA                           325      
+000001EA= 4D 4F 56 45 51 00        326  MOVEQ   DC.B    'MOVEQ',0
+000001F0                           327      
+000001F0                           328  **************************************************************************
+000001F0                           329  *        OP1000 - Subroutine for operations beginning with 1000          *
+000001F0                           330  *        DIVU, OR                                                        *
+000001F0                           331  **************************************************************************
+000001F0                           332  OP1000
+000001F0                           333      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+000001F0                           334      
+000001F0                           335      **ISOLATE NEXT BITS TO CHECK**
+000001F0                           336      **Look to 2/4 as both contain Xn in 1/4
+000001F0  3200                     337      MOVE.W  D0,D1           *Copy instruction for modification
+000001F2  E949                     338      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000001F4  E949                     339      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000001F6  E849                     340      LSR.W   #4,D1           *Rotate left four bits
+000001F8  E049                     341      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000001FA  0241 000F                342      ANDI.W  #$00F,D1        *Keep only three bits
+000001FE                           343      
+000001FE                           344      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS           
+000001FE  B27C 0003                345      CMP     #%011,D1    *Check for 011 to eliminate DIVU
+00000202  6700 0008                346      BEQ     _DIVU        *If equal, branch to DIVU
+00000206  6000 0013                347      BRA     _OR          *Else must be OR, branch
+0000020A  4E75                     348      RTS
+0000020C                           349      
+0000020C                           350  ********* DIVU *************        
+0000020C                           351  _DIVU
+0000020C  16B9 00000216            352      MOVE.B  DIVU,(A3) *(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
+00000212  6000 FDF8                353      BRA     PRINT
+00000216                           354  *    BRA     EA_MULS         *Branch to EA analysis of the command
+00000216= 44 49 56 55 00           355  DIVU     DC.B    'DIVU',0
+0000021B                           356  
+0000021B                           357  ********* OR *************        
+0000021B                           358  _OR
+0000021C  16B9 00000226            359      MOVE.B  OR,(A3) *(A3)+        *Load 'OR' to Add Reg 1 and then increment
+00000222  6000 FDE8                360      BRA     PRINT
+00000226                           361  *    BRA     EA_ADD           *Branch to EA analysis of the command
+00000226= 4F 52 00                 362  OR       DC.B    'OR',0
+00000229                           363  
+00000229                           364  **************************************************************************
+00000229                           365  *        OP1001 - Subroutine for operations beginning with 1001          *
+00000229                           366  *        SUB                                                             *
+00000229                           367  **************************************************************************
+00000229                           368  OP1001
+00000229                           369      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00000229                           370      *BEGIN OUTPUT
+00000229                           371      
+0000022A  16B9 00000234            372      MOVE.B  _SUB,(A3) *(A3)+     *Load 'SUB' to Add Reg 1 and then increment
+00000230  6000 FDDA                373      BRA     PRINT
+00000234                           374  *    BRA     EA_ADD          *Branch to EA analysis of the command
+00000234                           375  
+00000234= 53 55 42 00              376  _SUB     DC.B    'SUB',0
+00000238                           377  **************************************************************************
+00000238                           378  *        OP1011 - Subroutine for operations beginning with 1011          *
+00000238                           379  *        CMP                                                             *
+00000238                           380  **************************************************************************
+00000238                           381  OP1011
+00000238                           382      *SINGLE CODE, DO NOT NEED FURTHER CHECKING
+00000238                           383      *BEGIN OUTPUT
+00000238  16B9 00000242            384      MOVE.B  CMP,(A3) *(A3)+     *Load 'CMP' to Add Reg 1 and then increment
+0000023E  6000 FDCC                385      BRA     PRINT
+00000242                           386  *    BRA     EA_CMP          *Branch to EA analysis of the command
+00000242                           387  
+00000242= 43 4D 50 00              388  CMP     DC.B    'CMP',0
+00000246                           389  
+00000246                           390  **************************************************************************
+00000246                           391  *        OP1100 - Subroutine for operations beginning with 1100          *
+00000246                           392  *        MULS, AND                                                       *
+00000246                           393  **************************************************************************
+00000246                           394  OP1100
+00000246                           395      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+00000246                           396   
+00000246                           397      **ISOLATE NEXT BITS TO CHECK**
+00000246                           398      **Look to 2/4 as both contain Xn in 1/4
+00000246  3200                     399      MOVE.W  D0,D1           *Copy instruction for modification
+00000248  E949                     400      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+0000024A  E949                     401      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+0000024C  E849                     402      LSR.W   #4,D1           *Rotate left four bits
+0000024E  E049                     403      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00000250  0241 000F                404      ANDI.W  #$00F,D1        *Keep only three bits
+00000254                           405      
+00000254                           406      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS          
+00000254  B27C 0007                407      CMP     #%111,D1       *Check for 111 to eliminate MULS
+00000258  6700 0006                408      BEQ     _MULS           *If equal, branch to MULS
+0000025C  6000 0011                409      BRA     _AND            *Else must be AND, branch
+00000260                           410      
+00000260                           411  ********* MULS *************        
+00000260                           412  _MULS
+00000260  16B9 0000026A            413      MOVE.B  MULS,(A3) *(A3)+      *Load 'MULS' to Add Reg 1 and then increment
+00000266  6000 FDA4                414      BRA     PRINT
+0000026A                           415  *    BRA     EA_MULS         *Branch to EA analysis of the command
+0000026A= 4D 55 4C 53 00           416  MULS     DC.B    'MULS',0
+0000026F                           417  
+0000026F                           418  ********* AND *************        
+0000026F                           419  _AND
+00000270  16B9 0000027A            420      MOVE.B  AND,(A3) *(A3)+       *Load 'AND' to Add Reg 1 and then increment
+00000276  6000 FD94                421      BRA     PRINT
+0000027A                           422  *    BRA     EA_ADD          *Branch to EA analysis of the command
+0000027A= 41 4E 44 00              423  AND       DC.B    'AND',0
+0000027E                           424      
+0000027E                           425  **************************************************************************
+0000027E                           426  *        OP1101 - Subroutine for operations beginning with 1101          *
+0000027E                           427  *        ADD, ADDA                                                       *
+0000027E                           428  **************************************************************************
+0000027E                           429  OP1101
+0000027E                           430      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS  
+0000027E                           431      
+0000027E                           432      **ISOLATE NEXT BITS TO CHECK**
+0000027E                           433      **Look to 2/4 as both contain Xn in 1/4
+0000027E  3200                     434      MOVE.W  D0,D1           *Copy instruction for modification
+00000280  E949                     435      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00000282  E949                     436      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00000284  E849                     437      LSR.W   #4,D1           *Rotate left four bits
+00000286  E049                     438      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00000288  0241 000F                439      ANDI.W  #$00F,D1        *Keep only three bits
+0000028C                           440      
+0000028C                           441      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS             
+0000028C  B27C 0003                442      CMP     #%011,D1       *Check for 011 to eliminate ADDA (Size dependant)
+00000290  6700 001C                443      BEQ     _ADDA           *If equal, branch to ADDA
+00000294  B27C 0007                444      CMP     #%111,D1        *Else check for 111 to eliminate ADDA (Size dependant)
+00000298  6700 0014                445      BEQ     _ADDA           *If equal, branch to ADDA
+0000029C  6000 0002                446      BRA     _ADD            *Else must be ADD, branch
+000002A0                           447      
+000002A0                           448  ********* ADD *************        
+000002A0                           449  _ADD
+000002A0  16B9 000002AA            450      MOVE.B  ADD,(A3) *(A3)+       *Load 'ADD' to Add Reg 1 and then increment
+000002A6  6000 FD64                451      BRA     PRINT
+000002AA                           452  *    BRA     EA_ADD          *Branch to EA analysis of the command
+000002AA= 41 44 44 00              453  ADD     DC.B    'ADD',0
+000002AE                           454  
+000002AE                           455  ********* AND *************        
+000002AE                           456  _ADDA
+000002AE  16B9 000002B8            457      MOVE.B  ADDA,(A3) *(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
+000002B4  6000 FD56                458      BRA     PRINT
+000002B8                           459  *    BRA     EA_ADDA         *Branch to EA analysis of the command
+000002B8= 41 44 44 41 00           460  ADDA      DC.B    'ADDA',0
+000002BD                           461      
+000002BD                           462  **************************************************************************
+000002BD                           463  *        OP1110 - Subroutine for operations beginning with 1110          *
+000002BD                           464  *        LSR, LSL, ASR, ASL, ROL, ROR                                    *
+000002BD                           465  **************************************************************************
+000002BD                           466  OP1110
+000002BD                           467      *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
+000002BD                           468      
+000002BD                           469      **ISOLATE NEXT BITS TO CHECK**    
+000002BE  3200                     470      MOVE.W  D0,D1           *Copy instruction for modification
+000002C0  E949                     471      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000002C2  E849                     472      LSR.W   #4,D1           *Rotate left four bits
+000002C4  E049                     473      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000002C6  0241 000F                474      ANDI.W  #$00F,D1        *Keep only three bits
+000002CA                           475  
+000002CA                           476                    
+000002CA  B27C 0001                477      CMP     #%001,D1       *Check for 001 to eliminate LSd instructions
+000002CE  6700 0028                478      BEQ     _LSd            *If equal, branch to LSd to determine LSR or LSL
+000002D2  6000 0002                479      BRA     OP1110_1
+000002D6                           480      
+000002D6                           481  OP1110_1
+000002D6                           482      **ISOLATE NEXT BITS TO CHECK**
+000002D6                           483      **Look to 3/4 as 1/4 has been checked and 2/4 is ambiguous
+000002D6  3200                     484      MOVE.W  D0,D1           *Copy instruction for modification
+000002D8  E949                     485      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000002DA  E949                     486      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000002DC  E849                     487      LSR.W   #4,D1           *Rotate left four bits
+000002DE  E049                     488      LSR.W   #8,D1           *Shift left again (12 shifts total)
+000002E0  0241 000F                489      ANDI.W  #$00F,D1        *Keep only three bits
+000002E4                           490      
+000002E4                           491      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS                   
+000002E4  B27C 0000                492      CMP     #%000,D1       *Check for 000 to eliminate ASd (Rotation dependant)
+000002E8  6700 0044                493      BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
+000002EC  B27C 0004                494      CMP     #%100,D1       *Check for 100 to eliminate ASd (Rotation dependant)
+000002F0  6700 003C                495      BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
+000002F4  6000 0068                496      BRA     _ROd             *Else must be a ROd instruction, branch to determine
+000002F8                           497      
+000002F8                           498  ********** LSd *************        
+000002F8                           499  _LSd    
+000002F8                           500      **ISOLATE NEXT BITS TO CHECK**  
+000002F8                           501      **Look to 2/4 as 1/4 has been checked
+000002F8  3200                     502      MOVE.W  D0,D1           *Copy instruction for modification
+000002FA  E949                     503      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+000002FC  E949                     504      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+000002FE  E849                     505      LSR.W   #4,D1           *Rotate left four bits
+00000300  E049                     506      LSR.W   #8,D1           *Shift left again (12 shifts total)
+00000302  0241 000F                507      ANDI.W  #$00F,D1        *Keep only three bits
+00000306                           508  
+00000306                           509      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS          
+00000306  B27C 0003                510      CMP     #%011,D1        *Check for 011 to eliminate LSR
+0000030A  6700 0014                511      BEQ     _LSR            *If equal, branch to LSR
+0000030E  6000 0002                512      BRA     _LSL            *Else must be LSL, branch
+00000312                           513  
+00000312                           514  _LSL    
+00000312  16B9 0000031C            515      MOVE.B  LSL,(A3) *(A3)+       *Load 'LSL' to Add Reg 1 and then increment
+00000318  6000 FCF2                516          BRA     PRINT
+0000031C                           517  *BRA     EA_LSD         *Branch to EA analysis of the command
+0000031C= 4C 53 4C 00              518  LSL     DC.B    'LSL',0
+00000320                           519  
+00000320                           520  _LSR
+00000320  16B9 0000032A            521      MOVE.B  LSR,(A3) *(A3)+       *Load 'LSR' to Add Reg 1 and then increment
+00000326  6000 FCE4                522          BRA     PRINT
+0000032A                           523  *BRA     EA_LSD          *Branch to EA analysis of the command
+0000032A= 4C 53 52 00              524  LSR     DC.B    'LSR',0
+0000032E                           525  
+0000032E                           526  ********* ASd *************
+0000032E                           527  _ASd
+0000032E                           528      **ISOLATE NEXT BITS TO CHECK**
+0000032E                           529      **Look to 3/4 as 1/4,2/4 already checked
+0000032E  3200                     530      MOVE.W  D0,D1           *Copy instruction for modification
+00000330  E949                     531      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00000332  E949                     532      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00000334  E949                     533      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+00000336  E849                     534      LSR.W   #4,D1           *Rotate left four bits
+00000338  E049                     535      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000033A  0241 000F                536      ANDI.W  #$00F,D1        *Keep only three bits
+0000033E                           537  
+0000033E                           538      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS       
+0000033E  B27C 0000                539      CMP     #%000,D1        *Check for 000 to eliminate ASR
+00000342  6700 0010                540      BEQ     _ASR            *If equal, branch to ASR
+00000346  6000 0002                541      BRA     _ASL            *Else must be ASL, branch
+0000034A                           542  
+0000034A                           543  _ASL    
+0000034A  16B9 00000350            544      MOVE.B  ASL,(A3) *(A3)+       *Load 'ASL' to Add Reg 1 and then increment
+00000350                           545      *BRA     EA_LSD          *Branch to EA analysis of the command
+00000350= 41 53 4C 00              546  ASL     DC.B    'ASL',0
+00000354                           547  
+00000354                           548  _ASR
+00000354  16B9 0000035A            549      MOVE.B  ASR,(A3) *(A3)+       *Load 'ASR' to Add Reg 1 and then increment
+0000035A                           550      *BRA     EA_LSD          *Branch to EA analysis of the command
+0000035A= 41 53 52 00              551  ASR     DC.B    'ASR',0
+0000035E                           552  
+0000035E                           553  ********* ROd *************
+0000035E                           554  _ROd
+0000035E                           555      **ISOLATE NEXT BITS TO CHECK**
+0000035E                           556      **Look to 3/4 as 1/4,2/4 already checked
+0000035E  3200                     557      MOVE.W  D0,D1           *Copy instruction for modification
+00000360  E949                     558      LSL.W   #4,D1           *Shift left to grab 3 bits (1/4 'chunks')
+00000362  E949                     559      LSL.W   #4,D1           *Shift left to grab 3 bits (2/4 'chunks')
+00000364  E949                     560      LSL.W   #4,D1           *Shift left to grab 3 bits (3/4 'chunks')
+00000366  E849                     561      LSR.W   #4,D1           *Rotate left four bits
+00000368  E049                     562      LSR.W   #8,D1           *Shift left again (12 shifts total)
+0000036A  0241 000F                563      ANDI.W  #$00F,D1        *Keep only three bits
+0000036E                           564  
+0000036E                           565      **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
+0000036E  B27C 0003                566      CMP     #%011,D1        *Check for 011 to eliminate ROR
+00000372  6700 000C                567      BEQ     _ROR            *If equal, branch to ROR
+00000376                           568      *BRA     _ROL            *Else must be ROL, branch
+00000376                           569      
+00000376                           570  _ROL    
+00000376  16B9 0000037C            571      MOVE.B  ROL,(A3) *(A3)+       *Load 'ROL' to Add Reg 1 and then increment
+0000037C                           572      *BRA     EA_LSD          *Branch to EA analysis of the command
+0000037C= 52 4F 4C 00              573  ROL     DC.B    'ROL',0
+00000380                           574  
+00000380                           575  _ROR
+00000380  16B9 00000386            576      MOVE.B  ROR,(A3) *(A3)+       *Load 'ROR' to Add Reg 1 and then increment
+00000386                           577      *BRA     EA_LSD          *Branch to EA analysis of the command
+00000386= 52 4F 52 00              578  ROR     DC.B    'ROR',0
+0000038A                           579  
+Line 580 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADD                 2AA
+ADDA                2B8
+ADDI                88
+ADDQ                1D2
+AND                 27A
+ASL                 350
+ASR                 35A
+BCC                 1DC
+CMP                 242
+DIVU                216
+LSL                 31C
+LSR                 32A
+MOVEAL              10C
+MOVEAW              D2
+MOVEB               98
+MOVEL               FC
+MOVEM               1C2
+MOVEQ               1EA
+MOVEW               C2
+MULS                26A
+OP0000              80
+OP0001              8D
+OP0010              9D
+OP0011              D8
+OP0100              112
+OP0100_1            12A
+OP0100_2            14C
+OP0101              1C8
+OP0110              1D7
+OP0111              1E0
+OP1000              1F0
+OP1001              229
+OP1011              238
+OP1100              246
+OP1101              27E
+OP1110              2BD
+OP1110_1            2D6
+OPCLR               17C
+OPJSR               198
+OPLEA               18A
+OPNOP               1A6
+OPRTS               1B4
+OP_JTAB             E
+OR                  226
+PRINT               C
+ROL                 37C
+ROR                 386
+VERIFY_OPCODE       0
+_ADD                2A0
+_ADDA               2AE
+_AND                26F
+_ASD                32E
+_ASL                34A
+_ASR                354
+_CLR                172
+_DIVU               20C
+_JSR                18E
+_LEA                180
+_LSD                2F8
+_LSL                312
+_LSR                320
+_MOVEAL             101
+_MOVEAW             C7
+_MOVEL              F2
+_MOVEM              1B8
+_MOVEW              B8
+_MULS               260
+_NOP                19C
+_OR                 21B
+_ROD                35E
+_ROL                376
+_ROR                380
+_RTS                1AA
+_SUB                234

@@ -10,10 +10,6 @@ START:
     *CALL THE CORRESPONDING EA CODE
     MOVE.W     #$2E7C, D6
     BRA         EA_MOVE
-VALID_OPCODE
-    BRA         BYEBYE
-INVALID_OPCODE
-    BRA         BYEBYE
     *END EXAMPLE
     
 *-------------------------MOVE------------------------------------
@@ -698,11 +694,11 @@ FOR_2
     CMP.B       D4, D2
     BEQ         CHECK_TYPE
     ROR.W       #1, D7
-    BRA         PRINT_ADDRESS
+    BRA         EA_PRINT_ADDRESS
 JFF ADDQ        #1, D4
     BRA         FOR_2
     
-PRINT_ADDRESS
+EA_PRINT_ADDRESS
     BCC         JFF
     MOVE.B      D4, D5
     JSR         SLASH
@@ -1054,17 +1050,6 @@ OUTPUT_HEX
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     RTS
-
-CONVERT_TO_ASCII
-    CMP.B       #9,D1           *compare value with 9
-    BGT         ALPH_CHAR       *convert to numeric ascii
-    BRA         NUMERIC_CHAR    *convert to alphabetical ascii
-NUMERIC_CHAR        
-    ADD.B       #48,D1          *convert to ascii value
-    RTS                         *continue converting
-ALPH_CHAR
-    ADD.B       #55,D1          *convert to ascii value
-    RTS
                                    *continue converting            
 ADD_CHAR ********
     MOVE.B      D1, (A3)+
@@ -1175,7 +1160,8 @@ M_SLASH DC.B '/',0
 
 
 
+
 *~Font name~Courier New~
-*~Font size~12~
+*~Font size~10~
 *~Tab type~1~
 *~Tab size~4~

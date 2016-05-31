@@ -10,7 +10,7 @@ MAIN:                  ; first instruction of program
     
     INCLUDE         'Main.X68'
     INCLUDE         'OP_jumpTable.X68'
-*    INCLUDE         'EFFECTIVE_ADDRESSES_2.o.X68'
+    INCLUDE         'EFFECTIVE_ADDRESSES.X68'
 
     SIMHALT             ; halt simulator
 
@@ -18,6 +18,8 @@ MAIN:                  ; first instruction of program
 
 STOP:
     END    MAIN
+
+
 
 
 
