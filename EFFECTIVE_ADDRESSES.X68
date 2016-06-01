@@ -4,12 +4,11 @@
 * Date       : 5/24/16
 * Description: ALL THE EFFECTIVE ADDRESSES
 *-----------------------------------------------------------
-    ORG    $1000
-START:
+
     *EXAMPLE, MOVE A HEX CODE INTO D6
     *CALL THE CORRESPONDING EA CODE
-    MOVE.W     #$2E7C, D6
-    BRA         EA_MOVE
+    *MOVE.W     #$2E7C, D6
+    *BRA         EA_MOVE
     *END EXAMPLE
     
 *-------------------------MOVE------------------------------------
@@ -1151,7 +1150,7 @@ M_GT    DC.B 'GT',0
 M_LE    DC.B 'LE',0
 M_SLASH DC.B '/',0
 
-    END    START
+
 
 
 
