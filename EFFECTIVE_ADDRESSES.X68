@@ -918,7 +918,7 @@ GET_SIZE
     
 GET_REG ******************
     MOVE.L      D5, D1 
-    MOVE.B      D1, (A1)+
+    MOVE.B      D1, (A3)+
     RTS
     
 GET_OPMODE
