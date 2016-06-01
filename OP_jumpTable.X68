@@ -1,5 +1,6 @@
 VERIFY_OPCODE
-    *MOVE.W  D0,D1   *Copy instruction for modification
+    *JOHN COMMENT:  UNCOMMENTED THE NEXT LINE
+    MOVE.W  D0,D1   *Copy instruction for modification
     
     **ISOLATE FIRST FOUR BITS**                       ****************Marked to show change                      
     LSR.W   #4,D1       *Shift left four bits
@@ -36,50 +37,56 @@ PRINT
 *    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
 *    RTS
 
+*JOHN COMMENT : I CHANGED THESE FROM "CMP #$0000, D1" TO "CMP #%0000, D1".  THIS NEEDED TO BE DONE
+*               SO THAT THE COMPILER WOULD COMPARE THE BINARY NUMBER TO D1 INSTEAD OF THE HEX. 
+*               FOR INSTANCE : IN THE FIRST RUN OF THE PROGRAM D1 CONTAINS <00000006> BY THE TIME
+*               IT GETS TO THIS JUMPTABLE... COMPARING THE HEX NUMBER #$0110 (6)  T0 D1 COMPARES
+*               <00000110> TO D1 <00000006>, SO THAT JUMP WOULD NEVER EXECUTE.  BY CHANGING TO A BINARY
+*               COMPARISON, THE COMPILER COMPARES <00000006> TO D1 <00000006>, WHICH WILL EXECUTE.
 OP_JTAB
-    CMP     #$0000,D1
+    CMP     #%0000,D1
     BEQ     OP0000
     
-    CMP     #$0001,D1
+    CMP     #%0001,D1
     BEQ     OP0001
     
-    CMP     #$0010,D1
+    CMP     #%0010,D1
     BEQ     OP0010
     
-    CMP     #$0011,D1
+    CMP     #%0011,D1
     BEQ     OP0011
     
-    CMP     #$0100,D1
+    CMP     #%0100,D1
     BEQ     OP0100
     
-    CMP     #$0101,D1
+    CMP     #%0101,D1
     BEQ     OP0101
     
-    CMP     #$0110,D1
+    CMP     #%0110,D1
     BEQ     OP0110
     
-    CMP     #$1000,D1
+    CMP     #%1000,D1
     BEQ     OP1000
     
-    CMP     #$1001,D1
+    CMP     #%1001,D1
     BEQ     OP1000
     
-    CMP     #$1010,D1
+    CMP     #%1010,D1
     BEQ     OP1000
     
-    CMP     #$1011,D1
+    CMP     #%1011,D1
     BEQ     OP1000
     
-    CMP     #$1100,D1
+    CMP     #%1100,D1
     BEQ     OP1000
     
-    CMP     #$1101,D1
+    CMP     #%1101,D1
     BEQ     OP1000
     
-    CMP     #$1110,D1
+    CMP     #%1110,D1
     BEQ     OP1000
     
-*    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+    *BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
     RTS
 
 
@@ -576,6 +583,7 @@ _ROR
     MOVE.B  ROR,(A3) *(A3)+       *Load 'ROR' to Add Reg 1 and then increment
     BRA     EA_LSD          *Branch to EA analysis of the command
 ROR     DC.B    'ROR',0
+
 
 
 
