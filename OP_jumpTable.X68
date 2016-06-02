@@ -356,7 +356,8 @@ OP1110
 
     **ELSE CONTINUE CHECKING**
     MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #11,D1          *Shift left 7 bits 
+    LSL.W   #8,D1          *Shift left 7 bits
+    LSL.W   #3,D1 
     LSR.W   #5,D1           *Rotate left 5 bits
     LSR.W   #8,D1           *Shift left again (13 shifts total)
     ANDI.W  #$0F,D1         *Keep 2 bits
@@ -391,7 +392,8 @@ _LSR
 _ASd
 
     MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #10,D1           *Shift left 7 bits 
+    LSL.W   #8,D1           *Shift left 7 bits 
+    LSL.W   #2,D1           *Shift left 7 bits
     LSR.W   #5,D1           *Rotate right 5 bits
     LSR.W   #8,D1           *Shift right again (13 shifts total)
     ANDI.W  #$00F,D1        *Keep 3 bits
@@ -412,7 +414,8 @@ _ASR
 _ROd
 
     MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #10,D1           *Shift left 7 bits 
+    LSL.W   #2,D1           *Shift left 7 bits
+    LSL.W   #8,D1           *Shift left 7 bits 
     LSR.W   #5,D1           *Rotate right 5 bits
     LSR.W   #8,D1           *Shift right again (13 shifts total)
     ANDI.W  #$00F,D1        *Keep 3 bits
@@ -458,3 +461,4 @@ ASL     DC.B    'ASL',0
 ASR     DC.B    'ASR',0
 ROL     DC.B    'ROL',0
 ROR     DC.B    'ROR',0
+
