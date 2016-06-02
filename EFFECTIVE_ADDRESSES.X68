@@ -869,39 +869,35 @@ ADDM_4 *DONE
     RTS
     
 ABSW_5  *DONE
-    MOVE.W      A2, D2
+    ADD.L       #2, A2      *INCREMENT INTO WORD ADDRESS
+    MOVE.W      (A2), D2   
     JSR         CASH
     BSR         OUTPUT_HEX
-    ADD.L       #2, A2
     RTS
 
  
 ABSL_6 *
     JSR         CASH
-    
-    MOVE.W      A2, D2
+    ADD.L       #2, A2      *INCREMENT INTO WORD
+    MOVE.W      (A2), D2    *COPY
     BSR         OUTPUT_HEX
-    ADD.L       #2, A2      *ACQUIRED FIRST PART OF LONG
-
-***********
-    
-    MOVE.W      A2, D2
+    ADD.L       #2, A2      *IDCREMENT INTO NEXT WORK
+    MOVE.W      (A2), D2
     BSR         OUTPUT_HEX
-    ADD.L       #2, A2
     RTS
     
 IMME_7  *FOR NOW ONLY WORKING WITH IMMEDIATE HEX VALUES
     JSR         POUND
     JSR         CASH
     
-*****
-    MOVE.W      A2, D2
-    BSR         OUTPUT_HEX
     ADD.L       #2, A2
-****
-    MOVE.W      A2, D2
+    MOVE.W      (A2), D2
     BSR         OUTPUT_HEX
-    ADD.L       #2, A2
+    
+    *major problem, how to know how long immediate data is
+*    ADD.L       #2, A2
+*    MOVE.W      (A2), D2
+*    BSR         OUTPUT_HEX
     RTS
 
 *-------------------------END MODE JUMP----------------------------  
@@ -1018,41 +1014,42 @@ TO_FIVE
 
 OUTPUT_HEX
     *OUTPUT 1ST
-    MOVE.W      D2, D7              *D7 = <1010 1111 0101 0111>
-    LSR.W       #8, D7              *D7 = <0000 0000 1010 1111>
-    LSR.W       #4, D7              *D7 = <0000 0000 0000 1010>
-    MOVE.B      D7, D1
+    MOVE.W      D2, D4              *D7 = <1010 1111 0101 0111>
+    LSR.W       #8, D4              *D7 = <0000 0000 1010 1111>
+    LSR.W       #4, D4              *D7 = <0000 0000 0000 1010>
+    MOVE.B      D4, D1
     BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
     BSR         ADD_CHAR         *print the char in D1  
     *OUTPUT 2ND
-    MOVE.W      D2, D7
-    LSL.W       #4, D7              *SHIFT OUT FURTHEST RIGHT BIT
-    LSR.W       #8, D7
-    LSR.W       #4, D7  
-    MOVE.B      D7, D1
+    MOVE.W      D2, D4
+    LSL.W       #4, D4              *SHIFT OUT FURTHEST RIGHT BIT
+    LSR.W       #8, D4
+    LSR.W       #4, D4  
+    MOVE.B      D4, D1
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     *OUTPUT 3RD
-    MOVE.W      D2, D7
-    LSL.W       #8, D7
-    LSR.W       #8, D7
-    LSR.W       #4, D7
-    MOVE.B      D7, D1
+    MOVE.W      D2, D4
+    LSL.W       #8, D4
+    LSR.W       #8, D4
+    LSR.W       #4, D4
+    MOVE.B      D4, D1
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     *OUTPUT 4TH
-    MOVE.W      D2, D7  *D7 = <1010 1111 0101 0111>
-    LSL.W       #8, D7  *     <0101 0111 0000 0000>
-    LSL.W       #4, D7  *     <0111 0000 0000 0000>
-    LSR.W       #8, D7  *     <
-    LSR.W       #4, D7
-    MOVE.B      D7, D1
+    MOVE.W      D2, D4  *D7 = <1010 1111 0101 0111>
+    LSL.W       #8, D4  *     <0101 0111 0000 0000>
+    LSL.W       #4, D4  *     <0111 0000 0000 0000>
+    LSR.W       #8, D4  *     <
+    LSR.W       #4, D4
+    MOVE.B      D4, D1
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     RTS
                                    *continue converting            
 ADD_CHAR ********
     MOVE.B      D1, (A3)+
+    RTS
 
 *---------------------------END PRINT HEX------------------------
 *---------------------------START CHARACTERS---------------------------
@@ -1150,6 +1147,7 @@ LF      EQU     $0A
 *M_GT    DC.B 'GT',0
 *M_LE    DC.B 'LE',0
 *M_SLASH DC.B '/',0
+
 
 
 
