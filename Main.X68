@@ -15,7 +15,7 @@
 
 *----Display input message for mem start-----*
 INPUT_START
-*    BRA         TEST
+    BRA         TEST
     LEA         M_INPUT_START,A1      *load message
     MOVE.B      #14,D0          *display string
     TRAP        #15             *output string
@@ -167,7 +167,7 @@ READ_MEMORY_CONT                    *continue reading memory (if branched)
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
     MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
-    BRA         VERIFY_OPCODE
+    BRA         INVALID_OPCODE
     
     
         
@@ -347,30 +347,27 @@ DATA
     
 END
 
-*    SIMHALT             ; halt simulator
+    SIMHALT             ; halt simulator
 
-*CR          EQU     $0D
-*LF          EQU     $0A
-*
-*M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
-*M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
-*M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
-*M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
-*M_DATA        DC.B 'DATA    ',0
-*M_TAB         DC.B '    ',0
-*M_PRESS_CONT  DC.B 'Press any key to continue',0
-*
-*STRING_START    EQU     $0500
-*DATA_START      EQU     $0400
-*
-*MEM_START       EQU     $0100
-*MEM_END         EQU     $0200
-*
-*M_SPACE       DC.B  ' ',0
-*M_NEW_LINE    DC.B  '',CR,LF,0
+CR          EQU     $0D
+LF          EQU     $0A
 
+M_INPUT_START DC.B 'Please enter starting memory address in hexadecimal:',CR,LF,0
+M_INPUT_END   DC.B 'Please enter ending memory address in hexadecimal:',CR,LF,0
+M_INVALID     DC.B 'Invalid value. Please enter a valid value: ',CR,LF,0
+M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF,0
+M_DATA        DC.B 'DATA    ',0
+M_TAB         DC.B '    ',0
+M_PRESS_CONT  DC.B 'Press any key to continue',0
 
+STRING_START    EQU     $0500
+DATA_START      EQU     $0400
 
+MEM_START       EQU     $0100
+MEM_END         EQU     $0200
+
+M_SPACE       DC.B  ' ',0
+M_NEW_LINE    DC.B  '',CR,LF,0
 
 
 
