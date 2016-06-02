@@ -17,7 +17,7 @@ VERIFY_OPCODE
     LEA     OP_JTAB,A0 
     MULS    #6, D2
     JSR     0(A0,D2)
-    RTS
+
 
 **************************************************************************
 *               CMP table 1. Determine OP code.                         *
@@ -220,6 +220,12 @@ OP0101
 OP0110
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
+    MOVE.W  D0,D1
+    LSL.W   #4,D1
+    LSR.W   #4,D1
+    LSR.W   #8,D1
+    CMP.B   #0,D1
+    BEQ     INVALID_OPCODE
     
     MOVE.W  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
@@ -461,4 +467,6 @@ ASL     DC.B    'ASL',0
 ASR     DC.B    'ASR',0
 ROL     DC.B    'ROL',0
 ROR     DC.B    'ROR',0
+
+
 
