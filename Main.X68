@@ -131,7 +131,7 @@ VALIDATE_START_END
     MOVE.L      A3,D2           *copy end address into D2
     CMP         D1,D2           *compare start and end values
     BEQ         EQUAL_ERROR     *Start address is equal to end address
-    BLT         SWAP_VALUES     *Start address is larger than end address
+    BGT         SWAP_VALUES     *Start address is larger than end address
     BRA         PRE_READ_MEMORY *begin reading memory
     
 EQUAL_ERROR
@@ -410,6 +410,7 @@ DATA
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 
