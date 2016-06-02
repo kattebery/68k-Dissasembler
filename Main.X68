@@ -167,7 +167,7 @@ READ_MEMORY_CONT                    *continue reading memory (if branched)
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
     MOVE.B      -(A2),D0          *copy the rest of A2 to D0  
-    MOVE.L      STRING_START,A3   *A3 will act as the string address  
+    LEA         STRING_START,A3   *A3 will act as the string address  
     BRA         VERIFY_OPCODE
     
     
@@ -298,7 +298,7 @@ PRINT_OPCODE
     LEA         STRING_START,A1     *put the starting address of the string into A1
     MOVE.B      #14,D0              *print null terminated string into A
     TRAP        #15                 *output to terminal
-    MOVE.L      STRING_START,A3     *reset the current string pointer
+    LEA         STRING_START,A3     *reset the current string pointer
     RTS
     
     
