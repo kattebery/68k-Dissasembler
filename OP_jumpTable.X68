@@ -12,12 +12,11 @@ VERIFY_OPCODE
     LSR.W   #8,D1       *Shift left again (12 shifts total)
     ANDI.W  #$000F,D1   *Keep only four bits
     
+    MOVE.B  D1,D2
+    
     LEA     OP_JTAB,A0 
-    MULU    #6, D1
-    JSR     0(A0,D1)
-        
-
-
+    MULU    #6, D2
+    JSR     0(A0,D2)
 
 **************************************************************************
 *               CMP table 1. Determine OP code.                         *
