@@ -158,7 +158,7 @@ READ_MEMORY_LOOP
     BEQ         END               *stop if the end address is reached
     
     ROR         #8,D6               *select correct byte
-    CMP.B       #60,D6              *see if maximum lines printed
+    CMP.B       #30,D6              *see if maximum lines printed
     BGE         PRESS_TO_CONTINUE
     ROL         #8,D6
 
@@ -372,6 +372,8 @@ END
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
+
 
 
 
