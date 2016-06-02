@@ -35,7 +35,7 @@ OP_JTAB
     JMP     OP0100      *Subroutine for operations beginning with 0100
     JMP     OP0101      *Subroutine for operations beginning with 0101
     JMP     OP0110      *Subroutine for operations beginning with 0110
-    JSR     OP1000      *Subroutine for operations beginning with 1000
+    JMP     OP1000      *Subroutine for operations beginning with 1000
     JMP     OP1001      *Subroutine for operations beginning with 1001
     JMP     OP1011      *Subroutine for operations beginning with 1011
     JMP     OP1100      *Subroutine for operations beginning with 1100
