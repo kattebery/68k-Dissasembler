@@ -1132,7 +1132,7 @@ LF      EQU     $0A
 
 M_INVAL DC.B 'INVALID',0
 M_CASH  DC.B '$',0
-M_SPACE DC.B ' ',0
+*M_SPACE DC.B ' ',0
 M_COMMA DC.B ',',0
 M_POUND DC.B '#',0
 M_DOT   DC.B '.',0
@@ -1149,6 +1149,7 @@ M_CC    DC.B 'CC',0
 M_GT    DC.B 'GT',0
 M_LE    DC.B 'LE',0
 M_SLASH DC.B '/',0
+
 
 
 

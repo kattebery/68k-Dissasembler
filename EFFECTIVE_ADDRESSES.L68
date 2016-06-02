@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 6/1/2016 3:38:29 PM
+Created On: 6/1/2016 8:21:50 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : EFFECTIVE_ADDRESSES 2.o
@@ -864,12 +864,12 @@ Line 728 ERROR: Undefined symbol
 000006C0  4EF9 00000734            843                  JMP     IMME_7
 000006C6                           844  
 000006C6                           845  DATA_0 *DONE
-000006C6  16F9 0000096E            846      MOVE.B      M_DREG, (A3)+
+000006C6  16F9 0000096C            846      MOVE.B      M_DREG, (A3)+
 000006CC  4EB9 00000772            847      JSR         GET_REG
 000006D2  4E75                     848      RTS
 000006D4                           849  
 000006D4                           850  ADDR_1 *ADD CONDITIONS FOR SOURCE ONLY, AND NEVER BYTES
-000006D4  16F9 00000970            851      MOVE.B      M_AREG, (A3)+
+000006D4  16F9 0000096E            851      MOVE.B      M_AREG, (A3)+
 000006DA  4EB9 00000772            852      JSR         GET_REG
 000006E0  4E75                     853      RTS
 000006E2                           854   
@@ -939,7 +939,7 @@ Line 728 ERROR: Undefined symbol
 00000772                           918      
 00000772                           919  GET_REG ******************
 00000772  2205                     920      MOVE.L      D5, D1 
-00000774  12C1                     921      MOVE.B      D1, (A1)+
+00000774  16C1                     921      MOVE.B      D1, (A3)+
 00000776  4E75                     922      RTS
 00000778                           923      
 00000778                           924  GET_OPMODE
@@ -1081,50 +1081,51 @@ Line 1049 ERROR: Undefined symbol
 000008B4                          1056  *---------------------------END PRINT HEX------------------------
 000008B4                          1057  *---------------------------START CHARACTERS---------------------------
 000008B4                          1058  COMMA
-000008B4  16F9 0000095A           1059      MOVE.B      M_COMMA, (A3)+
+000008B4  16F9 00000958           1059      MOVE.B      M_COMMA, (A3)+
 000008BA  4E75                    1060      RTS
 000008BC                          1061      
 000008BC                          1062  POUND
-000008BC  16F9 0000095C           1063      MOVE.B      M_POUND, (A3)+
+000008BC  16F9 0000095A           1063      MOVE.B      M_POUND, (A3)+
 000008C2  4E75                    1064      RTS
 000008C4                          1065          
 000008C4                          1066  DOT
-000008C4  16F9 0000095E           1067      MOVE.B      M_DOT, (A3)+
+000008C4  16F9 0000095C           1067      MOVE.B      M_DOT, (A3)+
 000008CA  4E75                    1068      RTS   
 000008CC                          1069  
 000008CC                          1070  WORD
-000008CC  16F9 00000960           1071      MOVE.B      M_WORD, (A3)+
+000008CC  16F9 0000095E           1071      MOVE.B      M_WORD, (A3)+
 000008D2  4EB9 00000916           1072      JSR         SPACE
 000008D8  4E75                    1073      RTS
 000008DA                          1074  
 000008DA                          1075  BYTE
-000008DA  16F9 00000962           1076      MOVE.B      M_BYTE, (A3)+
+000008DA  16F9 00000960           1076      MOVE.B      M_BYTE, (A3)+
 000008E0  4EB9 00000916           1077      JSR         SPACE
 000008E6  4E75                    1078      RTS
 000008E8                          1079      
 000008E8                          1080  LONG
-000008E8  16F9 00000964           1081      MOVE.B      M_LONG, (A3)+
+000008E8  16F9 00000962           1081      MOVE.B      M_LONG, (A3)+
 000008EE  4EB9 00000916           1082      JSR         SPACE
 000008F4  4E75                    1083      RTS
 000008F6                          1084      
 000008F6                          1085  OPEN
-000008F6  16F9 00000966           1086      MOVE.B      M_OPEN, (A3)+
+000008F6  16F9 00000964           1086      MOVE.B      M_OPEN, (A3)+
 000008FC  4E75                    1087      RTS
 000008FE                          1088  
 000008FE                          1089  CLOSE
-000008FE  16F9 00000968           1090      MOVE.B      M_CLOSE, (A3)+
+000008FE  16F9 00000966           1090      MOVE.B      M_CLOSE, (A3)+
 00000904  4E75                    1091      RTS
 00000906                          1092      
 00000906                          1093  PLUS
-00000906  16F9 0000096A           1094      MOVE.B      M_PLUS, (A3)+
+00000906  16F9 00000968           1094      MOVE.B      M_PLUS, (A3)+
 0000090C  4E75                    1095      RTS
 0000090E                          1096      
 0000090E                          1097  SUB
-0000090E  16F9 0000096C           1098      MOVE.B      M_SUB, (A3)+
+0000090E  16F9 0000096A           1098      MOVE.B      M_SUB, (A3)+
 00000914  4E75                    1099      RTS
 00000916                          1100      
 00000916                          1101  SPACE
-00000916  16F9 00000958           1102      MOVE.B      M_SPACE, (A3)+
+Line 1102 ERROR: Undefined symbol
+00000916  16F9 004DBB8E           1102      MOVE.B      M_SPACE, (A3)+
 0000091C  4E75                    1103      RTS    
 0000091E                          1104      
 0000091E                          1105  CASH
@@ -1132,18 +1133,18 @@ Line 1049 ERROR: Undefined symbol
 00000924  4E75                    1107      RTS
 00000926                          1108  
 00000926                          1109  CC
-00000926  16F9 00000972           1110      MOVE.B      M_CC, (A3)+
+00000926  16F9 00000970           1110      MOVE.B      M_CC, (A3)+
 0000092C  4E75                    1111      RTS
 0000092E                          1112  GT
-0000092E  16F9 00000975           1113      MOVE.B      M_GT, (A3)+
+0000092E  16F9 00000973           1113      MOVE.B      M_GT, (A3)+
 00000934  4E75                    1114      RTS
 00000936                          1115  
 00000936                          1116  LE
-00000936  16F9 00000978           1117      MOVE.B      M_LE, (A3)+
+00000936  16F9 00000976           1117      MOVE.B      M_LE, (A3)+
 0000093C  4E75                    1118      RTS
 0000093E                          1119      
 0000093E                          1120  SLASH
-0000093E  16F9 0000097B           1121      MOVE.B      M_SLASH, (A3)+
+0000093E  16F9 00000979           1121      MOVE.B      M_SLASH, (A3)+
 00000944  4E75                    1122      RTS
 00000946                          1123      
 00000946                          1124  INVALID
@@ -1158,37 +1159,37 @@ Line 1126 ERROR: Undefined symbol
 0000094E                          1132  
 0000094E= 49 4E 56 41 4C 49 ...   1133  M_INVAL DC.B 'INVALID',0
 00000956= 24 00                   1134  M_CASH  DC.B '$',0
-00000958= 20 00                   1135  M_SPACE DC.B ' ',0
-0000095A= 2C 00                   1136  M_COMMA DC.B ',',0
-0000095C= 23 00                   1137  M_POUND DC.B '#',0
-0000095E= 2E 00                   1138  M_DOT   DC.B '.',0
-00000960= 57 00                   1139  M_WORD  DC.B 'W',0
-00000962= 42 00                   1140  M_BYTE  DC.B 'B',0
-00000964= 4C 00                   1141  M_LONG  DC.B 'L',0
-00000966= 28 00                   1142  M_OPEN  DC.B '(',0
-00000968= 29 00                   1143  M_CLOSE DC.B ')',0
-0000096A= 2B 00                   1144  M_PLUS  DC.B '+',0
-0000096C= 2D 00                   1145  M_SUB   DC.B '-',0
-0000096E= 44 00                   1146  M_DREG  DC.B 'D',0
-00000970= 41 00                   1147  M_AREG  DC.B 'A',0
-00000972= 43 43 00                1148  M_CC    DC.B 'CC',0
-00000975= 47 54 00                1149  M_GT    DC.B 'GT',0
-00000978= 4C 45 00                1150  M_LE    DC.B 'LE',0
-0000097B= 2F 00                   1151  M_SLASH DC.B '/',0
-0000097D                          1152  
-0000097D                          1153  
-0000097D                          1154  
-0000097D                          1155  
-0000097D                          1156  
-0000097D                          1157  
-0000097D                          1158  
-0000097D                          1159  
-0000097D                          1160  
-0000097D                          1161  
-0000097D                          1162  
+00000958                          1135  *M_SPACE DC.B ' ',0
+00000958= 2C 00                   1136  M_COMMA DC.B ',',0
+0000095A= 23 00                   1137  M_POUND DC.B '#',0
+0000095C= 2E 00                   1138  M_DOT   DC.B '.',0
+0000095E= 57 00                   1139  M_WORD  DC.B 'W',0
+00000960= 42 00                   1140  M_BYTE  DC.B 'B',0
+00000962= 4C 00                   1141  M_LONG  DC.B 'L',0
+00000964= 28 00                   1142  M_OPEN  DC.B '(',0
+00000966= 29 00                   1143  M_CLOSE DC.B ')',0
+00000968= 2B 00                   1144  M_PLUS  DC.B '+',0
+0000096A= 2D 00                   1145  M_SUB   DC.B '-',0
+0000096C= 44 00                   1146  M_DREG  DC.B 'D',0
+0000096E= 41 00                   1147  M_AREG  DC.B 'A',0
+00000970= 43 43 00                1148  M_CC    DC.B 'CC',0
+00000973= 47 54 00                1149  M_GT    DC.B 'GT',0
+00000976= 4C 45 00                1150  M_LE    DC.B 'LE',0
+00000979= 2F 00                   1151  M_SLASH DC.B '/',0
+0000097B                          1152  
+0000097B                          1153  
+0000097B                          1154  
+0000097B                          1155  
+0000097B                          1156  
+0000097B                          1157  
+0000097B                          1158  
+0000097B                          1159  
+0000097B                          1160  
+0000097B                          1161  
+0000097B                          1162  
 Line 1163 WARNING: END directive missing, starting address not set
 
-22 errors detected
+23 errors detected
 1 warning generated
 
 
@@ -1263,25 +1264,24 @@ MODE_CHOOSER        844
 MODE_JUMP           696
 MOVEM_ERROR_CHECK   66C
 MOVE_ERROR_CHECK    60C
-M_AREG              970
-M_BYTE              962
+M_AREG              96E
+M_BYTE              960
 M_CASH              956
-M_CC                972
-M_CLOSE             968
-M_COMMA             95A
-M_DOT               95E
-M_DREG              96E
-M_GT                975
+M_CC                970
+M_CLOSE             966
+M_COMMA             958
+M_DOT               95C
+M_DREG              96C
+M_GT                973
 M_INVAL             94E
-M_LE                978
-M_LONG              964
-M_OPEN              966
-M_PLUS              96A
-M_POUND             95C
-M_SLASH             97B
-M_SPACE             958
-M_SUB               96C
-M_WORD              960
+M_LE                976
+M_LONG              962
+M_OPEN              964
+M_PLUS              968
+M_POUND             95A
+M_SLASH             979
+M_SUB               96A
+M_WORD              95E
 NEW_MODE            84E
 OPEN                8F6
 OUTPUT_HEX          868
