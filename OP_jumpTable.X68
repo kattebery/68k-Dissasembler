@@ -11,7 +11,11 @@ VERIFY_OPCODE
     LSR.W   #4,D1       *Shift left four bits
     LSR.W   #8,D1       *Shift left again (12 shifts total)
     ANDI.W  #$000F,D1   *Keep only four bits
-    BRA     OP_JTAB    
+    
+    LEA     OP_JTAB,A0 
+    MULU    #6, D1
+    JSR     0(A0,D1)
+        
 
 
 
@@ -22,34 +26,52 @@ VERIFY_OPCODE
 **************************************************************************
 
 OP_JTAB
-    CMP     #%0000,D1   *ADDI 
-    BEQ     OP0000
-    CMP     #%0001,D1   *MOVE.B
-    BEQ     OP0001
-    CMP     #%0010,D1   *MOVE.W, MOVEA(WORD)
-    BEQ     OP0010 
-    CMP     #%0011,D1   *MOVE.L, MOVEA(LONG)  
-    BEQ     OP0011   
-    CMP     #%0100,D1   *NOP, MOVEM, LEA, CLR, JSR, RTS
-    BEQ     OP0100
-    CMP     #%0101,D1   *ADDQ
-    BEQ     OP0101    
-    CMP     #%0110,D1   *Bcc
-    BEQ     OP0110   
-    CMP     #%1000,D1   *MOVEQ
-    BEQ     OP1000    
-    CMP     #%1001,D1   *DIVU, OR
-    BEQ     OP1000    
-    CMP     #%1010,D1   *SUB
-    BEQ     OP1000    
-    CMP     #%1011,D1   *CMP
-    BEQ     OP1000    
-    CMP     #%1100,D1   *MULS, AND 
-    BEQ     OP1000   
-    CMP     #%1101,D1   *ADD, ADDA
-    BEQ     OP1000   
-    CMP     #%1110,D1   *LSR, LSL, ASR, ASL, ROL, ROR  
-    BEQ     OP1000
+
+*OP_JTAB
+    JMP     OP0000      *Subroutine for operations beginning with 0000
+    JMP     OP0001      *Subroutine for operations beginning with 0001
+    JMP     OP0010      *Subroutine for operations beginning with 0010
+    JMP     OP0011      *Subroutine for operations beginning with 0011
+    JMP     OP0100      *Subroutine for operations beginning with 0100
+    JMP     OP0101      *Subroutine for operations beginning with 0101
+    JMP     OP0110      *Subroutine for operations beginning with 0110
+    JSR     OP1000      *Subroutine for operations beginning with 1000
+    JMP     OP1001      *Subroutine for operations beginning with 1001
+    JMP     OP1011      *Subroutine for operations beginning with 1011
+    JMP     OP1100      *Subroutine for operations beginning with 1100
+    JMP     OP1101      *Subroutine for operations beginning with 1101
+    JMP     OP1110      *Subroutine for operations beginning with 1110
+
+
+*    CMP     #%0000,D1   *ADDI 
+*    BEQ     OP0000
+*    CMP     #%0001,D1   *MOVE.B
+*    BEQ     OP0001
+*    CMP     #%0010,D1   *MOVE.W, MOVEA(WORD)
+*    BEQ     OP0010 
+*    CMP     #%0011,D1   *MOVE.L, MOVEA(LONG)  
+*    BEQ     OP0011   
+*    CMP     #%0100,D1   *NOP, MOVEM, LEA, CLR, JSR, RTS
+*    BEQ     OP0100
+*    CMP     #%0101,D1   *ADDQ
+*    BEQ     OP0101    
+*    CMP     #%0110,D1   *Bcc
+*    BEQ     OP0110   
+*    CMP     #%1000,D1   *MOVEQ
+*    BEQ     OP1000    
+*    CMP     #%1001,D1   *DIVU, OR
+*    BEQ     OP1000    
+*    CMP     #%1010,D1   *SUB
+*    BEQ     OP1000    
+*    CMP     #%1011,D1   *CMP
+*    BEQ     OP1000    
+*    CMP     #%1100,D1   *MULS, AND 
+*    BEQ     OP1000   
+*    CMP     #%1101,D1   *ADD, ADDA
+*    BEQ     OP1000   
+*    CMP     #%1110,D1   *LSR, LSL, ASR, ASL, ROL, ROR  
+*    BEQ     OP1000
+
     
     BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
 
@@ -499,3 +521,5 @@ _ROR
     MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
     BRA     EA_LSD          *Branch to EA analysis of the command
 ROR     DC.B    'ROR',0
+
+
