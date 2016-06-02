@@ -166,7 +166,8 @@ READ_MEMORY_LOOP
 READ_MEMORY_CONT                    *continue reading memory (if branched)  
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
-    MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
+    MOVE.B      -(A2),D0          *copy the rest of A2 to D0  
+    MOVE.L      STRING_START,A3   *A3 will act as the string address  
     BRA         VERIFY_OPCODE
     
     
@@ -368,6 +369,7 @@ END
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 
