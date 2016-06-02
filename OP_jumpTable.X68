@@ -4,7 +4,7 @@
 * Date       :
 * Description:
 *-----------------------------------------------------------
-
+VERIFY_OPCODE
     MOVE.W  D0,D1   *Copy instruction for modification
     
     **ISOLATE FIRST FOUR BITS**                                             
