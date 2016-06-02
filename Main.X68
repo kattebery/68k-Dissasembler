@@ -131,7 +131,7 @@ VALIDATE_START_END
     MOVE.L      A3,D2           *copy end address into D2
     CMP         D1,D2           *compare start and end values
     BEQ         EQUAL_ERROR     *Start address is equal to end address
-    BGT         SWAP_VALUES     *Start address is larger than end address
+    BLT         SWAP_VALUES     *Start address is larger than end address
     BRA         PRE_READ_MEMORY *begin reading memory
     
 EQUAL_ERROR
@@ -202,12 +202,13 @@ CONTINUE_YN
     LEA         M_CONTINUE,A1        *ask the user if they want to read again
     MOVE.B      #14,D0
     TRAP        #15
+   
     MOVE.B      #5,D0               *get user input
     TRAP        #15
     CMP.B       #89,D1              *compare user input and ascii 'Y'
     BEQ         RESTART             *
     CMP.B       #121,D1             *compare user input with ascii 'y'
-    BEQ         RESTART
+    BEQ         RESTART         
     BRA         END
     
 PRESS_TO_CONTINUE
@@ -410,6 +411,7 @@ DATA
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 

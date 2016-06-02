@@ -12,8 +12,9 @@ MAIN:                  ; first instruction of program
     INCLUDE         'Main.X68'
     INCLUDE         'OP_jumpTable.X68'
     INCLUDE         'EFFECTIVE_ADDRESSES.X68'
-    INCLUDE         'demo_test.x68'
+
 END
+    JSR             IM_NEW_LINE
     LEA             M_END,A1
     MOVE.B          #14,D0
     TRAP            #15
@@ -89,8 +90,11 @@ M_LE    DC.B 'LE',0
 M_SLASH DC.B '/',0
 
 
+    INCLUDE         'demo_test.x68'
+
 STOP:
     END    MAIN
+
 
 
 

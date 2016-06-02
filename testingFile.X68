@@ -38,7 +38,7 @@
 *Absolute WORD Address...................(stuff).W      
 *Absolute LONG Address...................(stuff).L
 *-----------------------------------------------------------
-    ORG    $3000
+    ORG    $7000
         
 
     *NOP* DONE
@@ -371,6 +371,7 @@ TEST2        DC.B 'DATA    ',0
 
 *variables + constants here
 TEST_MESSAGE    DC.B       'I LOVE APPLES',0
+
 
 
 

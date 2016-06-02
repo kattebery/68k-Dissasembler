@@ -1,0 +1,122 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 6/2/2016 2:21:45 PM
+
+00000000                             1  *****************************
+00000000                             2  *
+00000000                             3  * demo_test.X68
+00000000                             4  *
+00000000                             5  * Created 06/02/2016
+00000000                             6  *
+00000000                             7  * Test program for CSS 422 Disassembler Project Demo
+00000000                             8  *
+00000000                             9  *****************************
+00000000                            10  
+00000000  =00007000                 11  start           EQU     $00007000       * ORG and END address
+00000000                            12  
+00000000                            13  * ORG the program so that it straddles the address boundary $00007FFF to $00008000
+00000000                            14  
+00007000                            15                  ORG     start
+00007000                            16  
+00007000                            17  * NOP and similar instructions. Should clearly differentiate NOP and RTS from others.
+00007000                            18  
+00007000  4E71                      19                  NOP                     *Required
+00007002  4E75                      20                  RTS                     *Required
+00007004                            21  
+00007004                            22  
+00007004                            23  * This is a group of ADD instructions
+00007004  D441                      24  add_start       ADD.W   D1,D2
+00007006  0641 4E71                 25                  ADDI.W  #$4E71,D1
+0000700A  5E87                      26                  ADDQ.L  #07,D7          
+0000700C  D6DE                      27                  ADDA.W  (A6)+,A3
+0000700E  DDFC 3000AAAA             28                  ADDA.L  #$3000AAAA,A6
+00007014  0685 D50000AA             29                  ADDI.L  #$D50000AA,D5
+0000701A  0646 5555                 30                  ADDI.W  #$5555,D6
+0000701E  0600 00FE                 31                  ADDI.B  #$FE,D0
+00007022  9441                      32                  SUB.W   D1,D2
+00007024                            33  
+00007024                            34  * Move instructions
+00007024  1200                      35  moves           MOVE.B  D0,D1
+00007026  33CE F30045BB             36                  MOVE.W  A6,$F30045BB
+0000702C  2000                      37                  MOVE.L  D0,D0
+0000702E  2CC7                      38                  MOVE.L  D7,(A6)+
+00007030  36BC FFD0                 39                  MOVE.W  #$FFD0,(A3)
+00007034  23F9 C00022AA 3000A0F8    40                  MOVE.L  $C00022AA,$3000A0F8
+0000703E  2B08                      41                  MOVE.L  A0,-(A5)
+00007040  3056                      42                  MOVEA.W (A6),A0
+00007042  48A7 07E0                 43                  MOVEM.W A0/A1/A2/D5/D6/D7,-(SP)
+00007046  4CD8 1B07                 44                  MOVEM.L (A0)+,D0/D1/D2/A4/A3/A0/A1
+0000704A  7401                      45                  MOVEQ   #1,D2
+0000704C                            46                  
+0000704C                            47  * Divide and multiple optional instructions
+0000704C                            48  *               ANDI.B  #$01,$4568
+0000704C  C6B9 8000A000             49  ands            AND.L   $8000A000,D3
+00007052  E128                      50  shifts          LSL.B   D0,D0
+00007054  E848                      51                  LSR.W   #4,D0
+00007056  E3DA                      52                  LSL.W   (A2)+
+00007058  EC27                      53                  ASR.B   D6,D7
+0000705A  EB27                      54                  ASL.B   D5,D7
+0000705C  E5BB                      55  rolls           ROL.L   D2,D3
+0000705E  E89E                      56                  ROR.L   #4,D6
+00007060                            57  
+00007060  4204                      58  clear           CLR.B   D4
+00007062  45F9 DC00FF00             59  load_addr       LEA     $DC00FF00,A2
+00007068  49D5                      60                  LEA     (A5),A4
+0000706A                            61  *               LEA     (ands,PC),A3
+0000706A                            62  *               LEA     -$20(A2,D7),A2
+0000706A                            63  
+0000706A  BA13                      64  compares        CMP.B   (A3),D5
+0000706C  B4B9 ABC0FF00             65                  CMP.L   $ABC0FF00,D2
+00007072  B8C2                      66                  CMPA.W  D2,A4
+00007074                            67  * Branches      
+00007074                            68                  
+00007074                            69  
+00007074                            70  * Jump and branch instructions
+00007074                            71  
+00007074  4E93                      72  jmplabel        JSR     (A3)            * Address register indirect
+00007076  64E8                      73                  BCC     clear           
+00007078  6EF0                      74                  BGT     compares                
+0000707A  6F00 0002                 75                  BLE     multiply
+0000707E                            76                  
+0000707E                            77  *These are not required instructions
+0000707E  C7C0                      78  multiply        MULS    D0,D3           *Optional instruction
+00007080  C1D6                      79                  MULS    (A6),D0         *Optional instruction
+00007082  C3FC 4567                 80                  MULS    #$4567,D1       *Optional instruction
+00007086  8ADB                      81                  DIVU    (A3)+,D5        *Optional instruction
+00007088  4E71                      82                  NOP
+0000708A  4E71                      83                  NOP
+0000708C  9882                      84                  SUB.L   D2,D4
+0000708E  9E93                      85                  SUB.L   (A3),D7
+00007090                            86          
+00007090                            87  
+00007090                            88  
+00007090                            89  
+00007090                            90  
+00007090                            91  
+00007090                            92  
+00007090                            93  
+00007090                            94  
+00007090                            95  
+00007090                            96  
+00007090                            97  
+00007090                            98  
+Line 99 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADD_START           7004
+ANDS                704C
+CLEAR               7060
+COMPARES            706A
+JMPLABEL            7074
+LOAD_ADDR           7062
+MOVES               7024
+MULTIPLY            707E
+ROLLS               705C
+SHIFTS              7052
+START               7000
