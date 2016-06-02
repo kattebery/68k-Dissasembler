@@ -46,7 +46,9 @@
     
     *MOVE* DONE
     *MOVE SOURCE: DATA REGISTER -> DN
+TEST1        DC.B 'DATA    ',0
     MOVE.B      D1, D2
+TEST2        DC.B 'DATA    ',0
     MOVE.B      D1, (A1)
     MOVE.B      D1, (A1)+
     MOVE.B      D1, -(A1)
@@ -369,6 +371,9 @@
 
 *variables + constants here
 TEST_MESSAGE    DC.B       'I LOVE APPLES',0
+
+
+
 
 
 

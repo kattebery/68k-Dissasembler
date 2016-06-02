@@ -4,9 +4,6 @@
 * Date       :4/29/2016
 * Description:
 *-----------------------------------------------------------
-
-    *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE   
-    BRA         TEST
     
 *--------------------------------------------*
 * Program Input. Read user input start and   *
@@ -155,14 +152,12 @@ PRE_READ_MEMORY
 READ_MEMORY_LOOP
     MOVE.L      MEM_END,A3        *put ending address in A3
     CMP         A2,A3             *compare the incrementing address and the end address
-    BLT         END               *stop if the end address is reached
+    BLT         CONTINUE_YN       *stop if the end address is reached
     
     ROR         #8,D6               *select correct byte
     CMP.B       #30,D6              *see if maximum lines printed
     BGE         PRESS_TO_CONTINUE
-    ROL         #8,D6
-
-    
+    ROL         #8,D6   
 READ_MEMORY_CONT                    *continue reading memory (if branched)  
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
@@ -199,6 +194,21 @@ EFFECTIVE_ADDRESSING
 *A5 will be the start of the DATA address
 *-------------------------------------*
 
+
+CONTINUE_YN
+    LEA         M_FINISHED,A1       *print out finished reading address
+    MOVE.B      #14,D0
+    TRAP        #15
+    LEA         M_CONTINUE,A1        *ask the user if they want to read again
+    MOVE.B      #14,D0
+    TRAP        #15
+    MOVE.B      #5,D0               *get user input
+    TRAP        #15
+    CMP.B       #89,D1              *compare user input and ascii 'Y'
+    BEQ         RESTART             *
+    CMP.B       #121,D1             *compare user input with ascii 'y'
+    BEQ         RESTART
+    BRA         END
     
 PRESS_TO_CONTINUE
     MOVE.B      #00,D6              *reset counter
@@ -230,12 +240,17 @@ INVALID_OPCODE_CONT
     
 PRINT_DATA
     MOVE.B      #00,D6              *reset the increment counter
-    BSR         PRINT_ADDRESS       *print the data address
+    BSR         PRINT_DATA_ADDRESS       *print the data address
     BSR         TAB                 *insert a space
-    BSR         DATA                *print 'DATA'   
-    BSR         INCREMENT_LINE      *increment line counter (line was printed)
+    BSR         DATA                *print 'DATA'       
     BSR         PRINT_DATA_LOOP     *print the data
+    BSR         INCREMENT_LINE      *increment line counter (line was printed)
     RTS
+
+PRINT_DATA_ADDRESS
+    MOVE.L      A6,D4               *put the address in D4
+    CLR         D3                  *counter for long
+    BRA         PRINT_ADDRESS_LOOP
 *print whatever's in D1
 PRINT_ADDRESS
     MOVE.L      A6,D4               *put the address in D4
@@ -281,13 +296,14 @@ OUTPUT_D1B
     BSR         CONVERT_TO_ASCII    *convert value in D1, to ascii
     BSR         OUTPUT_CHAR         *print the char in D1
     RTS
-VALID_OPCODE 
-    ADD.L       #02,A2              *increment the current address because word is valid
+VALID_OPCODE
     CMP.B       #00,D6              *if leftover data not printed
     BEQ         PRINT_OPCODE_EA     *print just the opcode
     BSR         PRINT_DATA          *print unreadable data
                                     *and the opcode
-PRINT_OPCODE_EA
+PRINT_OPCODE_EA    
+    ADD.L       #02,A2              *increment the current address because word is valid
+
     MOVE.B      #00,D6              *reset the increment counter
     BSR         PRINT_ADDRESS       *print the data address
     BSR         TAB                 *insert a space
@@ -304,8 +320,26 @@ PRINT_OPCODE
     lea         STRING_START,A3     *reset the current string pointer
     RTS
     
-    
-          
+RESTART
+*Clear all the data registers
+    CLR.L       D0
+    CLR.L       D1
+    CLR.L       D2
+    CLR.L       D3
+    CLR.L       D4
+    CLR.L       D5
+    CLR.L       D6
+    CLR.L       D7
+*clear all the address registers
+    MOVE.L      D0,A0
+    MOVE.L      D0,A1
+    MOVE.L      D0,A2
+    MOVE.L      D0,A3
+    MOVE.L      D0,A4
+    MOVE.L      D0,A5
+    MOVE.L      D0,A6
+    MOVE.L      D0,A7
+    BRA         INPUT_START
     
 *-------------Return to subroutine----------------*    
 RETURN_TO_SUBROUTINE
@@ -348,7 +382,8 @@ DATA
     MOVE.B      #14,D0
     TRAP        #15
     RTS
-   
+    
+
 
 *    SIMHALT             ; halt simulator
 
@@ -362,6 +397,8 @@ DATA
 *M_DATA        DC.B 'DATA    ',0
 *M_TAB         DC.B '    ',0
 *M_PRESS_CONT  DC.B 'Press any key to continue',0
+*M_FINISHED    DC.B 'Finished Reading Memory',0
+*M_CONTINUE    DC.B 'Would you like to read memory again? (Y/N)',0
 *
 *STRING_START    EQU     $0500
 *DATA_START      EQU     $0400
@@ -371,6 +408,7 @@ DATA
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 

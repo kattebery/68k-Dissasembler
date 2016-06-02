@@ -14,6 +14,9 @@ MAIN:                  ; first instruction of program
     INCLUDE         'EFFECTIVE_ADDRESSES.X68'
     INCLUDE         'testingFile.x68'
 END
+    LEA             M_END,A1
+    MOVE.B          #14,D0
+    TRAP            #15
     SIMHALT             ; halt simulator
 
 CR          EQU     $0D
@@ -26,6 +29,9 @@ M_EQUAL       DC.B 'Equal values. No memory read. Please enter new values',CR,LF
 M_DATA        DC.B 'DATA    ',0
 M_TAB         DC.B '    ',0
 M_PRESS_CONT  DC.B 'Press any key to continue',0
+M_FINISHED    DC.B 'Finished Reading Memory',CR,LF,0
+M_CONTINUE    DC.B 'Would you like to read memory again? (Y/N)',0
+M_END         DC.B 'Program Exit',CR,LF,0
 
 STRING_START    EQU     $0500
 DATA_START      EQU     $0400
@@ -85,6 +91,7 @@ M_SLASH DC.B '/',0
 
 STOP:
     END    MAIN
+
 
 
 
