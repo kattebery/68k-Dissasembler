@@ -1,46 +1,47 @@
 *-----------------------------------------------------------
-* Title      : Op Codes
+* Title      : Op_jumpTable
 * Written by : Kristen Attebery
-* Date       :
-* Description:
+* Date       : 6/4/16
+* Description: OP code decoder for 68k disassembler
+*              Team.cpp CSS 422 Spring 2016
 *-----------------------------------------------------------
 VERIFY_OPCODE
     MOVE.W  D0,D1   *Copy instruction for modification
     
-    **ISOLATE FIRST FOUR BITS**                                             
-    LSR.W   #4,D1       *Shift left four bits
-    LSR.W   #8,D1       *Shift left again (12 shifts total)
+    **ISOLATE BITS F-C**                                             
+    LSR.W   #4,D1       *Shift right four bits
+    LSR.W   #8,D1       *Shift right again (12 shifts total)
     
     CLR     D2
-    MOVE.B  D1,D2
+    MOVE.B  D1,D2       *Copy bits to jump table instruction register(D2)
     
-    LEA     OP_JTAB,A0 
-    MULS    #6, D2
-    JSR     0(A0,D2)
+    LEA     OP_JTAB,A0  *Load the jump table 
+    MULS    #6, D2      *Get the offset
+    JSR     0(A0,D2)    *Go to jump table address
 
 
 **************************************************************************
-*               CMP table 1. Determine OP code.                         *
+*              OP_JTAB. Determine OP code.                               *
 *        Analyzes the first four bits within the instruction             *
 *        and jumps to the corresponding subroutine.                      *
 **************************************************************************
 
-OP_JTAB    JMP     OP0000      *ADDI
-    JMP     OP0001      *MOVE.B
-    JMP     OP0010      *MOVE.W, MOVEA(WORD)
-    JMP     OP0011      *MOVE.L, MOVEA(LONG) 
-    JMP     OP0100      *NOP, MOVEM, LEA, CLR, JSR, RTS
-    JMP     OP0101      *ADDQ
-    JMP     OP0110      *Bcc
-    JMP     OP0111      *MOVEQ
-    JMP     OP1000      *DIVU, OR
-    JMP     OP1001      *SUB
-    JMP     INVALID_OPCODE
-    JMP     OP1011      *CMP
-    JMP     OP1100      *MULS, AND
-    JMP     OP1101      *ADD, ADDA
-    JMP     OP1110      *LSR, LSL, ASR, ASL, ROL, ROR
-    JMP     INVALID_OPCODE
+OP_JTAB    JMP     OP0000       *ADDI
+    JMP     OP0001              *MOVE.B
+    JMP     OP0010              *MOVE.W, MOVEA(WORD)
+    JMP     OP0011              *MOVE.L, MOVEA(LONG) 
+    JMP     OP0100              *NOP, MOVEM, LEA, CLR, JSR, RTS
+    JMP     OP0101              *ADDQ
+    JMP     OP0110              *Bcc
+    JMP     OP0111              *MOVEQ
+    JMP     OP1000              *DIVU, OR
+    JMP     OP1001              *SUB
+    JMP     INVALID_OPCODE      *No required opcodes
+    JMP     OP1011              *CMP
+    JMP     OP1100              *MULS, AND
+    JMP     OP1101              *ADD, ADDA
+    JMP     OP1110              *LSR, LSL, ASR, ASL, ROL, ROR
+    JMP     INVALID_OPCODE      *No required opcodes
 
 *    CMP     #%0000,D1   *ADDI 
 *    BEQ     OP0000
@@ -71,8 +72,7 @@ OP_JTAB    JMP     OP0000      *ADDI
 *    CMP     #%1110,D1   *LSR, LSL, ASR, ASL, ROL, ROR  
 *    BEQ     OP1000
 
-    
-    JMP     INVALID_OPCODE     *Subroutine to store as non-decodable
+    BRA    INVALID_OPCODE     *If you're reading this line, it's invalid.
     RTS
 
 **************************************************************************
@@ -83,8 +83,8 @@ OP0000
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     
-    *MOVE.W  ADDI,(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
-    LEA     ADDI, A4
+    *MOVE.W  ADDI,(A3)+     *Load 'ADDI' to Add Reg 1 and then increment
+    LEA     ADDI, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDI         *Branch to EA analysis of the command
 
@@ -96,9 +96,9 @@ OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING
         *BEGIN OUTPUT
     
     *MOVE.L  MOVE,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
-    LEA     MOVE, A4
+    LEA     MOVE, A4        *Load output string to A4
     JSR     PASTE_4
-    BRA     EA_MOVE        *Branch to EA analysis of the command
+    BRA     EA_MOVE         *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0010 - Subroutine for operations beginning with 0010          *
@@ -130,14 +130,14 @@ OP0011
 ********* MOVEL *************        
 _MOVE
     *MOVE.L  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment  
-    LEA     MOVE, A4
+    LEA     MOVE, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
 _MOVEA
     *MOVE.L  MOVEA,(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
-    LEA     MOVEA, A4
+    LEA     MOVEA, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEA       *Branch to EA analysis of the command
 
@@ -183,42 +183,44 @@ OP0100
 ********* CLR *************        
 _CLR
     *MOVE.W  OPCLR,(A3)+     *Load 'CLR' to Add Reg 1 and then increment
-    LEA     OPCLR, A4
+    LEA     OPCLR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_CLR          *Branch to EA analysis of the command
 
 ********* LEA *************        
 _LEA
     *MOVE.W  OPLEA,(A3)+     *Load 'LEA' to Add Reg 1 and then increment
-    LEA     OPLEA, A4
+    LEA     OPLEA, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LEA          *Branch to EA analysis of the command
 
 ********* JSR *************     
 _JSR
     *MOVE.W  OPJSR,(A3)+     *Load 'JSR' to Add Reg 1 and then increment
-    LEA     OPJSR, A4
+    LEA     OPJSR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_JSR          *Branch to EA analysis of the command
 
 ********* NOP *************     
 _NOP
     *MOVE.W  OPNOP,(A3)+     *Load 'NOP' to Add Reg 1 and then increment
-    LEA     OPNOP, A4
+    LEA     OPNOP, A4        *Load output string to A4
     JSR     PASTE_3
+    MOVE.B  #00,(A3)+
     BRA     VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* RTS *************     
 _RTS
     *MOVE.W  OPRTS,(A3)+     *Load 'RTS' to Add Reg 1 and then increment
-    LEA     OPRTS, A4
+    LEA     OPRTS, A4        *Load output string to A4
     JSR     PASTE_3
+        MOVE.B  #00,(A3)+
     BRA     VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* MOVEM *************     
 _MOVEM
     *MOVE.W  MOVEM,(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
-    LEA     MOVEM, A4
+    LEA     MOVEM, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEM        *Branch to EA analysis of the command
     
@@ -231,7 +233,7 @@ OP0101
     *BEGIN OUTPUT
     
     *MOVE.W  ADDQ,(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
-    LEA     ADDQ, A4
+    LEA     ADDQ, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDQ         *Branch to EA analysis of the command
     
@@ -261,7 +263,7 @@ OP0111
     *BEGIN OUTPUT
     
     *MOVE.W  MOVEQ,(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
-    LEA     MOVEQ, A4
+    LEA     MOVEQ, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEQ        *Branch to EA analysis of the command
     
@@ -286,14 +288,14 @@ OP1000
 ********* DIVU *************        
 _DIVU
     *MOVE.W  DIVU,(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
-    LEA     DIVU, A4
+    LEA     DIVU, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* OR *************        
 _OR
     *MOVE.W  OR,(A3)+        *Load 'OR' to Add Reg 1 and then increment
-    LEA     OR, A4
+    LEA     OR, A4        *Load output string to A4
     MOVE.B  (A4)+, (A3)+
     MOVE.B  (A4)+, (A3)+
     BRA     EA_ADD           *Branch to EA analysis of the command
@@ -307,7 +309,7 @@ OP1001
     *BEGIN OUTPUT
     
     *MOVE.W  OPSUB,(A3)+     *Load 'SUB' to Add Reg 1 and then increment
-    LEA     OPSUB, A4
+    LEA     OPSUB, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
 
@@ -319,7 +321,7 @@ OP1011
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     *MOVE.W  CMP,(A3)+     *Load 'CMP' to Add Reg 1 and then increment
-    LEA     CMP, A4
+    LEA     CMP, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_CMP          *Branch to EA analysis of the command
 
@@ -343,14 +345,14 @@ OP1100
 ********* MULS *************        
 _MULS
     *MOVE.W  MULS,(A3)+      *Load 'MULS' to Add Reg 1 and then increment
-    LEA     MULS, A4
+    LEA     MULS, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* AND *************        
 _AND
     *MOVE.W  AND,(A3)+       *Load 'AND' to Add Reg 1 and then increment
-    LEA     AND, A4
+    LEA     AND, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
     
@@ -374,20 +376,20 @@ OP1101
 ********* ADD *************        
 _ADD
     *MOVE.W  ADD,(A3)+       *Load 'ADD' to Add Reg 1 and then increment
-    LEA     ADD, A4
+    LEA     ADD, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
 
 ********* AND *************        
 _ADDA
     *MOVE.W  ADDA,(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
-    LEA     ADDA, A4
+    LEA     ADDA, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDA         *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP1110 - Subroutine for operations beginning with 1110          *
-*        LSR, LSL, ASR, ASL, ROL, ROR                                    *****************************************************************************
+*        LSR, LSL, ASR, ASL, ROL, ROR                                    *
 **************************************************************************
 OP1110
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
@@ -421,7 +423,7 @@ _LSd
     LSL.W   #7,D1           *Shift left 7 bits 
     LSR.W   #7,D1           *Rotate right 5 bits
     LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$F,D1          *Keep 3 bits
+    ANDI.W  #$F,D1          *Keep 1 bit
 
     CMP     #%0,D1        *Check for 011 to eliminate LSR
     BEQ     _LSR            *If equal, branch to LSR
@@ -429,13 +431,13 @@ _LSd
 
 _LSL    
     *MOVE.W  LSL,(A3)+       *Load 'LSL' to Add Reg 1 and then increment
-    LEA     LSL, A4
+    LEA     LSL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD         *Branch to EA analysis of the command
 
 _LSR
     *MOVE.W  LSR,(A3)+       *Load 'LSR' to Add Reg 1 and then increment
-    LEA     LSR, A4
+    LEA     LSR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
@@ -455,13 +457,13 @@ _ASd
 
 _ASL    
     *MOVE.W  ASL,(A3)+       *Load 'ASL' to Add Reg 1 and then increment
-    LEA     ASL, A4
+    LEA     ASL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ASR
     *MOVE.W  ASR,(A3)+       *Load 'ASR' to Add Reg 1 and then increment
-    LEA     ASR, A4
+    LEA     ASR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
@@ -482,13 +484,13 @@ _ROd
     
 _ROL    
     *MOVE.W  ROL,(A3)+       *Load 'ROL' to Add Reg 1 and then increment
-    LEA     ROL, A4
+    LEA     ROL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ROR
     *MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
-    LEA     ROR, A4
+    LEA     ROR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
     
@@ -546,7 +548,3 @@ PASTE_5
 
 
 
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
