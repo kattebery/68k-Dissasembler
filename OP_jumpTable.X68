@@ -1,7 +1,7 @@
 *-----------------------------------------------------------
 * Title      : Op Codes
 * Written by : Kristen Attebery
-* Date       :
+* Date       : 
 * Description:
 *-----------------------------------------------------------
 VERIFY_OPCODE
@@ -82,8 +82,11 @@ OP_JTAB    JMP     OP0000      *ADDI
 OP0000
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
+
+
+
     
-    MOVE.W  ADDI,(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
+    *MOVE.W  ADDI,(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
     BRA     EA_ADDI         *Branch to EA analysis of the command
 
 **************************************************************************
@@ -125,8 +128,14 @@ OP0011
     
 ********* MOVEL *************        
 _MOVE
-    MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
-    BRA.W     EA_MOVE        *Branch to EA analysis of the command
+    
+    MOVE.L  MOVE,A1
+    MOVE.B  (A1)+,(A3)+
+    LSL.W   #2,A1
+    MOVE.B  A1,(A3)+
+
+    *MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
+    BRA     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
 _MOVEA
@@ -467,8 +476,3 @@ ASL     DC.B    'ASL',0
 ASR     DC.B    'ASR',0
 ROL     DC.B    'ROL',0
 ROR     DC.B    'ROR',0
-
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
