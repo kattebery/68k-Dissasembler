@@ -13,7 +13,7 @@ MAIN:                  ; first instruction of program
     INCLUDE         'OP_jumpTable.X68'
     INCLUDE         'EFFECTIVE_ADDRESSES.X68'
     INCLUDE         'testingFile.x68'
-
+END
     SIMHALT             ; halt simulator
 
 CR          EQU     $0D
@@ -85,6 +85,7 @@ M_SLASH DC.B '/',0
 
 STOP:
     END    MAIN
+
 
 
 

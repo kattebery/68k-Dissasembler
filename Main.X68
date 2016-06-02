@@ -155,7 +155,7 @@ PRE_READ_MEMORY
 READ_MEMORY_LOOP
     MOVE.L      MEM_END,A3        *put ending address in A3
     CMP         A2,A3             *compare the incrementing address and the end address
-    BEQ         END               *stop if the end address is reached
+    BLT         END               *stop if the end address is reached
     
     ROR         #8,D6               *select correct byte
     CMP.B       #30,D6              *see if maximum lines printed
@@ -348,8 +348,7 @@ DATA
     MOVE.B      #14,D0
     TRAP        #15
     RTS
-    
-END
+   
 
 *    SIMHALT             ; halt simulator
 
@@ -372,6 +371,8 @@ END
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
+
 
 
 
