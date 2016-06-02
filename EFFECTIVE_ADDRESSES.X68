@@ -130,9 +130,9 @@ EA_ADD          *3 invalid; done
 
 *COVERS ADD, SUB, AND, OR
 *--------------------GET MODES-----------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
 
-    MOVE.W      D6, D4      *GETTING OPMODE AKA SIZE
+    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
     LSL.W       #7, D4      * 
     LSR.W       #7, D4      *
     LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
@@ -145,13 +145,13 @@ EA_ADD          *3 invalid; done
 *-------------------END GETS MODES------------------------------
 *-------------------DN VERSION------------------------
 DN_VERSION *EA IS SOURCE, REGISTER IS DESTINATION <EA> + DN -> DN
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -165,7 +165,7 @@ DN_VERSION *EA IS SOURCE, REGISTER IS DESTINATION <EA> + DN -> DN
     JSR         COMMA
     JSR         SPACE
     
-    MOVE.W      D6, D5      *LEFT 4; RIGHT 13
+    MOVE.W      D7, D5      *LEFT 4; RIGHT 13
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 DESTINATION REGISTER
@@ -176,7 +176,7 @@ DN_VERSION *EA IS SOURCE, REGISTER IS DESTINATION <EA> + DN -> DN
 *-------------------END DN VERSION-------------------
 *-------------------EA VERSION-------------------------
 EA_VERSION
-    MOVE.W      D6, D5      *LEFT 4; RIGHT 13
+    MOVE.W      D7, D5      *LEFT 4; RIGHT 13
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 DESTINATION REGISTER
@@ -185,13 +185,13 @@ EA_VERSION
     JSR         COMMA
     JSR         SPACE
     
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -214,9 +214,9 @@ EA_VERSION
 *-------------------ADDI--------------------------------
 EA_ADDI  *2 invalid; DONE
 *-------------------PRINT SIZE-----------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4      *
+    MOVE.W      D7, D4      *
     LSL.W       #8, D4      *
     LSR.W       #8, D4      *
     LSR.W       #6, D4      *D4 = SIZE
@@ -230,13 +230,13 @@ EA_ADDI  *2 invalid; DONE
     JSR         COMMA
     JSR         SPACE
 *-----------------PRINT EA------------------------------------
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -256,15 +256,15 @@ EA_ADDI  *2 invalid; DONE
 *------------------------ADDQ----------------------------------
 EA_ADDQ     *0 INVALID
 *-----------------------SOURCE------------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4
     LSL.W       #8, D4
     LSR.W       #8, D4
     LSR.W       #6, D4
     JSR         GET_SIZE_ADDI    *PRINT SIZE
     
-    MOVE.W      D6, D5      *GETTING DATA
+    MOVE.W      D7, D5      *GETTING DATA
     LSL.W       #4, D5      *SHIFT LEFT 4; RIGHT 13
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 = DATA
@@ -273,13 +273,13 @@ EA_ADDQ     *0 INVALID
     JSR COMMA
     JSR SPACE
 *-------------------PRINT EA-----------------------------------
-    MOVE.W      D6, D4      *GETTING EA MODE
+    MOVE.W      D7, D4      *GETTING EA MODE
     LSL.W       #8, D4      *
     LSL.W       #2, D4      *SHIFT 10 LEFT; 13 RIGHT
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *GETTING EA REGISTER
+    MOVE.W      D7, D5      *GETTING EA REGISTER
     LSL.W       #8, D5      *
     LSL.W       #5, D5      *SHIFT LEFT 13; RIGHT 13
     LSR.W       #8, D5      *
@@ -299,21 +299,21 @@ EA_ADDQ     *0 INVALID
 *-------------------------ADDA------------------------------------
 EA_ADDA         *0 INVALID
 *-----------------------SOURCE------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4      *GETTING OPMODE AKA SIZE
+    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
     LSL.W       #7, D4      * 
     LSR.W       #7, D4      *
     LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
     JSR         GET_OPMODE
     
-    MOVE.W      D6, D4      *GETTING SOURCE MODE
+    MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
     LSL.W       #2, D4      *SHIFT 10 BITS LEFT; 13 RIGHT
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = SOURCE MODE
     
-    MOVE.W      D6, D5      *GETTING SOURCE REGISTER
+    MOVE.W      D7, D5      *GETTING SOURCE REGISTER
     LSL.W       #8, D5      *
     LSL.W       #5, D5      *SHIFT LEFT 13; RIGHT 13
     LSR.W       #8, D5      *
@@ -327,7 +327,7 @@ EA_ADDA         *0 INVALID
     JSR COMMA 
     JSR SPACE
 *-----------------------DESTINATION-------------------------
-    MOVE.W      D6, D5      *GET THE DESTINATION REGISTER
+    MOVE.W      D7, D5      *GET THE DESTINATION REGISTER
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *SHIFT 4 BITS LEFT; 13 RIGHT
     LSR.W       #5, D5      *D5 = DESTINATION REGISTER
@@ -346,16 +346,16 @@ EA_MULS                *1 INVALID;
 *an absolute word or immediate data, you have to eat it. 
 
 *----------------------PRINT EA-------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
     JSR         SPACE
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -369,7 +369,7 @@ EA_MULS                *1 INVALID;
     JSR         COMMA
     JSR         SPACE
 *--------------------PRINT REGISTER--------------------
-    MOVE.W      D6, D5      *LEFT 4; RIGHT 13
+    MOVE.W      D7, D5      *LEFT 4; RIGHT 13
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 DESTINATION REGISTER
@@ -383,16 +383,16 @@ EA_MULS                *1 INVALID;
 *-------------------------LEA-----------------------------------
 EA_LEA          *5 INVALIDS; DONE
 *-------------------SOURCE-------------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
     JSR         SPACE
-    MOVE.W      D6, D4      *GETTING SOURCE MODE
+    MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
     LSL.W       #2, D4      *SHIFT 10 BITS LEFT; 13 RIGHT
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = SOURCE MODE
     
-    MOVE.W      D6, D5      *GETTING SOURCE REGISTER
+    MOVE.W      D7, D5      *GETTING SOURCE REGISTER
     LSL.W       #8, D5      *
     LSL.W       #5, D5      *SHIFT LEFT 13; RIGHT 13
     LSR.W       #8, D5      *
@@ -407,7 +407,7 @@ EA_LEA          *5 INVALIDS; DONE
     JSR COMMA
     JSR SPACE
 *-------------------DESTINATION-------------------------------
-    MOVE.W      D6, D5      *GET THE DESTINATION REGISTER
+    MOVE.W      D7, D5      *GET THE DESTINATION REGISTER
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *SHIFT 4 BITS LEFT; 13 RIGHT
     LSR.W       #5, D5      *D5 = DESTINATION REGISTER
@@ -422,22 +422,22 @@ EA_LEA          *5 INVALIDS; DONE
 *------------------------CLR-------------------------------------
 EA_CLR          *2 INVALID; DONE
 *-------------------PRINT SIZE-----------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4
     LSL.W       #8, D4      *
     LSR.W       #8, D4      *
     LSR.W       #6, D4      *D4 = SIZE
     JSR         GET_SIZE_ADDI
 *----------------END PRINT SIZE-------------------------
 *---------------PRINT EA---------------------------------
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -459,9 +459,9 @@ EA_CLR          *2 INVALID; DONE
 EA_LSD          *3 INVALID; DONE
 *COVERS LSD, ASD, ROD
 *-------------------------SIZE---------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4
     LSL.W       #8, D4
     LSR.W       #8, D4
     LSR.W       #6, D4      *ISOLATE SIZE
@@ -470,13 +470,13 @@ EA_LSD          *3 INVALID; DONE
     BEQ         EA_SHIFT    *BRANCH TO EA SHIFT
 *-----------------------END SIZE--------------------------
 *-----------------------SHIFTING------------------------------
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4
     LSL.W       #8, D4
     LSL.W       #2, D4
     LSR.W       #8, D4
     LSR.W       #7, D4      *D4 = TYPE
     
-    MOVE.W      D6, D5      *GETTING DATA
+    MOVE.W      D7, D5      *GETTING DATA
     LSL.W       #4, D5      *SHIFT LEFT 4; RIGHT 13
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 = DATA / REGISTER
@@ -486,7 +486,7 @@ EA_LSD          *3 INVALID; DONE
     JSR         COMMA
     JSR         SPACE
 *----------------------DESTINATION------------------------------
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -500,13 +500,13 @@ EA_LSD          *3 INVALID; DONE
 *---------------------------EA SHIFT-------------------------------
 EA_SHIFT
     JSR         SPACE
-    MOVE.W      D6, D4      *
+    MOVE.W      D7, D4      *
     LSL.W       #8, D4      *
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -529,22 +529,22 @@ DONE
 *-------------------------------CMP-----------------------------
 EA_CMP          *0 INVALID
 *------------------PRINT SIZE----------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4      *GETTING OPMODE AKA SIZE
+    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
     LSL.W       #7, D4      * 
     LSR.W       #7, D4      *
     LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
     JSR         GET_SIZE_ADDI
 *---------------END PRINT SIZE-------------------------
 *------------------PRINT EA---------------------------
-    MOVE.W      D6, D4      
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -558,7 +558,7 @@ EA_CMP          *0 INVALID
     JSR         COMMA
     JSR         SPACE
 *----------------PRINT REG----------------------------
-    MOVE.W      D6, D5      *LEFT 4; RIGHT 13
+    MOVE.W      D7, D5      *LEFT 4; RIGHT 13
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 DESTINATION REGISTER
@@ -573,9 +573,9 @@ EA_CMP          *0 INVALID
 *--------------------------------BCC------------------------------
 EA_BCC          *0 INVALID (I THINK)
 *--------------------PRINT TYPE------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4
     LSL.W       #4, D4
     LSR.W       #8, D4
     LSR.W       #4, D4   *D4 = BINARY CONDITION CODE
@@ -593,16 +593,16 @@ EA_BCC          *0 INVALID (I THINK)
 *---------------------------JSR---------------------------------------
 EA_JSR   *5 INVALID; DONE
 
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
     
     JSR         SPACE
-    MOVE.W      D6, D4      *GETTING SOURCE MODE
+    MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
     LSL.W       #2, D4      *SHIFT 10 BITS LEFT; 13 RIGHT
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = SOURCE MODE
     
-    MOVE.W      D6, D5      *GETTING SOURCE REGISTER
+    MOVE.W      D7, D5      *GETTING SOURCE REGISTER
     LSL.W       #8, D5      *
     LSL.W       #5, D5      *SHIFT LEFT 13; RIGHT 13
     LSR.W       #8, D5      *
@@ -1147,6 +1147,7 @@ LF      EQU     $0A
 *M_GT    DC.B 'GT',0
 *M_LE    DC.B 'LE',0
 *M_SLASH DC.B '/',0
+
 
 
 
