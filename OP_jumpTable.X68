@@ -72,7 +72,7 @@ OP_JTAB    JMP     OP0000       *ADDI
 *    CMP     #%1110,D1   *LSR, LSL, ASR, ASL, ROL, ROR  
 *    BEQ     OP1000
 
-    BRA    INVALID_OPCODE     *If you're reading this line, it's invalid.
+    JMP    INVALID_OPCODE     *If you're reading this line, it's invalid.
     RTS
 
 **************************************************************************
@@ -548,3 +548,8 @@ PASTE_5
 
 
 
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
