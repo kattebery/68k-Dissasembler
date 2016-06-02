@@ -6,7 +6,6 @@
 *-----------------------------------------------------------
     ORG    $1000
 MAIN:                  ; first instruction of program
-    BRA             3333
     BRA             INPUT_START
     
     INCLUDE         'Main.X68'
@@ -35,6 +34,34 @@ MEM_END         EQU     $0200
 M_SPACE       DC.B  ' ',0
 M_NEW_LINE    DC.B  '',CR,LF,0
 
+ADDI    DC.B    'ADDI',0
+MOVE    DC.B    'MOVE',0
+MOVEA   DC.B    'MOVEA',0
+OPCLR   DC.B    'CLR',0
+OPLEA   DC.B    'LEA',0
+OPJSR   DC.B    'JSR',0
+OPNOP   DC.B    'NOP',0
+OPRTS   DC.B    'RTS',0
+MOVEM   DC.B    'MOVEM',0
+ADDQ    DC.B    'ADDQ',0
+Bcc     DC.B    'B',0
+MOVEQ   DC.B    'MOVEQ',0
+DIVU    DC.B    'DIVU',0
+OR      DC.B    'OR',0
+OPSUB   DC.B    'SUB',0
+CMP     DC.B    'CMP',0
+MULS    DC.B    'MULS',0
+AND     DC.B    'AND',0
+ADD     DC.B    'ADD',0
+ADDA    DC.B    'ADDA',0
+LSL     DC.B    'LSL',0
+LSR     DC.B    'LSR',0
+ASL     DC.B    'ASL',0
+ASR     DC.B    'ASR',0
+ROL     DC.B    'ROL',0
+ROR     DC.B    'ROR',0
+
+
 STOP:
     END    MAIN
 
@@ -44,7 +71,5 @@ STOP:
 
 
 
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
+
+
