@@ -4,6 +4,7 @@
 * Date       : 
 * Description:
 *-----------------------------------------------------------
+
 VERIFY_OPCODE
     MOVE.W  D0,D1   *Copy instruction for modification
     
@@ -129,12 +130,13 @@ OP0011
 ********* MOVEL *************        
 _MOVE
     
-    MOVE.L  MOVE,A1
-    MOVE.B  (A1)+,(A3)+
-    LSL.W   #2,A1
-    MOVE.B  A1,(A3)+
+*    MOVE.L  MOVE,(A3)+
+*    MOVE.B      MOVE,A3
+*    MOVE.B      (A3)+,D1
+    
+    
 
-    *MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
+    MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
     BRA     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
@@ -449,30 +451,3 @@ _ROR
     BRA     EA_LSD          *Branch to EA analysis of the command
 
     SIMHALT
-
-ADDI    DC.B    'ADDI',0
-MOVE    DC.B    'MOVE',0
-MOVEA   DC.B    'MOVEA',0
-OPCLR   DC.B    'CLR',0
-OPLEA   DC.B    'LEA',0
-OPJSR   DC.B    'JSR',0
-OPNOP   DC.B    'NOP',0
-OPRTS   DC.B    'RTS',0
-MOVEM   DC.B    'MOVEM',0
-ADDQ    DC.B    'ADDQ',0
-Bcc     DC.B    'B',0
-MOVEQ   DC.B    'MOVEQ',0
-DIVU    DC.B    'DIVU',0
-OR      DC.B    'OR',0
-OPSUB   DC.B    'SUB',0
-CMP     DC.B    'CMP',0
-MULS    DC.B    'MULS',0
-AND     DC.B    'AND',0
-ADD     DC.B    'ADD',0
-ADDA    DC.B    'ADDA',0
-LSL     DC.B    'LSL',0
-LSR     DC.B    'LSR',0
-ASL     DC.B    'ASL',0
-ASR     DC.B    'ASR',0
-ROL     DC.B    'ROL',0
-ROR     DC.B    'ROR',0
