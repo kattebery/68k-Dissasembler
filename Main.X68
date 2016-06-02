@@ -280,7 +280,6 @@ PRINT_DATA_LOOP
 END_PRINT_DATA_LOOP
     MOVE.L      A2,A6               *set new address for data/opcode
     BSR         IM_NEW_LINE            *end line
-    BSR         INCREMENT_LINE      *increment line printing counter
     RTS                             *repeat loop   
  
 OUTPUT_D1B
@@ -317,10 +316,13 @@ PRINT_OPCODE
     LEA         STRING_START,A1     *put the starting address of the string into A1
     MOVE.B      #14,D0              *print null terminated string into A
     TRAP        #15                 *output to terminal
-    lea         STRING_START,A3     *reset the current string pointer
+    LEA         STRING_START,A3     *reset the current string pointer
     RTS
     
 RESTART
+    LEA         M_NEW_LINE,A1
+    MOVE.B      #14,D0
+    TRAP        #15
 *Clear all the data registers
     CLR.L       D0
     CLR.L       D1
