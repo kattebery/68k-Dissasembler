@@ -126,7 +126,7 @@ OP0011
 ********* MOVEL *************        
 _MOVE
     MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
-    BRA     EA_MOVE        *Branch to EA analysis of the command
+    BRA.W     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
 _MOVEA
@@ -467,3 +467,8 @@ ASL     DC.B    'ASL',0
 ASR     DC.B    'ASR',0
 ROL     DC.B    'ROL',0
 ROR     DC.B    'ROR',0
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
