@@ -870,7 +870,10 @@ ADDM_4 *DONE
     
 ABSW_5  *DONE
     ADD.L       #2, A2      *INCREMENT INTO WORD ADDRESS
-    MOVE.W      (A2), D2   
+    MOVE.B      (A2)+, D2
+    ROL         #8, D2
+    MOVE.B      (A2), D2
+    SUB         #1, A2  
     JSR         CASH
     BSR         OUTPUT_HEX
     RTS
@@ -879,10 +882,18 @@ ABSW_5  *DONE
 ABSL_6 *
     JSR         CASH
     ADD.L       #2, A2      *INCREMENT INTO WORD
-    MOVE.W      (A2), D2    *COPY
+    MOVE.B      (A2)+, D2
+    ROL         #8, D2
+    MOVE.B      (A2), D2
+    SUB         #1, A2
     BSR         OUTPUT_HEX
+    
+    
     ADD.L       #2, A2      *IDCREMENT INTO NEXT WORK
-    MOVE.W      (A2), D2
+    MOVE.B      (A2)+, D2
+    ROL         #8, D2
+    MOVE.B      (A2), D2
+    SUB         #1, A2
     BSR         OUTPUT_HEX
     RTS
     
@@ -891,10 +902,17 @@ IMME_7  *FOR NOW ONLY WORKING WITH IMMEDIATE HEX VALUES
     JSR         CASH
     
     ADD.L       #2, A2
-    MOVE.W      (A2), D2
+    MOVE.B      (A2)+, D2
+    ROL         #8, D2
+    MOVE.B      (A2), D2
+    SUB         #1, A2
     BSR         OUTPUT_HEX
     
-    *major problem, how to know how long immediate data is
+    
+    
+    *IDEA IS TO HAVE A FLAG HERE TO SEE IF THE DATA IS GONNA BE A LONG
+    *THEN BRANCH TO THE BELOW THREE COMMANDS IF THE IMMEDIATE DATA IS A LONG
+    
 *    ADD.L       #2, A2
 *    MOVE.W      (A2), D2
 *    BSR         OUTPUT_HEX
@@ -1000,6 +1018,12 @@ NEW_MODE
     BEQ         TO_FIVE *CHANGE MODE (D4) TO 5
     CMP.B       #1, D5 *CHECK REGISTER(D5), LONG ADDRESS?
     BEQ         TO_SIX *CHANGE MODE(D4) TO 6
+    
+    CMP.B       #4, D5 *for immediate data
+    BEQ         TO_EIGHT
+    RTS
+    
+TO_EIGHT
     RTS
     
 TO_SIX  
@@ -1077,6 +1101,7 @@ BYTE
     
 LONG
     MOVE.B      M_LONG, (A3)+
+    
     JSR         SPACE
     RTS
     
