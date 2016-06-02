@@ -60,6 +60,25 @@ ASL     DC.B    'ASL',0
 ASR     DC.B    'ASR',0
 ROL     DC.B    'ROL',0
 ROR     DC.B    'ROR',0
+M_INVAL DC.B 'INVALID',0
+M_CASH  DC.B '$',0
+*M_SPACE DC.B ' ',0
+M_COMMA DC.B ',',0
+M_POUND DC.B '#',0
+M_DOT   DC.B '.',0
+M_WORD  DC.B 'W',0
+M_BYTE  DC.B 'B',0
+M_LONG  DC.B 'L',0
+M_OPEN  DC.B '(',0
+M_CLOSE DC.B ')',0
+M_PLUS  DC.B '+',0
+M_SUB   DC.B '-',0
+M_DREG  DC.B 'D',0
+M_AREG  DC.B 'A',0
+M_CC    DC.B 'CC',0
+M_GT    DC.B 'GT',0
+M_LE    DC.B 'LE',0
+M_SLASH DC.B '/',0
 
 
 STOP:
@@ -73,3 +92,8 @@ STOP:
 
 
 
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
