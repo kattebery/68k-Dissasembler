@@ -5,8 +5,14 @@
 * Description:
 *-----------------------------------------------------------
 
-    *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE
+    *TODO: CHANGE THIS VALUE TO RIGHT AFTER PROGRAM CODE   
     BRA         TEST
+    
+*--------------------------------------------*
+* Program Input. Read user input start and   *
+* ending values                              *
+*--------------------------------------------*
+
 *----Display input message for mem start-----*
 INPUT_START
     BRA         TEST
@@ -161,7 +167,7 @@ READ_MEMORY_CONT                    *continue reading memory (if branched)
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
     MOVE.B      -(A2),D0          *copy the rest of A2 to D0    
-    BRA         VERIFY_OPCODE
+    BRA         INVALID_OPCODE
     
     
         
@@ -212,7 +218,10 @@ INCREMENT_LINE
 *word != opcode
 INVALID_OPCODE
     CMP.B       #8,D6               *check the loop increment counter
-    BGE         PRINT_DATA          *long amount of data. print it.
+    BLT         INVALID_OPCODE_CONT *less than long length. continue       
+    BSR         PRINT_DATA          *long amount of data. print it.
+    BRA         READ_MEMORY_LOOP    *read the next byte
+INVALID_OPCODE_CONT  
     ADD.L       #1,A2               *increment current address  
     ADD.B       #1,D6               *increment counter
     BRA         READ_MEMORY_LOOP    *data cap not reached. read next byte.    
@@ -223,7 +232,8 @@ PRINT_DATA
     BSR         TAB                 *insert a space
     BSR         DATA                *print 'DATA'   
     BSR         INCREMENT_LINE      *increment line counter (line was printed)
-    BRA         PRINT_DATA_LOOP     *print the data
+    BSR         PRINT_DATA_LOOP     *print the data
+    RTS
 *print whatever's in D1
 PRINT_ADDRESS
     MOVE.L      A6,D4               *put the address in D4
@@ -238,8 +248,6 @@ PRINT_ADDRESS_LOOP
     ADD.B       #1,D3               *increment D3 (loop counter)
     BRA         PRINT_ADDRESS_LOOP  *repeat loop         
          
-RETURN_TO_SUBROUTINE
-    RTS
 PRINT_DATA_LOOP
     MOVE.B      (A6)+,D1            *get the data
     MOVE.B      D1,D2               *copy the data to D2
@@ -255,7 +263,7 @@ END_PRINT_DATA_LOOP
     MOVE.L      A2,A6               *set new address for data/opcode
     BSR         IM_NEW_LINE            *end line
     BSR         INCREMENT_LINE      *increment line printing counter
-    BRA         READ_MEMORY_LOOP    *repeat loop   
+    RTS                             *repeat loop   
  
 OUTPUT_D1B
     *print the left character
@@ -271,7 +279,33 @@ OUTPUT_D1B
     BSR         OUTPUT_CHAR         *print the char in D1
     RTS
 VALID_OPCODE 
+    ADD.L       #02,A2              *increment the current address because word is valid
+    CMP         #00,D6              *if leftover data not printed
+    BEQ         PRINT_OPCODE_EA     *print just the opcode
+    BSR         PRINT_DATA          *print unreadable data
+                                    *and the opcode
+PRINT_OPCODE_EA
+    MOVE.B      #00,D6              *reset the increment counter
+    BSR         PRINT_ADDRESS       *print the data address
+    BSR         TAB                 *insert a space
+    BSR         PRINT_OPCODE        *print out hte opcode and eA
+    BSR         INCREMENT_LINE      *increment line counter (line was printed)
+    BRA         READ_MEMORY_LOOP    *read next byte.
     
+
+PRINT_OPCODE
+    LEA         STRING_START,A1     *put the starting address of the string into A1
+    MOVE.B      #14,D0              *print null terminated string into A
+    TRAP        #15                 *output to terminal
+    MOVE.L      STRING_START,A3     *reset the current string pointer
+    RTS
+    
+    
+          
+    
+*-------------Return to subroutine----------------*    
+RETURN_TO_SUBROUTINE
+    RTS
   
 *------Convert Number in D1 to ASCII------*
 CONVERT_TO_ASCII
@@ -289,8 +323,9 @@ OUTPUT_CHAR
     TRAP        #15
     RTS
 
+
 IM_NEW_LINE
-    LEA         M_SPACE,A1      *load new line
+    LEA         M_NEW_LINE,A1      *load new line
     MOVE.B      #14,D0          *load message
     TRAP        #15             *display message
     RTS
@@ -330,6 +365,10 @@ DATA_START      EQU     $0400
 
 MEM_START       EQU     $0100
 MEM_END         EQU     $0200
+
+M_SPACE       DC.B  ' ',0
+M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 
