@@ -38,11 +38,11 @@
 *Absolute WORD Address...................(stuff).W
 *Absolute LONG Address...................(stuff).L
 *-----------------------------------------------------------
-    ORG    $1000
-START:            
+    ORG    $3000
+        
 
     *NOP* DONE
-    NOP
+    *NOP
     
     *MOVE* DONE
     *MOVE SOURCE: DATA REGISTER -> DN
@@ -370,7 +370,8 @@ START:
 *variables + constants here
 TEST_MESSAGE    DC.B 'I LOVE APPLES',0
 
-    END    START        ; last line of source
+
+
 
 
 

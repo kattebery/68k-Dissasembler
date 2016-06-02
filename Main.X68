@@ -123,8 +123,8 @@ VALID_CHAR
     RTS                         *loop back to INPUT_START || INPUT_END   
    
 TEST
-    MOVE.L      #$1000,MEM_START
-    MOVE.L      #$1300,MEM_END
+    MOVE.L      #$3000,MEM_START
+    MOVE.L      #$3300,MEM_END
 READ_MEMORY   
     MOVEA.L     MEM_START,A2    *A2 will be the starting/current address
     MOVEA.L     MEM_END,A3      *A3 will act as the ending address
@@ -166,7 +166,8 @@ READ_MEMORY_LOOP
 READ_MEMORY_CONT                    *continue reading memory (if branched)  
     MOVE.B      (A2)+,D0          *get the value from incrementing address 
     LSL.W       #8,D0             *make room for the next byte of A2
-    MOVE.B      -(A2),D0          *copy the rest of A2 to D0  
+    MOVE.B      (A2),D0          *copy the rest of A2 to D0  
+    SUB.L       #1, A2
     LEA         STRING_START,A3   *A3 will act as the string address  
     BRA         VERIFY_OPCODE
     
@@ -239,6 +240,7 @@ PRINT_DATA
 PRINT_ADDRESS
     MOVE.L      A6,D4               *put the address in D4
     CLR         D3                  *counter for long
+    MOVE.L      A2, A6
     
 PRINT_ADDRESS_LOOP
     CMP         #4,D3               *if long reached
@@ -281,7 +283,7 @@ OUTPUT_D1B
     RTS
 VALID_OPCODE 
     ADD.L       #02,A2              *increment the current address because word is valid
-    CMP         #00,D6              *if leftover data not printed
+    CMP.B       #00,D6              *if leftover data not printed
     BEQ         PRINT_OPCODE_EA     *print just the opcode
     BSR         PRINT_DATA          *print unreadable data
                                     *and the opcode
@@ -291,6 +293,7 @@ PRINT_OPCODE_EA
     BSR         TAB                 *insert a space
     BSR         PRINT_OPCODE        *print out hte opcode and eA
     BSR         INCREMENT_LINE      *increment line counter (line was printed)
+    BSR         IM_NEW_LINE
     BRA         READ_MEMORY_LOOP    *read next byte.
     
 
@@ -298,7 +301,7 @@ PRINT_OPCODE
     LEA         STRING_START,A1     *put the starting address of the string into A1
     MOVE.B      #14,D0              *print null terminated string into A
     TRAP        #15                 *output to terminal
-    LEA         STRING_START,A3     *reset the current string pointer
+    lea         STRING_START,A3     *reset the current string pointer
     RTS
     
     
@@ -369,6 +372,9 @@ END
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
+
+
 
 
 

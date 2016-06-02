@@ -6,11 +6,13 @@
 *-----------------------------------------------------------
     ORG    $1000
 MAIN:                  ; first instruction of program
+    MOVE.B          D1, D2
     BRA             INPUT_START
     
     INCLUDE         'Main.X68'
     INCLUDE         'OP_jumpTable.X68'
     INCLUDE         'EFFECTIVE_ADDRESSES.X68'
+    INCLUDE         'testingFile.x68'
 
     SIMHALT             ; halt simulator
 
@@ -83,6 +85,8 @@ M_SLASH DC.B '/',0
 
 STOP:
     END    MAIN
+
+
 
 
 

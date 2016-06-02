@@ -14,20 +14,20 @@
 *-------------------------MOVE------------------------------------
 EA_MOVE      *1 invalid; done
 *----------------SOURCE-------------------------------------------  
-    MOVE.W      D0, D6 *DO THIS AT THE BEGGINING OF EVERY EA 
+    MOVE.W      D0, D7 *DO THIS AT THE BEGGINING OF EVERY EA 
     
-    MOVE.W      D6, D4      *
+    MOVE.W      D7, D4      *
     LSR.W       #8, D4      *
     LSR.W       #4, D4      *D4 = SIZE
     JSR GET_SIZE
     
-    MOVE.W      D6, D4      *
+    MOVE.W      D7, D4      *
     LSL.W       #8, D4      *
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = <0000 0000> D4 = SOURCE MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -41,13 +41,13 @@ EA_MOVE      *1 invalid; done
     JSR COMMA
     JSR SPACE
 *--------------DESTINATION-------------------------------------
-    MOVE.W      D6, D4      *
+    MOVE.W      D7, D4      *
     LSL.W       #7, D4      *
     LSR.W       #7, D4      *
     LSR.W       #6, D4      *D4 = DESTINATION MODE
     JSR         MOVE_ERROR_CHECK 
     
-    MOVE.W      D6, D5      *
+    MOVE.W      D7, D5      *
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      *D5 = DESTINATION REGISTER
@@ -64,20 +64,20 @@ EA_MOVE      *1 invalid; done
 *-------------------------MOVEA-----------------------------------
 EA_MOVEA        *0 invalid
 *------------------------SOURCE----------------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
 
-    MOVE.W      D6, D4      *GETTING SIZE
+    MOVE.W      D7, D4      *GETTING SIZE
     LSR.W       #8, D4      *
     LSR.W       #4, D4      *SHIFT 12 BITS RIGHT
     JSR         GET_SIZE    *D4 = SIZE
     
-    MOVE.W      D6, D4      *GETTING SOURCE MODE
+    MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
     LSL.W       #2, D4      *SHIFT 10 BITS LEFT; 13 RIGHT
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = SOURCE MODE
 
-    MOVE.W      D6, D5      *GETTING SOURCE REGISTER
+    MOVE.W      D7, D5      *GETTING SOURCE REGISTER
     LSL.W       #8, D5      *
     LSL.W       #5, D5      *SHIFT LEFT 13; RIGHT 13
     LSR.W       #8, D5      *
@@ -91,7 +91,7 @@ EA_MOVEA        *0 invalid
     JSR         COMMA
     JSR         SPACE
 *--------------------DESTINATION--------------------------------------
-    MOVE.W      D6, D5      *GET THE DESTINATION REGISTER
+    MOVE.W      D7, D5      *GET THE DESTINATION REGISTER
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *SHIFT 4 BITS LEFT; 13 RIGHT
     LSR.W       #5, D5      *D5 = DESTINATION REGISTER
@@ -105,7 +105,7 @@ EA_MOVEA        *0 invalid
 *-----------------------MOVEQ---------------------------------------
 EA_MOVEQ        *0 invalid
 *-----------------------SOURCE-----------------------------------------
-    MOVE.W      D0, D6
+    MOVE.W      D0, D7
 
     JSR SPACE
     JSR POUND
@@ -115,7 +115,7 @@ EA_MOVEQ        *0 invalid
     JSR COMMA
     JSR SPACE
 *---------------------DESTINATION------------------------------------
-    MOVE.W      D6, D5      *GET THE DESTINATION REGISTER
+    MOVE.W      D7, D5      *GET THE DESTINATION REGISTER
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
     LSR.W       #5, D5      * D5 = DESTINATION REGISTER
@@ -918,6 +918,7 @@ GET_SIZE
     
 GET_REG ******************
     MOVE.L      D5, D1 
+    JSR         CONVERT_TO_ASCII
     MOVE.B      D1, (A3)+
     RTS
     
@@ -1130,25 +1131,28 @@ INVALID
 CR      EQU     $0D
 LF      EQU     $0A
 
-M_INVAL DC.B 'INVALID',0
-M_CASH  DC.B '$',0
+*M_INVAL DC.B 'INVALID',0
+*M_CASH  DC.B '$',0
 *M_SPACE DC.B ' ',0
-M_COMMA DC.B ',',0
-M_POUND DC.B '#',0
-M_DOT   DC.B '.',0
-M_WORD  DC.B 'W',0
-M_BYTE  DC.B 'B',0
-M_LONG  DC.B 'L',0
-M_OPEN  DC.B '(',0
-M_CLOSE DC.B ')',0
-M_PLUS  DC.B '+',0
-M_SUB   DC.B '-',0
-M_DREG  DC.B 'D',0
-M_AREG  DC.B 'A',0
-M_CC    DC.B 'CC',0
-M_GT    DC.B 'GT',0
-M_LE    DC.B 'LE',0
-M_SLASH DC.B '/',0
+*M_COMMA DC.B ',',0
+*M_POUND DC.B '#',0
+*M_DOT   DC.B '.',0
+*M_WORD  DC.B 'W',0
+*M_BYTE  DC.B 'B',0
+*M_LONG  DC.B 'L',0
+*M_OPEN  DC.B '(',0
+*M_CLOSE DC.B ')',0
+*M_PLUS  DC.B '+',0
+*M_SUB   DC.B '-',0
+*M_DREG  DC.B 'D',0
+*M_AREG  DC.B 'A',0
+*M_CC    DC.B 'CC',0
+*M_GT    DC.B 'GT',0
+*M_LE    DC.B 'LE',0
+*M_SLASH DC.B '/',0
+
+
+
 
 
 

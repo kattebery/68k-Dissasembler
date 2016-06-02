@@ -1,10 +1,9 @@
 *-----------------------------------------------------------
 * Title      : Op Codes
 * Written by : Kristen Attebery
-* Date       : 
+* Date       :
 * Description:
 *-----------------------------------------------------------
-
 VERIFY_OPCODE
     MOVE.W  D0,D1   *Copy instruction for modification
     
@@ -83,11 +82,10 @@ OP_JTAB    JMP     OP0000      *ADDI
 OP0000
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
-
-
-
     
     *MOVE.W  ADDI,(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
+    LEA     ADDI, A4
+    JSR     PASTE_4
     BRA     EA_ADDI         *Branch to EA analysis of the command
 
 **************************************************************************
@@ -97,7 +95,9 @@ OP0000
 OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING 
         *BEGIN OUTPUT
     
-    MOVE.W  MOVE,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
+    *MOVE.L  MOVE,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
+    LEA     MOVE, A4
+    JSR     PASTE_4
     BRA     EA_MOVE        *Branch to EA analysis of the command
 
 **************************************************************************
@@ -129,19 +129,16 @@ OP0011
     
 ********* MOVEL *************        
 _MOVE
-    
-*    MOVE.L  MOVE,(A3)+
-*    MOVE.B      MOVE,A3
-*    MOVE.B      (A3)+,D1
-    
-    
-
-    MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
+    *MOVE.L  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment  
+    LEA     MOVE, A4
+    JSR     PASTE_4
     BRA     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
 _MOVEA
-    MOVE.W  MOVEA,(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
+    *MOVE.L  MOVEA,(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
+    LEA     MOVEA, A4
+    JSR     PASTE_5
     BRA     EA_MOVEA       *Branch to EA analysis of the command
 
 **************************************************************************
@@ -185,32 +182,44 @@ OP0100
     
 ********* CLR *************        
 _CLR
-    MOVE.W  OPCLR,(A3)+     *Load 'CLR' to Add Reg 1 and then increment
+    *MOVE.W  OPCLR,(A3)+     *Load 'CLR' to Add Reg 1 and then increment
+    LEA     OPCLR, A4
+    JSR     PASTE_3
     BRA     EA_CLR          *Branch to EA analysis of the command
 
 ********* LEA *************        
 _LEA
-    MOVE.W  OPLEA,(A3)+     *Load 'LEA' to Add Reg 1 and then increment
+    *MOVE.W  OPLEA,(A3)+     *Load 'LEA' to Add Reg 1 and then increment
+    LEA     OPLEA, A4
+    JSR     PASTE_3
     BRA     EA_LEA          *Branch to EA analysis of the command
 
 ********* JSR *************     
 _JSR
-    MOVE.W  OPJSR,(A3)+     *Load 'JSR' to Add Reg 1 and then increment
+    *MOVE.W  OPJSR,(A3)+     *Load 'JSR' to Add Reg 1 and then increment
+    LEA     OPJSR, A4
+    JSR     PASTE_3
     BRA     EA_JSR          *Branch to EA analysis of the command
 
 ********* NOP *************     
 _NOP
-    MOVE.W  OPNOP,(A3)+     *Load 'NOP' to Add Reg 1 and then increment
+    *MOVE.W  OPNOP,(A3)+     *Load 'NOP' to Add Reg 1 and then increment
+    LEA     OPNOP, A4
+    JSR     PASTE_3
     BRA     VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* RTS *************     
 _RTS
-    MOVE.W  OPRTS,(A3)+     *Load 'RTS' to Add Reg 1 and then increment
+    *MOVE.W  OPRTS,(A3)+     *Load 'RTS' to Add Reg 1 and then increment
+    LEA     OPRTS, A4
+    JSR     PASTE_3
     BRA     VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* MOVEM *************     
 _MOVEM
-    MOVE.W  MOVEM,(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
+    *MOVE.W  MOVEM,(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
+    LEA     MOVEM, A4
+    JSR     PASTE_5
     BRA     EA_MOVEM        *Branch to EA analysis of the command
     
 **************************************************************************
@@ -221,7 +230,9 @@ OP0101
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     
-    MOVE.W  ADDQ,(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
+    *MOVE.W  ADDQ,(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
+    LEA     ADDQ, A4
+    JSR     PASTE_4
     BRA     EA_ADDQ         *Branch to EA analysis of the command
     
 **************************************************************************
@@ -238,7 +249,7 @@ OP0110
     CMP.B   #0,D1
     BEQ     INVALID_OPCODE
     
-    MOVE.W  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
+    MOVE.B  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
 
 **************************************************************************
@@ -249,7 +260,9 @@ OP0111
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     
-    MOVE.W  MOVEQ,(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
+    *MOVE.W  MOVEQ,(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
+    LEA     MOVEQ, A4
+    JSR     PASTE_5
     BRA     EA_MOVEQ        *Branch to EA analysis of the command
     
 **************************************************************************
@@ -272,12 +285,17 @@ OP1000
     
 ********* DIVU *************        
 _DIVU
-    MOVE.W  DIVU,(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
+    *MOVE.W  DIVU,(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
+    LEA     DIVU, A4
+    JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* OR *************        
 _OR
-    MOVE.W  OR,(A3)+        *Load 'OR' to Add Reg 1 and then increment
+    *MOVE.W  OR,(A3)+        *Load 'OR' to Add Reg 1 and then increment
+    LEA     OR, A4
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
     BRA     EA_ADD           *Branch to EA analysis of the command
 
 **************************************************************************
@@ -288,7 +306,9 @@ OP1001
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     
-    MOVE.W  OPSUB,(A3)+     *Load 'SUB' to Add Reg 1 and then increment
+    *MOVE.W  OPSUB,(A3)+     *Load 'SUB' to Add Reg 1 and then increment
+    LEA     OPSUB, A4
+    JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
 
 **************************************************************************
@@ -298,7 +318,9 @@ OP1001
 OP1011
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
-    MOVE.W  CMP,(A3)+     *Load 'CMP' to Add Reg 1 and then increment
+    *MOVE.W  CMP,(A3)+     *Load 'CMP' to Add Reg 1 and then increment
+    LEA     CMP, A4
+    JSR     PASTE_3
     BRA     EA_CMP          *Branch to EA analysis of the command
 
 **************************************************************************
@@ -320,12 +342,16 @@ OP1100
     
 ********* MULS *************        
 _MULS
-    MOVE.W  MULS,(A3)+      *Load 'MULS' to Add Reg 1 and then increment
+    *MOVE.W  MULS,(A3)+      *Load 'MULS' to Add Reg 1 and then increment
+    LEA     MULS, A4
+    JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* AND *************        
 _AND
-    MOVE.W  AND,(A3)+       *Load 'AND' to Add Reg 1 and then increment
+    *MOVE.W  AND,(A3)+       *Load 'AND' to Add Reg 1 and then increment
+    LEA     AND, A4
+    JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
     
 **************************************************************************
@@ -347,12 +373,16 @@ OP1101
     
 ********* ADD *************        
 _ADD
-    MOVE.W  ADD,(A3)+       *Load 'ADD' to Add Reg 1 and then increment
+    *MOVE.W  ADD,(A3)+       *Load 'ADD' to Add Reg 1 and then increment
+    LEA     ADD, A4
+    JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
 
 ********* AND *************        
 _ADDA
-    MOVE.W  ADDA,(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
+    *MOVE.W  ADDA,(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
+    LEA     ADDA, A4
+    JSR     PASTE_4
     BRA     EA_ADDA         *Branch to EA analysis of the command
     
 **************************************************************************
@@ -398,11 +428,15 @@ _LSd
     BRA     _LSL            *Else must be LSL, branch
 
 _LSL    
-    MOVE.W  LSL,(A3)+       *Load 'LSL' to Add Reg 1 and then increment
+    *MOVE.W  LSL,(A3)+       *Load 'LSL' to Add Reg 1 and then increment
+    LEA     LSL, A4
+    JSR     PASTE_3
     BRA     EA_LSD         *Branch to EA analysis of the command
 
 _LSR
-    MOVE.W  LSR,(A3)+       *Load 'LSR' to Add Reg 1 and then increment
+    *MOVE.W  LSR,(A3)+       *Load 'LSR' to Add Reg 1 and then increment
+    LEA     LSR, A4
+    JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 ********* ASd *************
@@ -420,11 +454,15 @@ _ASd
     BRA     _ASL            *Else must be ASL, branch
 
 _ASL    
-    MOVE.W  ASL,(A3)+       *Load 'ASL' to Add Reg 1 and then increment
+    *MOVE.W  ASL,(A3)+       *Load 'ASL' to Add Reg 1 and then increment
+    LEA     ASL, A4
+    JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ASR
-    MOVE.W  ASR,(A3)+       *Load 'ASR' to Add Reg 1 and then increment
+    *MOVE.W  ASR,(A3)+       *Load 'ASR' to Add Reg 1 and then increment
+    LEA     ASR, A4
+    JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 ********* ROd *************
@@ -443,11 +481,71 @@ _ROd
     BRA     _ROL            *Else must be ROL, branch
     
 _ROL    
-    MOVE.W  ROL,(A3)+       *Load 'ROL' to Add Reg 1 and then increment
+    *MOVE.W  ROL,(A3)+       *Load 'ROL' to Add Reg 1 and then increment
+    LEA     ROL, A4
+    JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ROR
-    MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
+    *MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
+    LEA     ROR, A4
+    JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
+    
+PASTE_3
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    RTS
+
+PASTE_4
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    RTS
+
+PASTE_5
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    MOVE.B  (A4)+, (A3)+
+    RTS
 
     SIMHALT
+
+*ADDI    DC.B    'ADDI',0
+**MOVE    DC.B    'MOVE',0
+*MOVEA   DC.B    'MOVEA',0
+*OPCLR   DC.B    'CLR',0
+*OPLEA   DC.B    'LEA',0
+*OPJSR   DC.B    'JSR',0
+*OPNOP   DC.B    'NOP',0
+*OPRTS   DC.B    'RTS',0
+*MOVEM   DC.B    'MOVEM',0
+*ADDQ    DC.B    'ADDQ',0
+*Bcc     DC.B    'B',0
+*MOVEQ   DC.B    'MOVEQ',0
+*DIVU    DC.B    'DIVU',0
+*OR      DC.B    'OR',0
+*OPSUB   DC.B    'SUB',0
+*CMP     DC.B    'CMP',0
+*MULS    DC.B    'MULS',0
+*AND     DC.B    'AND',0
+*ADD     DC.B    'ADD',0
+*ADDA    DC.B    'ADDA',0
+*LSL     DC.B    'LSL',0
+*LSR     DC.B    'LSR',0
+*ASL     DC.B    'ASL',0
+*ASR     DC.B    'ASR',0
+*ROL     DC.B    'ROL',0
+*ROR     DC.B    'ROR',0
+
+
+
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
