@@ -12,7 +12,7 @@
 
 *----Display input message for mem start-----*
 INPUT_START
-    BRA         TEST
+*    BRA         TEST
     LEA         M_INPUT_START,A1      *load message
     MOVE.B      #14,D0          *display string
     TRAP        #15             *output string

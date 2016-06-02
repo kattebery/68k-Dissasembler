@@ -85,7 +85,8 @@ multiply	MULS	D0,D3		*Optional instruction
 		SUB.L	(A3),D7
 	
 
-		END	start
+
+
 
 
 

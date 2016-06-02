@@ -12,7 +12,7 @@ MAIN:                  ; first instruction of program
     INCLUDE         'Main.X68'
     INCLUDE         'OP_jumpTable.X68'
     INCLUDE         'EFFECTIVE_ADDRESSES.X68'
-    INCLUDE         'testingFile.x68'
+    INCLUDE         'demo_test.x68'
 END
     LEA             M_END,A1
     MOVE.B          #14,D0

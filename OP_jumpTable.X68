@@ -72,7 +72,7 @@ OP_JTAB    JMP     OP0000      *ADDI
 *    BEQ     OP1000
 
     
-    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+    JMP     INVALID_OPCODE     *Subroutine to store as non-decodable
     RTS
 
 **************************************************************************
@@ -541,6 +541,7 @@ PASTE_5
 *ASR     DC.B    'ASR',0
 *ROL     DC.B    'ROL',0
 *ROR     DC.B    'ROR',0
+
 
 
 
