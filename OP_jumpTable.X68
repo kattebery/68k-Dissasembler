@@ -72,7 +72,7 @@ OP_JTAB    JMP     OP0000      *ADDI
 *    BEQ     OP1000
 
     
-    BRA    INVALID_OPCODE     *Subroutine to store as non-decodable
+    JMP    INVALID_OPCODE     *Subroutine to store as non-decodable
     RTS
 
 **************************************************************************
@@ -84,7 +84,7 @@ OP0000
     *BEGIN OUTPUT
     
     MOVE.W  ADDI,(A3)+      *Load 'ADDI' to Add Reg 1 and then increment
-    BRA     EA_ADDI         *Branch to EA analysis of the command
+    JMP     EA_ADDI         *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0001 - Subroutine for operations beginning with 0001          *
@@ -94,7 +94,7 @@ OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING
         *BEGIN OUTPUT
     
     MOVE.W  MOVE,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
-    BRA     EA_MOVE        *Branch to EA analysis of the command
+    JMP     EA_MOVE        *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0010 - Subroutine for operations beginning with 0010          *
@@ -126,12 +126,12 @@ OP0011
 ********* MOVEL *************        
 _MOVE
     MOVE.W  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment   
-    BRA     EA_MOVE        *Branch to EA analysis of the command
+    JMP     EA_MOVE        *Branch to EA analysis of the command
 
 ********* MOVEAL *************        
 _MOVEA
     MOVE.W  MOVEA,(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
-    BRA     EA_MOVEA       *Branch to EA analysis of the command
+    JMP     EA_MOVEA       *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0100 - Subroutine for operations beginning with 0100          *
@@ -175,32 +175,32 @@ OP0100
 ********* CLR *************        
 _CLR
     MOVE.W  OPCLR,(A3)+     *Load 'CLR' to Add Reg 1 and then increment
-    BRA     EA_CLR          *Branch to EA analysis of the command
+    JMP     EA_CLR          *Branch to EA analysis of the command
 
 ********* LEA *************        
 _LEA
     MOVE.W  OPLEA,(A3)+     *Load 'LEA' to Add Reg 1 and then increment
-    BRA     EA_LEA          *Branch to EA analysis of the command
+    JMP     EA_LEA          *Branch to EA analysis of the command
 
 ********* JSR *************     
 _JSR
     MOVE.W  OPJSR,(A3)+     *Load 'JSR' to Add Reg 1 and then increment
-    BRA     EA_JSR          *Branch to EA analysis of the command
+    JMP    EA_JSR          *Branch to EA analysis of the command
 
 ********* NOP *************     
 _NOP
     MOVE.W  OPNOP,(A3)+     *Load 'NOP' to Add Reg 1 and then increment
-    BRA     VALID_OPCODE          *Branch to EA analysis of the command      
+    JMP    VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* RTS *************     
 _RTS
     MOVE.W  OPRTS,(A3)+     *Load 'RTS' to Add Reg 1 and then increment
-    BRA     VALID_OPCODE          *Branch to EA analysis of the command      
+    JMP    VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* MOVEM *************     
 _MOVEM
     MOVE.W  MOVEM,(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
-    BRA     EA_MOVEM        *Branch to EA analysis of the command
+    JMP    EA_MOVEM        *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP0101 - Subroutine for operations beginning with 0101          *
@@ -211,7 +211,7 @@ OP0101
     *BEGIN OUTPUT
     
     MOVE.W  ADDQ,(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
-    BRA     EA_ADDQ         *Branch to EA analysis of the command
+    JMP    EA_ADDQ         *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP0110 - Subroutine for operations beginning with 0110          *
@@ -222,7 +222,7 @@ OP0110
     *BEGIN OUTPUT
     
     MOVE.W  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
-    BRA     EA_BCC          *Branch to EA analysis of the command
+    JMP    EA_BCC          *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0111 - Subroutine for operations beginning with 0101          *
@@ -233,7 +233,7 @@ OP0111
     *BEGIN OUTPUT
     
     MOVE.W  MOVEQ,(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
-    BRA     EA_MOVEQ        *Branch to EA analysis of the command
+    JMP    EA_MOVEQ        *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP1000 - Subroutine for operations beginning with 1000          *
@@ -256,12 +256,12 @@ OP1000
 ********* DIVU *************        
 _DIVU
     MOVE.W  DIVU,(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
-    BRA     EA_MULS         *Branch to EA analysis of the command
+    JMP    EA_MULS         *Branch to EA analysis of the command
 
 ********* OR *************        
 _OR
     MOVE.W  OR,(A3)+        *Load 'OR' to Add Reg 1 and then increment
-    BRA     EA_ADD           *Branch to EA analysis of the command
+    JMP    EA_ADD           *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP1001 - Subroutine for operations beginning with 1001          *
@@ -272,7 +272,7 @@ OP1001
     *BEGIN OUTPUT
     
     MOVE.W  OPSUB,(A3)+     *Load 'SUB' to Add Reg 1 and then increment
-    BRA     EA_ADD          *Branch to EA analysis of the command
+    JMP    EA_ADD          *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP1011 - Subroutine for operations beginning with 1011          *
@@ -282,7 +282,7 @@ OP1011
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     MOVE.W  CMP,(A3)+     *Load 'CMP' to Add Reg 1 and then increment
-    BRA     EA_CMP          *Branch to EA analysis of the command
+    JMP    EA_CMP          *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP1100 - Subroutine for operations beginning with 1100          *
@@ -304,12 +304,12 @@ OP1100
 ********* MULS *************        
 _MULS
     MOVE.W  MULS,(A3)+      *Load 'MULS' to Add Reg 1 and then increment
-    BRA     EA_MULS         *Branch to EA analysis of the command
+    JMP    EA_MULS         *Branch to EA analysis of the command
 
 ********* AND *************        
 _AND
     MOVE.W  AND,(A3)+       *Load 'AND' to Add Reg 1 and then increment
-    BRA     EA_ADD          *Branch to EA analysis of the command
+    JMP    EA_ADD          *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP1101 - Subroutine for operations beginning with 1101          *
@@ -331,12 +331,12 @@ OP1101
 ********* ADD *************        
 _ADD
     MOVE.W  ADD,(A3)+       *Load 'ADD' to Add Reg 1 and then increment
-    BRA     EA_ADD          *Branch to EA analysis of the command
+    JMP    EA_ADD          *Branch to EA analysis of the command
 
 ********* AND *************        
 _ADDA
     MOVE.W  ADDA,(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
-    BRA     EA_ADDA         *Branch to EA analysis of the command
+    JMP    EA_ADDA         *Branch to EA analysis of the command
     
 **************************************************************************
 *        OP1110 - Subroutine for operations beginning with 1110          *
@@ -382,11 +382,11 @@ _LSd
 
 _LSL    
     MOVE.W  LSL,(A3)+       *Load 'LSL' to Add Reg 1 and then increment
-    BRA     EA_LSD         *Branch to EA analysis of the command
+    JMP    EA_LSD         *Branch to EA analysis of the command
 
 _LSR
     MOVE.W  LSR,(A3)+       *Load 'LSR' to Add Reg 1 and then increment
-    BRA     EA_LSD          *Branch to EA analysis of the command
+    JMP    EA_LSD          *Branch to EA analysis of the command
 
 ********* ASd *************
 _ASd
@@ -404,11 +404,11 @@ _ASd
 
 _ASL    
     MOVE.W  ASL,(A3)+       *Load 'ASL' to Add Reg 1 and then increment
-    BRA     EA_LSD          *Branch to EA analysis of the command
+    JMP    EA_LSD          *Branch to EA analysis of the command
 
 _ASR
     MOVE.W  ASR,(A3)+       *Load 'ASR' to Add Reg 1 and then increment
-    BRA     EA_LSD          *Branch to EA analysis of the command
+    JMP    EA_LSD          *Branch to EA analysis of the command
 
 ********* ROd *************
 _ROd
@@ -427,38 +427,46 @@ _ROd
     
 _ROL    
     MOVE.W  ROL,(A3)+       *Load 'ROL' to Add Reg 1 and then increment
-    BRA     EA_LSD          *Branch to EA analysis of the command
+    JMP    EA_LSD          *Branch to EA analysis of the command
 
 _ROR
     MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
-    BRA     EA_LSD          *Branch to EA analysis of the command
+    JMP    EA_LSD          *Branch to EA analysis of the command
 
-    SIMHALT
+*    SIMHALT
+*
+*ADDI    DC.B    'ADDI',0
+*MOVE    DC.B    'MOVE',0
+*MOVEA   DC.B    'MOVEA',0
+*OPCLR   DC.B    'CLR',0
+*OPLEA   DC.B    'LEA',0
+*OPJSR   DC.B    'JSR',0
+*OPNOP   DC.B    'NOP',0
+*OPRTS   DC.B    'RTS',0
+*MOVEM   DC.B    'MOVEM',0
+*ADDQ    DC.B    'ADDQ',0
+*Bcc     DC.B    'B',0
+*MOVEQ   DC.B    'MOVEQ',0
+*DIVU    DC.B    'DIVU',0
+*OR      DC.B    'OR',0
+*OPSUB   DC.B    'SUB',0
+*CMP     DC.B    'CMP',0
+*MULS    DC.B    'MULS',0
+*AND     DC.B    'AND',0
+*ADD     DC.B    'ADD',0
+*ADDA    DC.B    'ADDA',0
+*LSL     DC.B    'LSL',0
+*LSR     DC.B    'LSR',0
+*ASL     DC.B    'ASL',0
+*ASR     DC.B    'ASR',0
+*ROL     DC.B    'ROL',0
+*ROR     DC.B    'ROR',0
 
-ADDI    DC.B    'ADDI',0
-MOVE    DC.B    'MOVE',0
-MOVEA   DC.B    'MOVEA',0
-OPCLR   DC.B    'CLR',0
-OPLEA   DC.B    'LEA',0
-OPJSR   DC.B    'JSR',0
-OPNOP   DC.B    'NOP',0
-OPRTS   DC.B    'RTS',0
-MOVEM   DC.B    'MOVEM',0
-ADDQ    DC.B    'ADDQ',0
-Bcc     DC.B    'B',0
-MOVEQ   DC.B    'MOVEQ',0
-DIVU    DC.B    'DIVU',0
-OR      DC.B    'OR',0
-OPSUB   DC.B    'SUB',0
-CMP     DC.B    'CMP',0
-MULS    DC.B    'MULS',0
-AND     DC.B    'AND',0
-ADD     DC.B    'ADD',0
-ADDA    DC.B    'ADDA',0
-LSL     DC.B    'LSL',0
-LSR     DC.B    'LSR',0
-ASL     DC.B    'ASL',0
-ASR     DC.B    'ASR',0
-ROL     DC.B    'ROL',0
-ROR     DC.B    'ROR',0
 
+
+
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
