@@ -295,9 +295,15 @@ OP1010 *DO NOT DELETE THIS, HAS TO BE HERE FOR THE JUMP TABLE TO WORK
 *        CMP                                                             *
 **************************************************************************
 OP1011
-    *SINGLE CODE, DO NOT NEED FURTHER CHECKING
-    *BEGIN OUTPUT
-    *MOVE.W  CMP,(A3)+     *Load 'CMP' to Add Reg 1 and then increment
+*    MOVE.W  D0, D1 *ISOLATE 8,7,6 TO CHECK FOR CMPA
+*    LSL.W   #7, D1
+*    LSR.W   #7, D1
+*    LSR.W   #6, D1 *D1 HOLDS SIZE AKA OPMODE, IF OPMODE IS 111 OR 011 ITS INVALID
+*    CMP.B   #7, D1
+*    BEQ     INVALID_OPCODE
+*    CMP.B   #3, D1
+*    BEQ     INVALID_OPCODE
+    
     LEA     CMP, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_CMP          *Branch to EA analysis of the command
@@ -536,6 +542,7 @@ PASTE_5
 *    CMP     #%011,D1        *Check for 011 to eliminate ROR
 *    BEQ     _ROR            *If equal, branch to ROR
 *    BRA     _ROL            *Else must be ROL, branch
+
 
 
 

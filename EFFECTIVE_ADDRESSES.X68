@@ -698,7 +698,7 @@ EA_MOVEM
     BEQ         PRINT_LIST
 *-------------------END TYPE---------------------------
 *----------------------EA INFO-----------------------
-EAP CMP.W       #0, D5      *IF ITS A ZERO, THAT MEANS WE JUST JUMPED HERE 
+EAP CMP.B       #0, D5      *IF ITS A ZERO, THAT MEANS WE JUST JUMPED HERE 
     BEQ         COMMA_SPACE *FROM CHECK TYPE, ELSE MEANS ITS UNALTERED
 EAS ROR.L       #8, D5
     MOVE.W      D7, D4      
