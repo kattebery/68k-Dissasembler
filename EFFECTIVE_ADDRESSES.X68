@@ -4,16 +4,10 @@
 * Date       : 5/24/16
 * Description: ALL THE EFFECTIVE ADDRESSES
 *-----------------------------------------------------------
-
-    *EXAMPLE, MOVE A HEX CODE INTO D6
-    *CALL THE CORRESPONDING EA CODE
-    *MOVE.W     #$2E7C, D6
-    *BRA         EA_MOVE
-    *END EXAMPLE
+    
     
     *MULS IS A SPECIAL CASE BECAUSE I NEVER GET THIS SIZE
     
-    *LSD IS A SPECIAL CASE NEVERMIND LSD NEVER USES IMME_7
     
 *-------------------------MOVE------------------------------------
 EA_MOVE      *1 invalid; done 
@@ -618,10 +612,27 @@ EA_BCC          *0 INVALID (I THINK)
 *-------------------END PRINT TYPE---------------------
     JSR         SPACE
 *------------------PRINT ADDRESS OR SOMETHING---------
+    MOVE.W      D7, D4
+    LSL.W       #8, D4
+    LSR.W       #8, D4 *NOW THE DISPLACEMENT IS IN D4 BYTE
+    BRA         DISPLACEMENT
     
+DISPLACEMENT
+    CMP.B       #$00, D4
+    BEQ         WORD_BIT
+    CMP.B       #$FF, D4
+    BEQ         LONG_BIT
+    BRA         DISP_DONE
     
+WORD_BIT
+    JSR         ABSW_5
+    BRA         DISP_DONE
+LONG_BIT
+    JSR         ABSL_6
+    BRA         DISP_DONE
+    
+DISP_DONE
     MOVE.B      #00, (A3)
-    
     BRA         VALID_OPCODE
 *-------------END PRINT ADDRESS OR SOMETHING-------------
 *-----------------------------END BCC-------------------------------
@@ -1243,6 +1254,7 @@ LF      EQU     $0A
 *M_GT    DC.B 'GT',0
 *M_LE    DC.B 'LE',0
 *M_SLASH DC.B '/',0
+
 
 
 
