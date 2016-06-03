@@ -131,7 +131,7 @@ VALIDATE_START_END
     MOVE.L      A3,D2           *copy end address into D2
     CMP         D1,D2           *compare start and end values
     BEQ         EQUAL_ERROR     *Start address is equal to end address
-    BLT         SWAP_VALUES     *Start address is larger than end address
+    BMI         SWAP_VALUES     *Start address is larger than end address
     BRA         PRE_READ_MEMORY *begin reading memory
     
 EQUAL_ERROR
@@ -151,7 +151,7 @@ PRE_READ_MEMORY
     MOVE.L      A2,A6           *A6 will act as the current address for Data               
 READ_MEMORY_LOOP
     MOVE.L      MEM_END,A3        *put ending address in A3
-    CMP         A2,A3             *compare the incrementing address and the end address
+    CMP.L       A2,A3             *compare the incrementing address and the end address
     BLT         CONTINUE_YN       *stop if the end address is reached
     
     ROR         #8,D6               *select correct byte
@@ -220,7 +220,7 @@ PRESS_TO_CONTINUE
     MOVE.B      #5,D0               *read single character from keyboard
     TRAP        #15    
     BSR         IM_NEW_LINE            *add new line
-    BRA         READ_MEMORY_CONT    *continue reading loop
+    BRA         READ_MEMORY_LOOP    *continue reading loop
     
 INCREMENT_LINE
     ROR.L       #8,D6               *select correct byte
@@ -411,6 +411,7 @@ DATA
 *
 *M_SPACE       DC.B  ' ',0
 *M_NEW_LINE    DC.B  '',CR,LF,0
+
 
 
 
