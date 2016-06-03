@@ -11,17 +11,23 @@
     *BRA         EA_MOVE
     *END EXAMPLE
     
+    *MULS IS A SPECIAL CASE BECAUSE I NEVER GET THIS SIZE
+    
+    *LSD IS A SPECIAL CASE NEVERMIND LSD NEVER USES IMME_7
+    
 *-------------------------MOVE------------------------------------
-EA_MOVE      *1 invalid; done
+EA_MOVE      *1 invalid; done 
 *----------------SOURCE-------------------------------------------  
+    CLR.L         D5
     MOVE.W      D0, D7 *DO THIS AT THE BEGGINING OF EVERY EA 
     
-    MOVE.W      D7, D4      *
-    LSR.W       #8, D4      *
-    LSR.W       #4, D4      *D4 = SIZE
-    JSR GET_SIZE
+    MOVE.W      D7, D5      *
+    LSR.W       #8, D5      *
+    LSR.W       #4, D5      *D5 = SIZE 
+    JSR         GET_SIZE    *D5 = <0000 0000 0000 0000 0000 0000 0000 0010>
+    ROR.L       #8, D5      *D5 = <0000 0010 0000 0000 0000 0000 0000 0000>
     
-    MOVE.W      D7, D4      *
+    MOVE.W      D7, D4      *d5 = <0000 0010 0000 0000 xxx xxxx xxxx xxxX>
     LSL.W       #8, D4      *
     LSL.W       #2, D4
     LSR.W       #8, D4      *
@@ -35,7 +41,7 @@ EA_MOVE      *1 invalid; done
     
     JSR         MODE_CHOOSER
     LEA         MODE_JUMP, A0   *LOAD MODE JUMP TABLE
-    MULS        #6, D4          *GET JUMP
+    MULS.W      #6, D4          *GET JUMP
     JSR         0(A0, D4)       *JUMP
 *---------------END SOURCE---------------------------------------
     JSR COMMA
@@ -64,12 +70,14 @@ EA_MOVE      *1 invalid; done
 *-------------------------MOVEA-----------------------------------
 EA_MOVEA        *0 invalid
 *------------------------SOURCE----------------------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
 
-    MOVE.W      D7, D4      *GETTING SIZE
-    LSR.W       #8, D4      *
-    LSR.W       #4, D4      *SHIFT 12 BITS RIGHT
+    MOVE.W      D7, D5      *GETTING SIZE
+    LSR.W       #8, D5      *
+    LSR.W       #4, D5      *SHIFT 12 BITS RIGHT
     JSR         GET_SIZE    *D4 = SIZE
+    ROR.L       #8, D5
     
     MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
@@ -105,12 +113,19 @@ EA_MOVEA        *0 invalid
 *-----------------------MOVEQ---------------------------------------
 EA_MOVEQ        *0 invalid
 *-----------------------SOURCE-----------------------------------------
+    CLR.L       D5
     MOVE.W      D0, D7
 
     JSR SPACE
     JSR POUND
     JSR CASH
-    BSR OUTPUT_HEX    
+    MOVE.W      D7, D5
+    LSL.W       #8, D5
+    LSR.W       #8, D5 *PROLLY UNNECESSARY
+    MOVE.W      D5, D2
+    JSR         MOQ
+    
+  
 *----------------------END SOURCE--------------------------------------
     JSR COMMA
     JSR SPACE
@@ -130,21 +145,24 @@ EA_ADD          *3 invalid; done
 
 *COVERS ADD, SUB, AND, OR
 *--------------------GET MODES-----------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
 
-    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
-    LSL.W       #7, D4      * 
-    LSR.W       #7, D4      *
-    LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
+    MOVE.W      D7, D5      *GETTING OPMODE AKA SIZE
+    LSL.W       #7, D5      * 
+    LSR.W       #7, D5      *
+    LSR.W       #6, D5      *D4 = OPMODE AKA SIZE
     JSR         GET_OPMODE_MATH *PRINTS THE SIZE
 
-    CMP.B       #3, D4
+    CMP.B       #3, D5
     BLT         DN_VERSION
-    CMP.B       #3, D4
+    CMP.B       #3, D5
     BGT         EA_VERSION
 *-------------------END GETS MODES------------------------------
 *-------------------DN VERSION------------------------
 DN_VERSION *EA IS SOURCE, REGISTER IS DESTINATION <EA> + DN -> DN
+    ROR.L       #8, D5
+    
     MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
@@ -176,6 +194,8 @@ DN_VERSION *EA IS SOURCE, REGISTER IS DESTINATION <EA> + DN -> DN
 *-------------------END DN VERSION-------------------
 *-------------------EA VERSION-------------------------
 EA_VERSION
+    ROR.L       #8, D5
+
     MOVE.W      D7, D5      *LEFT 4; RIGHT 13
     LSL.W       #4, D5      *
     LSR.W       #8, D5      *
@@ -214,18 +234,18 @@ EA_VERSION
 *-------------------ADDI--------------------------------
 EA_ADDI  *2 invalid; DONE
 *-------------------PRINT SIZE-----------------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4      *
-    LSL.W       #8, D4      *
-    LSR.W       #8, D4      *
-    LSR.W       #6, D4      *D4 = SIZE
+    MOVE.W      D7, D5      *
+    LSL.W       #8, D5      *
+    LSR.W       #8, D5      *
+    LSR.W       #6, D5      *D5 = SIZE
     JSR         GET_SIZE_ADDI
+    ROR.L       #8, D5
 *-----------------END PRINT SIZE-----------------------------
 *----------------PRINT IMMEDIATE----------------------------
-    JSR         POUND
-    JSR         CASH
-    BSR         OUTPUT_HEX
+    JSR         IMME_7
 *-------------END PRINT IMMEDIATE-----------------------------
     JSR         COMMA
     JSR         SPACE
@@ -256,13 +276,15 @@ EA_ADDI  *2 invalid; DONE
 *------------------------ADDQ----------------------------------
 EA_ADDQ     *0 INVALID
 *-----------------------SOURCE------------------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4
-    LSL.W       #8, D4
-    LSR.W       #8, D4
-    LSR.W       #6, D4
+    MOVE.W      D7, D5
+    LSL.W       #8, D5
+    LSR.W       #8, D5
+    LSR.W       #6, D5
     JSR         GET_SIZE_ADDI    *PRINT SIZE
+    ROR.L       #8, D5
     
     MOVE.W      D7, D5      *GETTING DATA
     LSL.W       #4, D5      *SHIFT LEFT 4; RIGHT 13
@@ -299,13 +321,15 @@ EA_ADDQ     *0 INVALID
 *-------------------------ADDA------------------------------------
 EA_ADDA         *0 INVALID
 *-----------------------SOURCE------------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
-    LSL.W       #7, D4      * 
-    LSR.W       #7, D4      *
-    LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
+    MOVE.W      D7, D5      *GETTING OPMODE AKA SIZE
+    LSL.W       #7, D5      * 
+    LSR.W       #7, D5      *
+    LSR.W       #6, D5      *D4 = OPMODE AKA SIZE
     JSR         GET_OPMODE
+    ROR.L       #8, D5
     
     MOVE.W      D7, D4      *GETTING SOURCE MODE
     LSL.W       #8, D4      *
@@ -345,7 +369,9 @@ EA_MULS                *1 INVALID;
 *COMPLICATED BECAUSE: if one is an address and the other is 
 *an absolute word or immediate data, you have to eat it. 
 
+
 *----------------------PRINT EA-------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
     JSR         SPACE
@@ -383,6 +409,7 @@ EA_MULS                *1 INVALID;
 *-------------------------LEA-----------------------------------
 EA_LEA          *5 INVALIDS; DONE
 *-------------------SOURCE-------------------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
     JSR         SPACE
@@ -422,13 +449,15 @@ EA_LEA          *5 INVALIDS; DONE
 *------------------------CLR-------------------------------------
 EA_CLR          *2 INVALID; DONE
 *-------------------PRINT SIZE-----------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4
-    LSL.W       #8, D4      *
-    LSR.W       #8, D4      *
-    LSR.W       #6, D4      *D4 = SIZE
+    MOVE.W      D7, D5
+    LSL.W       #8, D5      *
+    LSR.W       #8, D5      *
+    LSR.W       #6, D5      *D4 = SIZE
     JSR         GET_SIZE_ADDI
+    ROR.L       #8, D5
 *----------------END PRINT SIZE-------------------------
 *---------------PRINT EA---------------------------------
     MOVE.W      D7, D4      
@@ -459,14 +488,16 @@ EA_CLR          *2 INVALID; DONE
 EA_LSD          *3 INVALID; DONE
 *COVERS LSD, ASD, ROD
 *-------------------------SIZE---------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4
-    LSL.W       #8, D4
-    LSR.W       #8, D4
-    LSR.W       #6, D4      *ISOLATE SIZE
+    MOVE.W      D7, D5
+    LSL.W       #8, D5
+    LSR.W       #8, D5
+    LSR.W       #6, D5     *ISOLATE SIZE
     JSR         GET_SIZE_ADDI  *PRINT SIZE
-    CMP.B       #3, D4      *EA SHIFT
+    CMP.B       #3, D5      *EA SHIFT
+    *DOES A ROTATE COMMAND AFFECT CARRY FLAG
     BEQ         EA_SHIFT    *BRANCH TO EA SHIFT
 *-----------------------END SIZE--------------------------
 *-----------------------SHIFTING------------------------------
@@ -499,6 +530,7 @@ EA_LSD          *3 INVALID; DONE
 *----------------------END DESTINATION-------------------------    
 *---------------------------EA SHIFT-------------------------------
 EA_SHIFT
+    JSR         WORD
     JSR         SPACE
     MOVE.W      D7, D4      *
     LSL.W       #8, D4      *
@@ -529,13 +561,15 @@ DONE
 *-------------------------------CMP-----------------------------
 EA_CMP          *0 INVALID
 *------------------PRINT SIZE----------------------------
+    CLR.L         D5
     MOVE.W      D0, D7
     
-    MOVE.W      D7, D4      *GETTING OPMODE AKA SIZE
-    LSL.W       #7, D4      * 
-    LSR.W       #7, D4      *
-    LSR.W       #6, D4      *D4 = OPMODE AKA SIZE
+    MOVE.W      D7, D5      *GETTING OPMODE AKA SIZE
+    LSL.W       #7, D5      * 
+    LSR.W       #7, D5      *
+    LSR.W       #6, D5      *D4 = OPMODE AKA SIZE
     JSR         GET_SIZE_ADDI
+    ROR.L       #8, D5
 *---------------END PRINT SIZE-------------------------
 *------------------PRINT EA---------------------------
     MOVE.W      D7, D4      
@@ -573,6 +607,7 @@ EA_CMP          *0 INVALID
 *--------------------------------BCC------------------------------
 EA_BCC          *0 INVALID (I THINK)
 *--------------------PRINT TYPE------------------------
+    CLR.L       D5
     MOVE.W      D0, D7
     
     MOVE.W      D7, D4
@@ -583,7 +618,8 @@ EA_BCC          *0 INVALID (I THINK)
 *-------------------END PRINT TYPE---------------------
     JSR         SPACE
 *------------------PRINT ADDRESS OR SOMETHING---------
-    JSR         OUTPUT_HEX
+    
+    
     MOVE.B      #00, (A3)
     
     BRA         VALID_OPCODE
@@ -592,6 +628,7 @@ EA_BCC          *0 INVALID (I THINK)
 *-------------------------------------------------------------------
 *---------------------------JSR---------------------------------------
 EA_JSR   *5 INVALID; DONE
+    CLR.L         D5
 
     MOVE.W      D0, D7
     
@@ -621,34 +658,45 @@ EA_JSR   *5 INVALID; DONE
 *-----------------------------------------------------------------
 *-----------------------------MOVEM-------------------------------
 EA_MOVEM
+        *REG-->MEM
+*CASE : MOVEM.W A0/A1/A2/D5/D6/D7,-(SP)  AUTOS D AUT S EAM EAR
+*                                        01001 0 001 0 100 111 -> 48A7
+*   SP IS A7
+* PRE-DEC REVERSES SO A7 A6 A5 A4 A3 A2 A1 A0 D7 D6 D5 D4 D3 D2 D1 D0
+*                      0  0  0  0  0  1  1  1  1  1  1  0  0  0  0  0
+*                                                              -> 07E0
 
-    MOVE.W      D0, D6
+    CLR.L       D5
+
+    MOVE.W      D0, D7 *D6
 *---------------------SIZE--------------------------------
-    MOVE.W      D6, D4
+    MOVE.W      D7, D4 *D6
     LSL.W       #5, D4
     LSL.W       #4, D4
     LSR.W       #8, D4
     LSR.W       #7, D4
-    JSR         REG_SIZE
+    JSR         REG_SIZE    
+    
 *-------------------END SIZE----------------------------
 *--------------------TYPE-------------------------------
-    MOVE.W      D6, D7
-    LSL.W       #5, D7
-    LSR.W       #8, D7
-    LSR.W       #7, D7
-    CMP.B       #0, D7
+    MOVE.W      D7, D5
+    LSL.W       #5, D5
+    LSR.W       #8, D5
+    LSR.W       #7, D5
+    CMP.B       #0, D5       *D5 NOW CONTAINS TYPE
     BEQ         PRINT_LIST
 *-------------------END TYPE---------------------------
 *----------------------EA INFO-----------------------
-EAP CMP.W       #0, D7      *IF ITS A ZERO, THAT MEANS WE JUST JUMPED HERE 
+EAP CMP.W       #0, D5      *IF ITS A ZERO, THAT MEANS WE JUST JUMPED HERE 
     BEQ         COMMA_SPACE *FROM CHECK TYPE, ELSE MEANS ITS UNALTERED
-EAS MOVE.W      D6, D4      
+EAS ROR.L       #8, D5
+    MOVE.W      D7, D4      
     LSL.W       #8, D4      *LEFT 10; RIGHT 13
     LSL.W       #2, D4
     LSR.W       #8, D4      *
     LSR.W       #5, D4      *D4 = EA MODE
     
-    MOVE.W      D6, D5      *SHIFT LEFT 13; RIGHT 13
+    MOVE.W      D7, D5      *SHIFT LEFT 13; RIGHT 13
     LSL.W       #8, D5  
     LSL.W       #5, D5      *
     LSR.W       #8, D5
@@ -659,57 +707,64 @@ EAS MOVE.W      D6, D4
     MULS        #6, D4          *GET JUMP
     JSR         0(A0, D4)       *JUMP
     
-    CMP.W       #1, D7 *IF ONE THEN THIS WAS PRINTED FIRST
+    ROL.L       #8, D5
+    CMP.W       #1, D5 *IF ONE THEN THIS WAS PRINTED FIRST
     BEQ         PRINT_LIST
     
     BRA         DONE_PRINTING
 *--------------------END EA INFO--------------------------
 *---------------------REGISTER PRINT------------------------
 PRINT_LIST
-    CMP.B       #1, D7 
+    CMP.B       #1, D5 
     BEQ         COMMA_SPACE2
-EA2 MOVE.L      A2, D7
+EA2 ROR.L       #8, D5
     ADD.L       #2, A2
+    MOVE.W      (A2), D5  
     MOVE.B      #$8, D2
     CLR         D4
 FOR_LOOP    
     CMP.B       D4, D2
     BEQ         ADDRESS_REGISTERS
-    ROR.W       #1, D7
+    ROR.W       #1, D5
     BRA         PRINT_CURRENT
 JFZ ADDQ        #1, D4
     BRA         FOR_LOOP
     
 PRINT_CURRENT
-    BCC         JFZ
-    MOVE.B      D4, D5
+    BCC         JFZ *D5 = <0000 0001 0000 0000 XXXX XXXX XXXX XXXX>
+    ROR.L       #8, D5
+    ROR.L       #8, D5 
+    MOVE.B      D4, D5 *D5 = <XXXX XXXX XXXX XXXX 0000 0001 0000 000Y>
     JSR         DATA_0
     JSR         SLASH
+    ROL.L       #8, D5
+    ROL.L       #8, D5
     BRA         JFZ
     
-ADDRESS_REGISTERS
+ADDRESS_REGISTERS  *LEFT OFF HERE
     CLR         D4
 FOR_2
     CMP.B       D4, D2
     BEQ         CHECK_TYPE
-    ROR.W       #1, D7
+    ROR.W       #1, D5
     BRA         EA_PRINT_ADDRESS
 JFF ADDQ        #1, D4
     BRA         FOR_2
     
 EA_PRINT_ADDRESS
     BCC         JFF
+    ROR.L       #8, D5
+    ROR.L       #8, D5
     MOVE.B      D4, D5
     JSR         SLASH
     JSR         ADDR_1
+    ROL.L       #8, D5
+    ROL.L       #8, D5
     BRA         JFF  
 *----------------------END REGISTER PRINT-----------------
 CHECK_TYPE
-    MOVE.W      D6, D7
-    LSL.W       #5, D7  
-    LSR.W       #8, D7
-    LSR.W       #7, D7
-    CMP.B       #0, D7   *IF TYPE IS 0 THE LIST HAS BEEN PRINTED FIRST  
+    ROL.L       #8, D5
+    CMP.B       #0, D5   *IF TYPE IS 0 THE LIST HAS BEEN PRINTED FIRST  
     BEQ         EAP      *THEREFORE ITS TIME TO PRINT THE EAP
     BNE         DONE_PRINTING
     
@@ -885,7 +940,7 @@ ABSL_6 *
     MOVE.B      (A2)+, D2
     ROL         #8, D2
     MOVE.B      (A2), D2
-    SUB         #1, A2
+    SUB         #1, A2      *WHATS WITH THE SUB 1
     BSR         OUTPUT_HEX
     
     
@@ -893,7 +948,7 @@ ABSL_6 *
     MOVE.B      (A2)+, D2
     ROL         #8, D2
     MOVE.B      (A2), D2
-    SUB         #1, A2
+    SUB         #1, A2          *WHY THE SUB 1
     BSR         OUTPUT_HEX
     RTS
     
@@ -907,26 +962,39 @@ IMME_7  *FOR NOW ONLY WORKING WITH IMMEDIATE HEX VALUES
     MOVE.B      (A2), D2
     SUB         #1, A2
     BSR         OUTPUT_HEX
-    
-    
-    
-    *IDEA IS TO HAVE A FLAG HERE TO SEE IF THE DATA IS GONNA BE A LONG
-    *THEN BRANCH TO THE BELOW THREE COMMANDS IF THE IMMEDIATE DATA IS A LONG
-    
-*    ADD.L       #2, A2
-*    MOVE.W      (A2), D2
-*    BSR         OUTPUT_HEX
+    *if size is a 2, 7, or 6, its a long
+    *d4 needs to always hold the size
+    JSR         ADD_WORD
     RTS
 
+ADD_WORD
+    ROL.L       #8, D5
+    CMP.B       #2, D5
+    BEQ         ADD_NEW
+    CMP.B       #6, D5
+    BEQ         ADD_NEW
+    CMP.B       #7, D5
+    BEQ         ADD_NEW
+    RTS
+    
+ADD_NEW
+    ROR.L       #8, D5
+    ADD.L       #2, A2
+    MOVE.B      (A2)+, D2
+    ROL         #8, D2
+    MOVE.B      (A2), D2
+    SUB         #1, A2
+    BSR         OUTPUT_HEX
+    RTS
 *-------------------------END MODE JUMP----------------------------  
 *-------------------------START HELPERS-----------------------------
 GET_SIZE
     JSR         DOT
-    CMP.B       #1, D4
+    CMP.B       #1, D5
     BEQ         BYTE
-    CMP.B       #3, D4
+    CMP.B       #3, D5
     BEQ         WORD
-    CMP.B       #2, D4
+    CMP.B       #2, D5
     BEQ         LONG  
     RTS
     
@@ -936,27 +1004,27 @@ GET_REG ******************
     MOVE.B      D1, (A3)+
     RTS
     
-GET_OPMODE
+GET_OPMODE          
     JSR         DOT
-    CMP.B       #3, D4
+    CMP.B       #3, D5
     BEQ         WORD
-    CMP.B       #7, D4
+    CMP.B       #7, D5
     BEQ         LONG
     RTS
     
 GET_OPMODE_MATH
     JSR         DOT
-    CMP.B       #0, D4
+    CMP.B       #0, D5
     BEQ         BYTE
-    CMP.B       #4, D4
+    CMP.B       #4, D5
     BEQ         BYTE
-    CMP.B       #1, D4
+    CMP.B       #1, D5
     BEQ         WORD
-    CMP.B       #5, D4
+    CMP.B       #5, D5
     BEQ         WORD
-    CMP.B       #2, D4
+    CMP.B       #2, D5
     BEQ         LONG
-    CMP.B       #6, D4
+    CMP.B       #6, D5
     BEQ         LONG
     RTS
     
@@ -964,8 +1032,8 @@ GET_DATA ******************
     JSR         POUND
     CMP.B       #0, D5
     BEQ         PRINT_8
-    MOVE.L      D5, D1
-    MOVE.B      D1, (A3)+
+    MOVE.W      D5, D2
+    JSR         QHX
     RTS
     
 PRINT_8 ********
@@ -975,11 +1043,11 @@ PRINT_8 ********
     
 GET_SIZE_ADDI
     JSR         DOT
-    CMP.B       #0, D4
+    CMP.B       #0, D5
     BEQ         BYTE
-    CMP.B       #1, D4
+    CMP.B       #1, D5
     BEQ         WORD
-    CMP.B       #2, D4
+    CMP.B       #2, D5
     BEQ         LONG  
     RTS
     
@@ -1018,7 +1086,6 @@ NEW_MODE
     BEQ         TO_FIVE *CHANGE MODE (D4) TO 5
     CMP.B       #1, D5 *CHECK REGISTER(D5), LONG ADDRESS?
     BEQ         TO_SIX *CHANGE MODE(D4) TO 6
-    
     CMP.B       #4, D5 *for immediate data
     BEQ         TO_EIGHT
     RTS
@@ -1053,7 +1120,7 @@ OUTPUT_HEX
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     *OUTPUT 3RD
-    MOVE.W      D2, D4
+MOQ MOVE.W      D2, D4
     LSL.W       #8, D4
     LSR.W       #8, D4
     LSR.W       #4, D4
@@ -1061,7 +1128,7 @@ OUTPUT_HEX
     BSR         CONVERT_TO_ASCII
     BSR         ADD_CHAR
     *OUTPUT 4TH
-    MOVE.W      D2, D4  *D7 = <1010 1111 0101 0111>
+QHX MOVE.W      D2, D4  *D7 = <1010 1111 0101 0111>
     LSL.W       #8, D4  *     <0101 0111 0000 0000>
     LSL.W       #4, D4  *     <0111 0000 0000 0000>
     LSR.W       #8, D4  *     <
@@ -1130,14 +1197,18 @@ CASH
     RTS
 
 CC
-    MOVE.B      M_CC, (A3)+
+    MOVE.B      M_C, (A3)+
+    MOVE.B      M_C, (A3)+
     RTS
+    
 GT
-    MOVE.B      M_GT, (A3)+
+    MOVE.B      M_G, (A3)+
+    MOVE.B      M_T, (A3)+
     RTS
 
 LE
-    MOVE.B      M_LE, (A3)+
+    MOVE.B      M_L, (A3)+
+    MOVE.B      M_E, (A3)+
     RTS
     
 SLASH
@@ -1172,6 +1243,8 @@ LF      EQU     $0A
 *M_GT    DC.B 'GT',0
 *M_LE    DC.B 'LE',0
 *M_SLASH DC.B '/',0
+
+
 
 
 

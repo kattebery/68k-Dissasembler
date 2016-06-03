@@ -26,51 +26,23 @@ VERIFY_OPCODE
 *        and jumps to the corresponding subroutine.                      *
 **************************************************************************
 
-OP_JTAB    JMP     OP0000       *ADDI
-    JMP     OP0001              *MOVE.B
-    JMP     OP0010              *MOVE.W, MOVEA(WORD)
-    JMP     OP0011              *MOVE.L, MOVEA(LONG) 
-    JMP     OP0100              *NOP, MOVEM, LEA, CLR, JSR, RTS
-    JMP     OP0101              *ADDQ
-    JMP     OP0110              *Bcc
-    JMP     OP0111              *MOVEQ
-    JMP     OP1000              *DIVU, OR
-    JMP     OP1001              *SUB
-    JMP     INVALID_OPCODE      *No required opcodes
-    JMP     OP1011              *CMP
-    JMP     OP1100              *MULS, AND
-    JMP     OP1101              *ADD, ADDA
-    JMP     OP1110              *LSR, LSL, ASR, ASL, ROL, ROR
-    JMP     INVALID_OPCODE      *No required opcodes
+OP_JTAB     JMP     OP0000       *ADDI
+            JMP     OP0001              *MOVE.B
+            JMP     OP0010              *MOVE.W, MOVEA(WORD)
+            JMP     OP0011              *MOVE.L, MOVEA(LONG) 
+            JMP     OP0100              *NOP, MOVEM, LEA, CLR, JSR, RTS
+            JMP     OP0101              *ADDQ
+            JMP     OP0110              *Bcc
+            JMP     OP0111              *MOVEQ
+            JMP     OP1000              *DIVU, OR
+            JMP     OP1001              *SUB
+            JMP     OP1010              *this is necessary for the jump table 
+            JMP     OP1011              *CMP
+            JMP     OP1100              *MULS, AND
+            JMP     OP1101              *ADD, ADDA
+            JMP     OP1110              *LSR, LSL, ASR, ASL, ROL, ROR
+            JMP     INVALID_OPCODE      *No required opcodes
 
-*    CMP     #%0000,D1   *ADDI 
-*    BEQ     OP0000
-*    CMP     #%0001,D1   *MOVE.B
-*    BEQ     OP0001
-*    CMP     #%0010,D1   *MOVE.W, MOVEA(WORD)
-*    BEQ     OP0010 
-*    CMP     #%0011,D1   *MOVE.L, MOVEA(LONG)  
-*    BEQ     OP0011   
-*    CMP     #%0100,D1   *NOP, MOVEM, LEA, CLR, JSR, RTS
-*    BEQ     OP0100
-*    CMP     #%0101,D1   *ADDQ
-*    BEQ     OP0101    
-*    CMP     #%0110,D1   *Bcc
-*    BEQ     OP0110   
-*    CMP     #%1000,D1   *MOVEQ
-*    BEQ     OP1000    
-*    CMP     #%1001,D1   *DIVU, OR
-*    BEQ     OP1000    
-*    CMP     #%1010,D1   *SUB
-*    BEQ     OP1000    
-*    CMP     #%1011,D1   *CMP
-*    BEQ     OP1000    
-*    CMP     #%1100,D1   *MULS, AND 
-*    BEQ     OP1000   
-*    CMP     #%1101,D1   *ADD, ADDA
-*    BEQ     OP1000   
-*    CMP     #%1110,D1   *LSR, LSL, ASR, ASL, ROL, ROR  
-*    BEQ     OP1000
 
     JMP    INVALID_OPCODE     *If you're reading this line, it's invalid.
     RTS
@@ -312,6 +284,11 @@ OP1001
     LEA     OPSUB, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
+    
+    
+OP1010 *DO NOT DELETE THIS, HAS TO BE HERE FOR THE JUMP TABLE TO WORK
+    BRA     INVALID_OPCODE
+    
 
 **************************************************************************
 *        OP1011 - Subroutine for operations beginning with 1011          *
@@ -365,7 +342,7 @@ OP1101
 
     MOVE.W  D0,D1           *Copy instruction for modification
     LSL.W   #8,D1           *Shift left 7 bits 
-    LSR.W   #5,D1           *Rotate left 5 bits
+    LSR.W   #6,D1           *Rotate left 5 bits
     LSR.W   #8,D1           *Shift left again (13 shifts total)
     ANDI.W  #$0F,D1         *Keep 3 bits
               
@@ -392,104 +369,92 @@ _ADDA
 *        LSR, LSL, ASR, ASL, ROL, ROR                                    *
 **************************************************************************
 OP1110
-    *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
-      
-    MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #7,D1           *Shift left 7 bits 
-    LSR.W   #5,D1           *Rotate right 5 bits
-    LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$00F,D1        *Keep 3 bits
-                  
-    CMP     #%001,D1        *Check for 001 to eliminate LSd instructions
-    BEQ     _LSd            *If equal, branch to LSd to determine LSR or LSL
-
-    **ELSE CONTINUE CHECKING**
-    MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #8,D1          *Shift left 7 bits
-    LSL.W   #3,D1 
-    LSR.W   #5,D1           *Rotate left 5 bits
-    LSR.W   #8,D1           *Shift left again (13 shifts total)
-    ANDI.W  #$0F,D1         *Keep 2 bits
+    MOVE.W  D0, D1           *iso bits 7, 6 to determine shift type
+    LSL.W   #8, D1          
+    LSR.W   #8, D1           
+    LSR.W   #6, D1           * d1 = shift type
+    CMP.B   #3, D1
+    BEQ     MEM_SHIFT
+    BNE     REG_SHIFT
+               
+MEM_SHIFT   *BITS 10 AND 9 DECIDE THE OPERATION
+    MOVE.W  D0, D1
+    LSL.W   #5, D1
+    LSR.W   #8, D1
+    LSR.W   #6, D1 *D1 = OP CODE
+    BRA     GET_OP
     
-    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS                   
-    CMP     #%00,D1         *Check for 00 to eliminate ASd
-    BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
-    BRA     _ROd            *Else must be a ROd instruction, branch to determine
+REG_SHIFT   *BITS 4 AND 3 DECIDE THE OPERATION
+    MOVE.W  D0, D1
+    LSL.W   #8, D1
+    LSL.W   #3, D1
+    LSR.W   #8, D1
+    LSR.W   #6, D1 *D1 = OP CODE
+    BRA     GET_OP
     
-********** LSd *************        
-_LSd   
- 
-    MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #7,D1           *Shift left 7 bits 
-    LSR.W   #7,D1           *Rotate right 5 bits
-    LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$F,D1          *Keep 1 bit
+GET_OP
+    CMP.B   #0, D1
+    BEQ     ARI
+    CMP.B   #1, D1
+    BEQ     LOG
+    CMP.B   #3, D1
+    BEQ     ROT
+    BRA     INVALID_OPCODE
+    
+LOG
+    MOVE.W  D0, D1
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #8, D1
+    CMP.B   #0, D1
+    BEQ     _LSR
+    BNE     _LSL
+    
+ARI
+    MOVE.W  D0, D1
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #8, D1
+    CMP.B   #0, D1
+    BEQ     _ASR
+    BNE     _ASL
 
-    CMP     #%0,D1        *Check for 011 to eliminate LSR
-    BEQ     _LSR            *If equal, branch to LSR
-    BRA     _LSL            *Else must be LSL, branch
-
+ROT
+    MOVE.W  D0, D1
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #8, D1
+    CMP.B   #0, D1
+    BEQ     _ROR
+    BNE     _ROL
+    
+*--------------------------------------good below---------------------------
 _LSL    
-    *MOVE.W  LSL,(A3)+       *Load 'LSL' to Add Reg 1 and then increment
     LEA     LSL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD         *Branch to EA analysis of the command
 
 _LSR
-    *MOVE.W  LSR,(A3)+       *Load 'LSR' to Add Reg 1 and then increment
     LEA     LSR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
-
-********* ASd *************
-_ASd
-
-    MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #8,D1           *Shift left 7 bits 
-    LSL.W   #2,D1           *Shift left 7 bits
-    LSR.W   #5,D1           *Rotate right 5 bits
-    LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$00F,D1        *Keep 3 bits
-   
-    CMP     #%000,D1        *Check for 000 to eliminate ASR
-    BEQ     _ASR            *If equal, branch to ASR
-    BRA     _ASL            *Else must be ASL, branch
-
+    
 _ASL    
-    *MOVE.W  ASL,(A3)+       *Load 'ASL' to Add Reg 1 and then increment
     LEA     ASL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ASR
-    *MOVE.W  ASR,(A3)+       *Load 'ASR' to Add Reg 1 and then increment
     LEA     ASR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
-
-********* ROd *************
-_ROd
-
-    MOVE.W  D0,D1           *Copy instruction for modification
-    LSL.W   #2,D1           *Shift left 7 bits
-    LSL.W   #8,D1           *Shift left 7 bits 
-    LSR.W   #5,D1           *Rotate right 5 bits
-    LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$00F,D1        *Keep 3 bits
-
-    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
-    CMP     #%011,D1        *Check for 011 to eliminate ROR
-    BEQ     _ROR            *If equal, branch to ROR
-    BRA     _ROL            *Else must be ROL, branch
     
 _ROL    
-    *MOVE.W  ROL,(A3)+       *Load 'ROL' to Add Reg 1 and then increment
     LEA     ROL, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
 
 _ROR
-    *MOVE.W  ROR,(A3)+       *Load 'ROR' to Add Reg 1 and then increment
     LEA     ROR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LSD          *Branch to EA analysis of the command
@@ -517,34 +482,60 @@ PASTE_5
 
     SIMHALT
 
-*ADDI    DC.B    'ADDI',0
-**MOVE    DC.B    'MOVE',0
-*MOVEA   DC.B    'MOVEA',0
-*OPCLR   DC.B    'CLR',0
-*OPLEA   DC.B    'LEA',0
-*OPJSR   DC.B    'JSR',0
-*OPNOP   DC.B    'NOP',0
-*OPRTS   DC.B    'RTS',0
-*MOVEM   DC.B    'MOVEM',0
-*ADDQ    DC.B    'ADDQ',0
-*Bcc     DC.B    'B',0
-*MOVEQ   DC.B    'MOVEQ',0
-*DIVU    DC.B    'DIVU',0
-*OR      DC.B    'OR',0
-*OPSUB   DC.B    'SUB',0
-*CMP     DC.B    'CMP',0
-*MULS    DC.B    'MULS',0
-*AND     DC.B    'AND',0
-*ADD     DC.B    'ADD',0
-*ADDA    DC.B    'ADDA',0
-*LSL     DC.B    'LSL',0
-*LSR     DC.B    'LSR',0
-*ASL     DC.B    'ASL',0
-*ASR     DC.B    'ASR',0
-*ROL     DC.B    'ROL',0
-*ROR     DC.B    'ROR',0
-
-
+    **ELSE CONTINUE CHECKING**
+*    MOVE.W  D0,D1           *Copy instruction for modification
+*    LSL.W   #8,D1          *Shift left 7 bits
+*    LSL.W   #3,D1 
+*    LSR.W   #5,D1           *Rotate left 5 bits
+*    LSR.W   #8,D1           *Shift left again (13 shifts total)
+*    ANDI.W  #$0F,D1         *Keep 2 bits
+*    
+*    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS                   
+*    CMP     #%00,D1         *Check for 00 to eliminate ASd
+*    BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
+*    BRA     _ROd            *Else must be a ROd instruction, branch to determine
+*    
+*********** LSd *************        
+*_LSd   
+* 
+*    MOVE.W  D0,D1           *Copy instruction for modification
+*    LSL.W   #7,D1           *Shift left 7 bits 
+*    LSR.W   #7,D1           *Rotate right 5 bits
+*    LSR.W   #8,D1           *Shift right again (13 shifts total)
+*    ANDI.W  #$F,D1          *Keep 1 bit
+*
+*    CMP     #%0,D1        *Check for 011 to eliminate LSR
+*    BEQ     _LSR            *If equal, branch to LSR
+*    BRA     _LSL            *Else must be LSL, branch
+*
+********** ASd *************
+*_ASd
+*
+*    MOVE.W  D0,D1           *Copy instruction for modification
+*    LSL.W   #8,D1           *Shift left 7 bits 
+*    LSL.W   #2,D1           *Shift left 7 bits
+*    LSR.W   #5,D1           *Rotate right 5 bits
+*    LSR.W   #8,D1           *Shift right again (13 shifts total)
+*    ANDI.W  #$00F,D1        *Keep 3 bits
+*   
+*    CMP     #%000,D1        *Check for 000 to eliminate ASR
+*    BEQ     _ASR            *If equal, branch to ASR
+*    BRA     _ASL            *Else must be ASL, branch
+*
+********** ROd *************
+*_ROd
+*
+*    MOVE.W  D0,D1           *Copy instruction for modification
+*    LSL.W   #2,D1           *Shift left 7 bits
+*    LSL.W   #8,D1           *Shift left 7 bits 
+*    LSR.W   #5,D1           *Rotate right 5 bits
+*    LSR.W   #8,D1           *Shift right again (13 shifts total)
+*    ANDI.W  #$00F,D1        *Keep 3 bits
+*
+*    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
+*    CMP     #%011,D1        *Check for 011 to eliminate ROR
+*    BEQ     _ROR            *If equal, branch to ROR
+*    BRA     _ROL            *Else must be ROL, branch
 
 
 

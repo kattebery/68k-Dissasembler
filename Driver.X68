@@ -84,9 +84,11 @@ M_PLUS  DC.B '+',0
 M_SUB   DC.B '-',0
 M_DREG  DC.B 'D',0
 M_AREG  DC.B 'A',0
-M_CC    DC.B 'CC',0
-M_GT    DC.B 'GT',0
-M_LE    DC.B 'LE',0
+M_C     DC.B 'C',0
+M_G     DC.B 'G',0
+M_T     DC.B 'T',0
+M_E     DC.B 'E',0
+M_L     DC.B 'L',0
 M_SLASH DC.B '/',0
 
 
@@ -94,6 +96,7 @@ M_SLASH DC.B '/',0
 
 STOP:
     END    MAIN
+
 
 
 
