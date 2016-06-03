@@ -482,7 +482,7 @@ EA_CLR          *2 INVALID; DONE
 EA_LSD          *3 INVALID; DONE
 *COVERS LSD, ASD, ROD
 *-------------------------SIZE---------------------------
-    CLR.L         D5
+    CLR.L       D5
     MOVE.W      D0, D7
     
     MOVE.W      D7, D5
@@ -1048,8 +1048,8 @@ GET_DATA ******************
     RTS
     
 PRINT_8 ********
-    MOVE.L      #8, D1
-    MOVE.B      D1, (A3)+
+    MOVE.W      #8, D2
+    JSR         QHX
     RTS
     
 GET_SIZE_ADDI
