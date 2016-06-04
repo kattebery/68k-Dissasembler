@@ -1070,6 +1070,8 @@ TYPE_CHOOSER
     RTS
     
 PRINT_BCC
+    CMP.B       #0, D4
+    BEQ         RA
     CMP.B       #4, D4
     BEQ         CC
     CMP.B       #14, D4
@@ -1222,6 +1224,11 @@ LE
     MOVE.B      M_E, (A3)+
     RTS
     
+RA
+    MOVE.B      M_R, (A3)+
+    MOVE.B      M_A, (A3)+
+    RTS
+    
 SLASH
     MOVE.B      M_SLASH, (A3)+
     RTS
@@ -1235,25 +1242,7 @@ INVALID
 CR      EQU     $0D
 LF      EQU     $0A
 
-*M_INVAL DC.B 'INVALID',0
-*M_CASH  DC.B '$',0
-*M_SPACE DC.B ' ',0
-*M_COMMA DC.B ',',0
-*M_POUND DC.B '#',0
-*M_DOT   DC.B '.',0
-*M_WORD  DC.B 'W',0
-*M_BYTE  DC.B 'B',0
-*M_LONG  DC.B 'L',0
-*M_OPEN  DC.B '(',0
-*M_CLOSE DC.B ')',0
-*M_PLUS  DC.B '+',0
-*M_SUB   DC.B '-',0
-*M_DREG  DC.B 'D',0
-*M_AREG  DC.B 'A',0
-*M_CC    DC.B 'CC',0
-*M_GT    DC.B 'GT',0
-*M_LE    DC.B 'LE',0
-*M_SLASH DC.B '/',0
+
 
 
 

@@ -89,13 +89,18 @@ M_G     DC.B 'G',0
 M_T     DC.B 'T',0
 M_E     DC.B 'E',0
 M_L     DC.B 'L',0
+M_R     DC.B 'R',0
+M_A     DC.B 'A',0
 M_SLASH DC.B '/',0
 
 
     INCLUDE         'demo_test.x68'
+    INCLUDE         'testingFile.x68'
 
 STOP:
     END    MAIN
+
+
 
 
 

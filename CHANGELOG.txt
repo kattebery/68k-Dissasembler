@@ -15,3 +15,7 @@ CHANGELOG
 - UPDATED TESTING FILE (didnt push tho yet so that you guys can see the demo)
 
 - ISSUE WITH THE CMPA COMMAND IN THE DEMO FILE 
+
+6/4/16
+
+- ADDED SUPPORT FOR THE BRA COMMAND

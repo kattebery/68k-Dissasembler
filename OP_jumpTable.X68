@@ -214,22 +214,7 @@ OP0101
 *        Bcc                                                             *
 **************************************************************************
 OP0110
-    MOVE.W  D0, D1  *CASE FOR BRA
-    LSL.W   #4, D1
-    LSR.W   #8, D1
-    LSR.W   #4, D1
-    CMP.B   #0, D1
-    BEQ     INVALID_OPCODE
-    
-    *SINGLE CODE, DO NOT NEED FURTHER CHECKING
-    *BEGIN OUTPUT
-    MOVE.W  D0,D1
-    LSL.W   #4,D1
-    LSR.W   #4,D1
-    LSR.W   #8,D1
-    CMP.B   #0,D1
-    BEQ     INVALID_OPCODE
-    
+
     MOVE.B  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
 
@@ -549,6 +534,7 @@ PASTE_5
 *    CMP     #%011,D1        *Check for 011 to eliminate ROR
 *    BEQ     _ROR            *If equal, branch to ROR
 *    BRA     _ROL            *Else must be ROL, branch
+
 
 
 
