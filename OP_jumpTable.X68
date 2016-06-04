@@ -214,6 +214,13 @@ OP0101
 *        Bcc                                                             *
 **************************************************************************
 OP0110
+    MOVE.W  D0, D1  *CASE FOR BRA
+    LSL.W   #4, D1
+    LSR.W   #8, D1
+    LSR.W   #4, D1
+    CMP.B   #0, D1
+    BEQ     INVALID_OPCODE
+    
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
     MOVE.W  D0,D1
@@ -295,14 +302,14 @@ OP1010 *DO NOT DELETE THIS, HAS TO BE HERE FOR THE JUMP TABLE TO WORK
 *        CMP                                                             *
 **************************************************************************
 OP1011
-*    MOVE.W  D0, D1 *ISOLATE 8,7,6 TO CHECK FOR CMPA
-*    LSL.W   #7, D1
-*    LSR.W   #7, D1
-*    LSR.W   #6, D1 *D1 HOLDS SIZE AKA OPMODE, IF OPMODE IS 111 OR 011 ITS INVALID
-*    CMP.B   #7, D1
-*    BEQ     INVALID_OPCODE
-*    CMP.B   #3, D1
-*    BEQ     INVALID_OPCODE
+    MOVE.W  D0, D1 *ISOLATE 8,7,6 TO CHECK FOR CMPA
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #6, D1 *D1 HOLDS SIZE AKA OPMODE, IF OPMODE IS 111 OR 011 ITS INVALID
+    CMP.B   #7, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #3, D1
+    BEQ     INVALID_OPCODE
     
     LEA     CMP, A4        *Load output string to A4
     JSR     PASTE_3
@@ -542,6 +549,8 @@ PASTE_5
 *    CMP     #%011,D1        *Check for 011 to eliminate ROR
 *    BEQ     _ROR            *If equal, branch to ROR
 *    BRA     _ROL            *Else must be ROL, branch
+
+
 
 
 
