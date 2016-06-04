@@ -6,7 +6,9 @@
 *-----------------------------------------------------------
     ORG    $1000
 MAIN:                  ; first instruction of program
+    ADDI.L          #9, D1
     MOVE.B          D1, D2
+
     BRA             INPUT_START
     
     INCLUDE         'Main.X68'

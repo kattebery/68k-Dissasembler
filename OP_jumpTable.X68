@@ -49,13 +49,37 @@ OP_JTAB     JMP     OP0000       *ADDI
 
 **************************************************************************
 *        OP0000 - Subroutine for operations beginning with 0000          *
-*        ADDI                                                            *
+*        ADDI         *MORE ERROR CHECKING IS POSSIBLE BC OF THE IMMEDIATE DATA LIMITS
 **************************************************************************
 OP0000
-    *SINGLE CODE, DO NOT NEED FURTHER CHECKING
-    *BEGIN OUTPUT
+    MOVE.W  D0, D1 *BITS 11, 10, 9, 8 MUST BE 0110
+    LSL.W   #4, D1
+    LSR.W   #4, D1
+    LSR.W   #8, D1
+    CMP.B   #6, D1
+    BNE     INVALID_OPCODE
     
-    *MOVE.W  ADDI,(A3)+     *Load 'ADDI' to Add Reg 1 and then increment
+    MOVE.W  D0, D1 *BITS 7, 6 MUST BE LESS THAN OR EQUAL TO 2
+    LSR.B   #6, D1
+    CMP.B   #3, D1
+    BGE     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3 MAY NEVER BE 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.B  D0, D1 *BITS 5,4,3,2,1,0 MAY NEVER BE GT (111 010) 0011 1010 
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    
     LEA     ADDI, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDI         *Branch to EA analysis of the command
@@ -64,10 +88,45 @@ OP0000
 *        OP0001 - Subroutine for operations beginning with 0001          *
 *        MOVE.B                                                          *
 **************************************************************************
-OP0001  *SINGLE CODE, DO NOT NEED FURTHER CHECKING 
-        *BEGIN OUTPUT
+OP0001
+    MOVE.W  D0, D1 *BITS 8,7,6 CAN NEVER BE 001, 110, 101
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #6, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
     
-    *MOVE.L  MOVE,(A3)+     *Load 'MOVE.B' to Add Reg 1 and then increment
+    MOVE.W  D0, D1 *BITS 11,10,9,8,7,6 MAY NOT BE 00 100 111, 00 010 111, 00 011 111
+    LSL.W   #4, D1
+    LSR.W   #4, D1
+    LSR.W   #6, D1
+    CMP.B   #%00100111, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00010111, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00011111, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3 CANT BE 110, OR 101
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 MAY NOT BE 111 010, 111 011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    
     LEA     MOVE, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MOVE         *Branch to EA analysis of the command
@@ -86,40 +145,93 @@ OP0010
 **************************************************************************
 OP0011
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
-
     **ISOLATE NEXT BITS TO CHECK**
+    MOVE.W  D0, D1 *BITS 5,4,3 CANT BE 110, OR 101
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 MAY NOT BE 111 010, 111 011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    
     MOVE.W  D0,D1           *Copy instruction for modification
     LSL.W   #7,D1           *Shift left 7 bits 
     LSR.W   #5,D1           *Rotate right 5 bits
     LSR.W   #8,D1           *Shift right again (13 shifts total)
-    ANDI.W  #$00F,D1        *Keep 3 bits
     
-    CMP     #%001,D1      *Check for 0010 to eliminate CLR
+    CMP     #%001,D1      *Check for 001 to eliminate CLR
     BEQ     _MOVEA          *If equal, branch to CLR
-    
     BRA     _MOVE
     
 ********* MOVEL *************        
 _MOVE
-    *MOVE.L  MOVE,(A3)+     *Load 'MOVE.L' to Add Reg 1 and then increment  
+    MOVE.W  D0, D1 *BITS 8,7,6 CAN NEVER BE 001, 110, 101
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #6, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 11,10,9,8,7,6 MAY NOT BE 00 100 111, 00 010 111, 00 011 111
+    LSL.W   #4, D1
+    LSR.W   #4, D1
+    LSR.W   #6, D1
+    CMP.B   #%00100111, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00010111, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00011111, D1
+    BEQ     INVALID_OPCODE
+
     LEA     MOVE, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MOVE        *Branch to EA analysis of the command
 
-********* MOVEAL *************        
+********* MOVEAL *************  
+
+      
 _MOVEA
-    *MOVE.L  MOVEA,(A3)+    *Load 'MOVEA.L' to Add Reg 1 and then increment
+    MOVE.W  D0, D1 *BITS 13,12 MUST BE 11 OR 10
+    LSL.W   #2, D1
+    LSR.W   #8, D1
+    LSR.W   #6, D1
+    CMP.B   #2, D1
+    BEQ     NX1
+    CMP.B   #3, D1
+    BEQ     NX1
+    BRA     INVALID_OPCODE
+    
+NX1     
+    MOVE.W  D0, D1 *BITS 8,7,6 MUST BE 001
+    LSL.W   #7, D1
+    LSR.W   #7, D1
+    LSR.W   #6, D1
+    CMP.B   #1, D1
+    BNE     INVALID_OPCODE
+    
     LEA     MOVEA, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEA       *Branch to EA analysis of the command
 
 **************************************************************************
 *        OP0100 - Subroutine for operations beginning with 0100          *
-*        NOP, MOVEM, LEA, CLR, JSR, RTS                                  *
+*        NOP(), MOVEM, LEA, CLR(), JSR(), RTS()                            *
 **************************************************************************
 OP0100
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
-     MOVE.W  D0,D1           *Copy instruction for modification
+    MOVE.W  D0,D1           *Copy instruction for modification
     
     CMP     #%0100111001110001,D1   *Check to eliminate NOP
     BEQ     _NOP
@@ -127,7 +239,7 @@ OP0100
     BEQ     _RTS
     
     LSR.W   #6,D1                   *Shift right 6 bits
-    CMP     #%0000000100111010,D1   *Check to eliminate RTS
+    CMP     #%0000000100111010,D1   *Check to eliminate JSR
     BEQ     _JSR
     
     **ISOLATE 4 BITS TO CHECK CLR**    
@@ -154,28 +266,61 @@ OP0100
     
 ********* CLR *************        
 _CLR
-    *MOVE.W  OPCLR,(A3)+     *Load 'CLR' to Add Reg 1 and then increment
+    MOVE.W  D0, D1 *BITS 7,6 CANT BE 11
+    LSR.B   #6, D1
+    CMP.B   #3, D1
+    BGE     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3 CANT BE 001, 110, 101
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    
     LEA     OPCLR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_CLR          *Branch to EA analysis of the command
 
 ********* LEA *************        
 _LEA
-    *MOVE.W  OPLEA,(A3)+     *Load 'LEA' to Add Reg 1 and then increment
     LEA     OPLEA, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LEA          *Branch to EA analysis of the command
 
 ********* JSR *************     
 _JSR
-    *MOVE.W  OPJSR,(A3)+     *Load 'JSR' to Add Reg 1 and then increment
+    MOVE.W  D0, D1 *BITS 5,4,3 MUST BE 010, 111
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #7, D1
+    BEQ     NX2
+    CMP.B   #2, D1
+    BEQ     NX2
+    BRA     INVALID_OPCODE
+    
+NX2 
+    MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    
     LEA     OPJSR, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_JSR          *Branch to EA analysis of the command
 
 ********* NOP *************     
 _NOP
-    *MOVE.W  OPNOP,(A3)+     *Load 'NOP' to Add Reg 1 and then increment
     LEA     OPNOP, A4        *Load output string to A4
     JSR     PASTE_3
     MOVE.B  #00,(A3)+
@@ -183,10 +328,9 @@ _NOP
 
 ********* RTS *************     
 _RTS
-    *MOVE.W  OPRTS,(A3)+     *Load 'RTS' to Add Reg 1 and then increment
     LEA     OPRTS, A4        *Load output string to A4
     JSR     PASTE_3
-        MOVE.B  #00,(A3)+
+    MOVE.B  #00,(A3)+
     BRA     VALID_OPCODE          *Branch to EA analysis of the command      
 
 ********* MOVEM *************     
@@ -213,7 +357,7 @@ OP0101
 *        OP0110 - Subroutine for operations beginning with 0110          *
 *        Bcc                                                             *
 **************************************************************************
-OP0110
+OP0110 *CHANGE TO FLAG BRA AS AN ERROR
 
     MOVE.B  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
@@ -304,7 +448,16 @@ OP1011
 *        OP1100 - Subroutine for operations beginning with 1100          *
 *        MULS, AND                                                       *
 **************************************************************************
-OP1100
+OP1100 *CASE C24E -> 1100 0010 0100 1110 -> 1100 001 001 001 110
+                                        *-> AUTO REG OMO EAM EAR\
+                          
+    *EA MODE CAN NEVER BE A 001; ISOLATING
+    MOVE.W  D0, D1
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
 
     MOVE.W  D0,D1           *Copy instruction for modification
