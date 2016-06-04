@@ -38,17 +38,22 @@
 *Absolute WORD Address...................(stuff).W      
 *Absolute LONG Address...................(stuff).L
 *-----------------------------------------------------------
-    ORG    $7000
-        
 
-    *NOP* DONE
-    *NOP
+*start		EQU	$00008000	* ORG and END address
+
+* ORG the program so that it straddles the address boundary $00007FFF to $00008000
+
+		*ORG	start
+        
+    LSL.W       #8, D1
+    NOP * DONE
+    NOP
     
     *MOVE* DONE
     *MOVE SOURCE: DATA REGISTER -> DN
-TEST1        DC.B 'DATA    ',0
-    MOVE.B      D1, D2
-TEST2        DC.B 'DATA    ',0
+*TEST1        DC.B 'DATA    ',0
+*    MOVE.B      D1, D2
+*TEST2        DC.B 'DATA    ',0
     MOVE.B      D1, (A1)
     MOVE.B      D1, (A1)+
     MOVE.B      D1, -(A1)
@@ -317,9 +322,27 @@ TEST2        DC.B 'DATA    ',0
     
     *OR*    and this
     
-    *LSL* look up this
-    
-    *LSR*  and this
+    *LSL*
+    *memory shifts
+    LSL         (A1)
+    LSL         (A2)+
+    LSL         -(A3)
+    LSL         $8000
+    LSL         $8002
+    *DATA SHIFTS
+    LSL.B       #1, D1
+    LSL.B       #7, D1
+    LSL.W       #1, D1
+
+    LSL.L       #1, D1
+    LSL.L       #8, D1
+    *LSR*
+    *MEMORY SHIFTS
+    LSR         (A1)
+    LSR         (A2)+
+    LSR         -(A3)
+    LSR         $8000
+    LSR         $8002
     
     *ASR*  and this
     
@@ -371,6 +394,8 @@ TEST2        DC.B 'DATA    ',0
 
 *variables + constants here
 TEST_MESSAGE    DC.B       'I LOVE APPLES',0
+
+
 
 
 
