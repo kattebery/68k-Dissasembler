@@ -339,7 +339,7 @@ _JSR
     BEQ     NX2
     CMP.B   #2, D1
     BEQ     NX2
-    BRA     INVALID_OPCODE
+    BRA     EAT_WORD
     
 NX2 
     MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
@@ -1066,6 +1066,7 @@ PASTE_5
     RTS
 
     SIMHALT
+
 
 
 
