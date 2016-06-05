@@ -241,6 +241,8 @@ NX1
 *        NOP(), MOVEM(), LEA(), CLR(), JSR(), RTS()                            *
 **************************************************************************
 OP0100
+    *4EF9 -> 0100 1110 1111 1001 
+
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
     MOVE.W  D0,D1           *Copy instruction for modification
     
@@ -272,6 +274,12 @@ OP0100
     
     CMP     #%001,D1
     BEQ     _MOVEM
+    
+    *CHECK FOR JMP 
+    CMP.W   #%0100111011111001, D0
+    BEQ     EAT_LONG
+    CMP.W   #%0100111011111000, D0
+    BEQ     EAT_WORD
     
     BRA     _LEA            *Else by process of elimination it must be LEA   
     
