@@ -480,6 +480,7 @@ EAT_STUFF
     BEQ         EAT_WORD
     CMP.B       #$FF, D1
     BEQ         EAT_LONG
+    ADD.L       #1, A2
     BRA         INVALID_OPCODE
     
 EAT_WORD

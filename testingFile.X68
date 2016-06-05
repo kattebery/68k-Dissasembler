@@ -12,14 +12,14 @@
 *
 *NOP
 *MOVE + MOVEA + MOVEQ + MOVEM
-*ADD + ADDA + ADDI + ADDQ
-*SUB
-*MULS
-*DIVU
+*ADD + ADDA + ADDI + ADDQ    *********ADD
+**************************************SUB
+**************************************MULS
+**************************************DIVU
 *LEA
 *CLR
-*AND
-*OR
+**************************************AND
+**************************************OR
 *LSL + LSR + ASL + ASR
 *ROL + ROR
 *CMP
@@ -381,9 +381,9 @@
     *BLE*   look these up
     
     *JSR*  (NOT SURE HOW TO TEST THIS CORRECTLY
-    *JSR $1234
-    *JSR $12345678
-    *JSR (A4)
+    JSR $1234
+    JSR $12345678
+    JSR (A4)
     
     *RTS* (good)
     RTS
@@ -394,6 +394,8 @@
 
 *variables + constants here
 TEST_MESSAGE    DC.B       'I LOVE APPLES',0
+
+
 
 
 

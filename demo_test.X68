@@ -8,11 +8,14 @@
 *
 *****************************
 
-start		EQU	$00007000	* ORG and END address
+*must comment that back in for this to run 
+*also must comment the same thing out of testingFile.x68
+
+*start		EQU	$00007000	* ORG and END address
 
 * ORG the program so that it straddles the address boundary $00007FFF to $00008000
 
-		ORG	start
+		*ORG	start
 
 * NOP and similar instructions. Should clearly differentiate NOP and RTS from others.
 
@@ -40,8 +43,8 @@ moves		MOVE.B	D0,D1
 		MOVE.L	$C00022AA,$3000A0F8
 		MOVE.L	A0,-(A5)
 		MOVEA.W	(A6),A0
-		MOVEM.W	A0/A1/A2/D5/D6/D7,-(SP)
 		MOVEM.L	(A0)+,D0/D1/D2/A4/A3/A0/A1
+                MOVEM.W	A0/A1/A2/D5/D6/D7,-(SP)
 		MOVEQ	#1,D2
 		
 * Divide and multiple optional instructions
@@ -84,6 +87,11 @@ multiply	MULS	D0,D3		*Optional instruction
 		SUB.L	D2,D4
 		SUB.L	(A3),D7
 	
+
+
+
+
+
 
 
 

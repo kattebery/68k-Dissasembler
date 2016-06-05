@@ -877,12 +877,8 @@ MOVEM_ERROR_CHECK *0, 1, 4, 7
     BEQ         EAT_INVALID
     RTS
     
-    
-    
-    *assuming FOR NOW that it always eats a long
-EAT_INVALID *EATS THE NEXT TWO WORD VALUES... THEN CALLS INVALID
-    ADD.L       #2, A2      *EAT THE FIRST WORD
-    ADD.L       #2, A2      *EAT THE SECOND WORD
+EAT_INVALID 
+    ADD.L       #3, A2      *EAT THE FIRST WORD
     BRA         INVALID
 *-----------------END ERROR CHECK-------------------------------
 
