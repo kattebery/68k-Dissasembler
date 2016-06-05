@@ -6,6 +6,13 @@
 *              Team.cpp CSS 422 Spring 2016
 *-----------------------------------------------------------
 VERIFY_OPCODE
+
+    *MOVE.L A2, A6 ->2C4A ??  0010 1100 0100 1010 
+    
+    *SHOULD BE                0010 110 001 001 010
+
+
+
     MOVE.W  D0,D1   *Copy instruction for modification
     
     **ISOLATE BITS F-C**                                             
@@ -28,8 +35,8 @@ VERIFY_OPCODE
 
 OP_JTAB     JMP     OP0000       *ADDI
             JMP     OP0001              *MOVE.B
-            JMP     OP0010              *MOVE.W, MOVEA(WORD)
-            JMP     OP0011              *MOVE.L, MOVEA(LONG) 
+            JMP     OP0010              *MOVE.L, MOVEA(LONG)
+            JMP     OP0011              *MOVE.W, MOVEA(WORD) 
             JMP     OP0100              *NOP, MOVEM, LEA, CLR, JSR, RTS
             JMP     OP0101              *ADDQ
             JMP     OP0110              *Bcc
@@ -144,6 +151,10 @@ OP0010
 *        MOVE.L, MOVEA(LONG)                                             *
 **************************************************************************
 OP0011
+
+    *20e0 -> 0010 0000 1110 0000 
+     *       0010 000 011 100 000  = move.l (a0)+, 
+     
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
     **ISOLATE NEXT BITS TO CHECK**
     MOVE.W  D0, D1 *BITS 5,4,3 CANT BE 110, OR 101
@@ -454,13 +465,32 @@ OP0110
     LSR.W           #4, D1
     LSR.W           #8, D1
     CMP.B           #4, D1 
-    BEQ                NX6
+    BEQ             NX6
     CMP.B           #14, D1
-    BEQ                 NX6
+    BEQ             NX6
     CMP.B           #15, D1
-    BEQ                 NX6
-    BRA                 INVALID_OPCODE
+    BEQ             NX6
+    BRA             EAT_STUFF
+    
+EAT_STUFF   
+    MOVE.W      D0, D1
+    LSL.W       #8, D1
+    LSR.W       #8, D1 *D1 = 8 BIT DISPLACEMENT
+    CMP.B       #0, D1
+    BEQ         EAT_WORD
+    CMP.B       #$FF, D1
+    BEQ         EAT_LONG
+    BRA         INVALID_OPCODE
+    
+EAT_WORD
+    ADD.L       #3, A2
+    BRA         INVALID_OPCODE
 
+EAT_LONG
+    ADD.L       #3, A2
+    ADD.L       #2, A2
+    BRA         INVALID_OPCODE
+    
 NX6
     MOVE.B  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
