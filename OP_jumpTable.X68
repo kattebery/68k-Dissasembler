@@ -227,7 +227,7 @@ NX1
 
 **************************************************************************
 *        OP0100 - Subroutine for operations beginning with 0100          *
-*        NOP(), MOVEM, LEA, CLR(), JSR(), RTS()                            *
+*        NOP(), MOVEM(), LEA(), CLR(), JSR(), RTS()                            *
 **************************************************************************
 OP0100
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
@@ -293,6 +293,28 @@ _CLR
 
 ********* LEA *************        
 _LEA
+    MOVE.W      D0, D1 *BITS 8,7,6 MUST BE 111
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #7, D1
+    BNE                INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3, MUST BE 010, OR 111
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #2, D1
+    BEQ        NX5
+    CMP.B   #7, D1
+    BEQ         NX5
+
+NX5
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0 MUST NOT BE GT 111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+
     LEA     OPLEA, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_LEA          *Branch to EA analysis of the command
@@ -335,7 +357,55 @@ _RTS
 
 ********* MOVEM *************     
 _MOVEM
-    *MOVE.W  MOVEM,(A3)+     *Load 'MOVEM' to Add Reg 1 and then increment
+    MOVE.W      D0, D1 *BIT 11 MUST BE 1
+    LSL.W           #4, D1
+    LSR.W           #8, D1
+    LSR.W           #7, D1
+    CMP.B           #0, D1
+    BEQ                INVALID_OPCODE
+                            *
+    MOVE.W      D0, D1 *BIT 10 DETERMINES MODE
+    LSL.W           #5, D1
+    LSR.W           #8, D1
+    LSR.W           #7, D1
+    CMP.B           #1, D1
+    BEQ                MEM_REG
+    CMP.B           #0, D1
+    BEQ                REG_MEM
+
+MEM_REG
+    MOVE.W       D0, D1 * BITS 5,4,3 MUST BE 010, 011, 111
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #7, D1
+    BEQ         NX3
+    CMP.B   #2, D1
+    BEQ         NX3
+    CMP.B   #3, D1
+    BEQ         NX3
+    BRA     INVALID_OPCODE
+
+REG_MEM
+    MOVE.W      D0, D1 * BITS 5,4,3 MUST BE 010 100, 111
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #7, D1
+    BEQ         NX3
+    CMP.B   #2, D1
+    BEQ         NX3
+    CMP.B   #4, D1
+    BEQ         NX3
+    BRA     INVALID_OPCODE
+
+NX3
+    MOVE.W      D0, D1  *BITS 5,4,3,2,1,0 MUST NOT BE GT 111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    BRA     NX4
+
+NX4
     LEA     MOVEM, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEM        *Branch to EA analysis of the command
@@ -347,8 +417,29 @@ _MOVEM
 OP0101
     *SINGLE CODE, DO NOT NEED FURTHER CHECKING
     *BEGIN OUTPUT
+
+    MOVE.W      D0, D1 *BITS 8,7,6 MUST NOT BE GT 2
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #3, D1
+    BGE                INVALID_OPCODE
+
+    MOVE.W      D0, D1 * BITS 5,4,3 MUST NOT BE 101, 110 
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0   MUST NOT BE GT 111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+
     
-    *MOVE.W  ADDQ,(A3)+      *Load 'AddQ' to Add Reg 1 and then increment
     LEA     ADDQ, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDQ         *Branch to EA analysis of the command
@@ -357,20 +448,36 @@ OP0101
 *        OP0110 - Subroutine for operations beginning with 0110          *
 *        Bcc                                                             *
 **************************************************************************
-OP0110 *CHANGE TO FLAG BRA AS AN ERROR
+OP0110
+    MOVE.W      D0, D1 *BITS 11,10,9,8 MUST BE EITHER 4, 14, 15
+    LSL.W           #4, D1
+    LSR.W           #4, D1
+    LSR.W           #8, D1
+    CMP.B           #4, D1 
+    BEQ                NX6
+    CMP.B           #14, D1
+    BEQ                 NX6
+    CMP.B           #15, D1
+    BEQ                 NX6
+    BRA                 INVALID_OPCODE
 
+NX6
     MOVE.B  Bcc,(A3)+       *Load 'Bcc' to Add Reg 1 and then increment 
     BRA     EA_BCC          *Branch to EA analysis of the command
 
 **************************************************************************
-*        OP0111 - Subroutine for operations beginning with 0101          *
+*        OP0111 - Subroutine for operations beginning with 0111          *
 *        MOVEQ                                                           *
 **************************************************************************
 OP0111
-    *SINGLE CODE, DO NOT NEED FURTHER CHECKING
-    *BEGIN OUTPUT
+    MOVE.W      D0, D1 * BIT 8 MUST BE A ZERO
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #8, D1
+    CMP.B           #0, D1
+    BNE                INVALID_OPCODE
+
     
-    *MOVE.W  MOVEQ,(A3)+     *Load 'MOVEQ' to Add Reg 1 and then increment
     LEA     MOVEQ, A4        *Load output string to A4
     JSR     PASTE_5
     BRA     EA_MOVEQ        *Branch to EA analysis of the command
@@ -380,8 +487,7 @@ OP0111
 *        DIVU, OR                                                        *
 **************************************************************************
 OP1000
-    *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
-    
+
     **ISOLATE NEXT BITS TO CHECK**
     MOVE.W  D0,D1           *Copy instruction for modification
     LSL.W   #7,D1           *Shift left 7 bits 
@@ -395,33 +501,155 @@ OP1000
     
 ********* DIVU *************        
 _DIVU
-    *MOVE.W  DIVU,(A3)+      *Load 'DIVU' to Add Reg 1 and then increment
+    MOVE.W          D0, D1  * BITS 5,4,3, CANT BE 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 CANT BE  00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+
     LEA     DIVU, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* OR *************        
 _OR
-    *MOVE.W  OR,(A3)+        *Load 'OR' to Add Reg 1 and then increment
+    MOVE.W          D0, D1 * BITS 8,7,6 CANT BE 111
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #7, D1
+    BEQ                INVALID_OPCODE
+    CMP.B           #3, D1
+    BLT                 DN_V
+    CMP.B           #3, D1
+    BGT                EA_V
+
+DN_V                                                        *EA IS SOURCE, REGISTER IS DESTINATION
+    MOVE.W          D0, D1 *BITS 5,4,3 CANT BE 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 CANT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    BRA         NX7
+
+EA_V
+    MOVE.W          D0, D1 * BITS 5,4,3, CANT BE 000, 001, 110, 101
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B       #0, D1
+    BEQ         INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    BRA         NX7
+
+
+NX7
     LEA     OR, A4        *Load output string to A4
     MOVE.B  (A4)+, (A3)+
     MOVE.B  (A4)+, (A3)+
     BRA     EA_ADD           *Branch to EA analysis of the command
+
 
 **************************************************************************
 *        OP1001 - Subroutine for operations beginning with 1001          *
 *        SUB                                                             *
 **************************************************************************
 OP1001
-    *SINGLE CODE, DO NOT NEED FURTHER CHECKING
-    *BEGIN OUTPUT
-    
-    *MOVE.W  OPSUB,(A3)+     *Load 'SUB' to Add Reg 1 and then increment
+
+    MOVE.W          D0, D1 * BITS 8,7,6  CANT BE 111, 011
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #7, D1
+    BEQ                INVALID_OPCODE
+    CMP.B           #3, D1
+    BEQ                 INVALID_OPCODE
+    CMP.B           #3, D1
+    BLT                 DN_V1
+    CMP.B           #3, D1
+    BGT                EA_V1
+
+DN_V1
+    MOVE.W      D0, D1 *BITS 5,4,3 CANT BE 101, 110 
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0 CANT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    BRA     NX8
+
+EA_V1
+    MOVE.W          D0, D1 * BITS 5,4,3 CANT BE 000, 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B       #0, D1
+    BEQ         INVALID_OPCODE
+
+    MOVE.W          D0, D1 * BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    BRA         NX8
+
+NX8
     LEA     OPSUB, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
     
-    
+***************************************************************************
+*       OP1010
+*     NULL
+***************************************************************************
 OP1010 *DO NOT DELETE THIS, HAS TO BE HERE FOR THE JUMP TABLE TO WORK
     BRA     INVALID_OPCODE
     
@@ -435,11 +663,25 @@ OP1011
     LSL.W   #7, D1
     LSR.W   #7, D1
     LSR.W   #6, D1 *D1 HOLDS SIZE AKA OPMODE, IF OPMODE IS 111 OR 011 ITS INVALID
-    CMP.B   #7, D1
-    BEQ     INVALID_OPCODE
     CMP.B   #3, D1
+    BGE         INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3 CANNOT BE 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
     BEQ     INVALID_OPCODE
-    
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0 CANNOT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+
     LEA     CMP, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_CMP          *Branch to EA analysis of the command
@@ -449,7 +691,7 @@ OP1011
 *        MULS, AND                                                       *
 **************************************************************************
 OP1100 *CASE C24E -> 1100 0010 0100 1110 -> 1100 001 001 001 110
-                                        *-> AUTO REG OMO EAM EAR\
+                                        **                                   -> AUTO REG OMO EAM EAR\
                           
     *EA MODE CAN NEVER BE A 001; ISOLATING
     MOVE.W  D0, D1
@@ -460,26 +702,94 @@ OP1100 *CASE C24E -> 1100 0010 0100 1110 -> 1100 001 001 001 110
 
     *MULTIPLE CODE, CHECK AND GET NEXT 3 BITS
 
-    MOVE.W  D0,D1           *Copy instruction for modification
+    MOVE.W  D0,D1           *Copy instruction for modification    *8,7,6
     LSL.W   #7,D1           *Shift left 7 bits 
     LSR.W   #5,D1           *Rotate right 5 bits
     LSR.W   #8,D1           *Shift right again (13 shifts total)
     ANDI.W  #$00F,D1        *Keep 3 bits
          
+    CMP.B   #3, D1
+    BEQ         INVALID_OPCODE
     CMP     #%111,D1       *Check for 111 to eliminate MULS
     BEQ     _MULS           *If equal, branch to MULS
     BRA     _AND            *Else must be AND, branch
     
 ********* MULS *************        
 _MULS
-    *MOVE.W  MULS,(A3)+      *Load 'MULS' to Add Reg 1 and then increment
+    MOVE.W      D0,D1 *BITS 5,4,3 CANT BE 1, 5, 6
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 SAME AS DIVU
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+
     LEA     MULS, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_MULS         *Branch to EA analysis of the command
 
 ********* AND *************        
 _AND
-    *MOVE.W  AND,(A3)+       *Load 'AND' to Add Reg 1 and then increment
+    MOVE.W          D0, D1 * BITS 8,7,6 CANT BE 111
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #3, D1
+    BLT                 DN_V2
+    CMP.B           #3, D1
+    BGT                EA_V2
+
+DN_V2                                                      *EA IS SOURCE, REGISTER IS DESTINATION
+    MOVE.W          D0, D1 *BITS 5,4,3 CANT BE 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 CANT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    BRA         NX9
+
+EA_V2
+    MOVE.W          D0, D1 * BITS 5,4,3, CANT BE 000, 001, 110, 101
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B       #0, D1
+    BEQ         INVALID_OPCODE
+
+    MOVE.W          D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    BRA         NX9
+
+NX9
     LEA     AND, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
@@ -503,17 +813,85 @@ OP1101
     
 ********* ADD *************        
 _ADD
-    *MOVE.W  ADD,(A3)+       *Load 'ADD' to Add Reg 1 and then increment
+    MOVE.W          D0, D1 * BITS 8,7,6  CANT BE 111, 011
+    LSL.W           #7, D1
+    LSR.W           #7, D1
+    LSR.W           #6, D1 
+    CMP.B           #3, D1
+    BLT                 DN_V3
+    CMP.B           #3, D1
+    BGT                EA_V3
+
+DN_V3
+    MOVE.W      D0, D1 *BITS 5,4,3 CANT BE 101, 110 
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0 CANT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+    BRA     NX11
+
+EA_V3
+    MOVE.W          D0, D1 * BITS 5,4,3 CANT BE 000, 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B       #0, D1
+    BEQ         INVALID_OPCODE
+
+    MOVE.W          D0, D1 * BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    BRA         NX11
+
+NX11
+
     LEA     ADD, A4        *Load output string to A4
     JSR     PASTE_3
     BRA     EA_ADD          *Branch to EA analysis of the command
 
 ********* AND *************        
 _ADDA
-    *MOVE.W  ADDA,(A3)+      *Load 'ADDA' to Add Reg 1 and then increment
+
+    MOVE.W      D0, D1 *BITS 5,4,3 CANT BE 101, 110 
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+
+    MOVE.W      D0, D1 *BITS 5,4,3,2,1,0 CANT BE 00111010 OR 00111011
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #%00111011, D1
+    BEQ     INVALID_OPCODE
+
+
     LEA     ADDA, A4        *Load output string to A4
     JSR     PASTE_4
     BRA     EA_ADDA         *Branch to EA analysis of the command
+
+
+
     
 **************************************************************************
 *        OP1110 - Subroutine for operations beginning with 1110          *
@@ -632,62 +1010,6 @@ PASTE_5
     RTS
 
     SIMHALT
-
-    **ELSE CONTINUE CHECKING**
-*    MOVE.W  D0,D1           *Copy instruction for modification
-*    LSL.W   #8,D1          *Shift left 7 bits
-*    LSL.W   #3,D1 
-*    LSR.W   #5,D1           *Rotate left 5 bits
-*    LSR.W   #8,D1           *Shift left again (13 shifts total)
-*    ANDI.W  #$0F,D1         *Keep 2 bits
-*    
-*    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS                   
-*    CMP     #%00,D1         *Check for 00 to eliminate ASd
-*    BEQ     _ASd            *If equal, branch to ASd to determine ASR or ASL
-*    BRA     _ROd            *Else must be a ROd instruction, branch to determine
-*    
-*********** LSd *************        
-*_LSd   
-* 
-*    MOVE.W  D0,D1           *Copy instruction for modification
-*    LSL.W   #7,D1           *Shift left 7 bits 
-*    LSR.W   #7,D1           *Rotate right 5 bits
-*    LSR.W   #8,D1           *Shift right again (13 shifts total)
-*    ANDI.W  #$F,D1          *Keep 1 bit
-*
-*    CMP     #%0,D1        *Check for 011 to eliminate LSR
-*    BEQ     _LSR            *If equal, branch to LSR
-*    BRA     _LSL            *Else must be LSL, branch
-*
-********** ASd *************
-*_ASd
-*
-*    MOVE.W  D0,D1           *Copy instruction for modification
-*    LSL.W   #8,D1           *Shift left 7 bits 
-*    LSL.W   #2,D1           *Shift left 7 bits
-*    LSR.W   #5,D1           *Rotate right 5 bits
-*    LSR.W   #8,D1           *Shift right again (13 shifts total)
-*    ANDI.W  #$00F,D1        *Keep 3 bits
-*   
-*    CMP     #%000,D1        *Check for 000 to eliminate ASR
-*    BEQ     _ASR            *If equal, branch to ASR
-*    BRA     _ASL            *Else must be ASL, branch
-*
-********** ROd *************
-*_ROd
-*
-*    MOVE.W  D0,D1           *Copy instruction for modification
-*    LSL.W   #2,D1           *Shift left 7 bits
-*    LSL.W   #8,D1           *Shift left 7 bits 
-*    LSR.W   #5,D1           *Rotate right 5 bits
-*    LSR.W   #8,D1           *Shift right again (13 shifts total)
-*    ANDI.W  #$00F,D1        *Keep 3 bits
-*
-*    **BEGIN ELIMINATION 'IF/ELSE' STATEMENTS   
-*    CMP     #%011,D1        *Check for 011 to eliminate ROR
-*    BEQ     _ROR            *If equal, branch to ROR
-*    BRA     _ROL            *Else must be ROL, branch
-
 
 
 

@@ -1070,8 +1070,6 @@ TYPE_CHOOSER
     RTS
     
 PRINT_BCC
-    CMP.B       #0, D4
-    BEQ         RA
     CMP.B       #4, D4
     BEQ         CC
     CMP.B       #14, D4
