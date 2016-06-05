@@ -526,6 +526,10 @@ OP0111
 *        DIVU, OR                                                        *
 **************************************************************************
 OP1000
+    
+    * ->8A47 1000 101 001 000 111
+
+    
 
     **ISOLATE NEXT BITS TO CHECK**
     MOVE.W  D0,D1           *Copy instruction for modification
@@ -936,6 +940,10 @@ _ADDA
 *        OP1110 - Subroutine for operations beginning with 1110          *
 *        LSR, LSL, ASR, ASL, ROL, ROR                                    *
 **************************************************************************
+
+    *LSL  (A1)->  E3D1 1110 0011 1101 0001
+    
+    
 OP1110
     MOVE.W  D0, D1           *iso bits 7, 6 to determine shift type
     LSL.W   #8, D1          
@@ -951,7 +959,7 @@ MEM_SHIFT   *BITS 10 AND 9 DECIDE THE OPERATION
     LSR.W   #8, D1
     LSR.W   #7, D1
     CMP.B   #0, D1
-    BEQ     INVALID_OPCODE
+    BNE     INVALID_OPCODE
     
     MOVE.W  D0, D1 * BITS 5,4,3 MAY NOT BE 000, 001, 101, 110
     LSL.B   #2, D1
@@ -1074,7 +1082,6 @@ PASTE_5
     RTS
 
     SIMHALT
-
 
 
 
