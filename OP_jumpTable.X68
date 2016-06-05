@@ -907,6 +907,31 @@ OP1110
     BNE     REG_SHIFT
                
 MEM_SHIFT   *BITS 10 AND 9 DECIDE THE OPERATION
+    MOVE.W  D0, D1 * BIT 11 SHOULD ALWAYS BE A 0
+    LSL.W   #4, D1
+    LSR.W   #8, D1
+    LSR.W   #7, D1
+    CMP.B   #0, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 * BITS 5,4,3 MAY NOT BE 000, 001, 101, 110
+    LSL.B   #2, D1
+    LSR.B   #5, D1
+    CMP.B   #1, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #5, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #6, D1
+    BEQ     INVALID_OPCODE
+    CMP.B   #0, D1
+    BEQ     INVALID_OPCODE
+    
+    MOVE.W  D0, D1 *BITS 5,4,3,2,1,0 CANT BE GT 00111010
+    LSL.B   #2, D1
+    LSR.B   #2, D1 
+    CMP.B   #%00111010, D1
+    BGE     INVALID_OPCODE
+    
     MOVE.W  D0, D1
     LSL.W   #5, D1
     LSR.W   #8, D1
@@ -1010,6 +1035,8 @@ PASTE_5
     RTS
 
     SIMHALT
+
+
 
 
 

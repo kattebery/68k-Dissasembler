@@ -730,7 +730,12 @@ PRINT_LIST
     BEQ         COMMA_SPACE2
 EA2 ROR.L       #8, D5
     ADD.L       #2, A2
-    MOVE.W      (A2), D5  
+    *MOVE.W      (A2), D5  ERROR
+    CLR.W       D5
+    MOVE.B      (A2)+, D5 
+    ROL.W       #8, D5
+    MOVE.B      (A2), D5
+    *END ERROR
     MOVE.B      #$8, D2
     CLR         D4
 FOR_LOOP    
@@ -1239,6 +1244,7 @@ INVALID
 
 CR      EQU     $0D
 LF      EQU     $0A
+
 
 
 
